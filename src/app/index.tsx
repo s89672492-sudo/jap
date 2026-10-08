@@ -38,13 +38,13 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <CaseCard label="CASE 001" title="事務所開張">
+        <CaseCard label="CASE 001" title="五十音之謎">
           <ThemedText type="small" themeColor="textSecondary">
-            偵探風格的配色、卡片和按鈕已經準備好，接下來會依照你的需求加入功能。
+            每位偵探的第一步：認得平假名和片假名。先從五十音表開始調查吧！
           </ThemedText>
         </CaseCard>
 
-        <PrimaryButton label="開始調查" onPress={() => router.navigate('/explore')} />
+        <PrimaryButton label="開始調查五十音" onPress={() => router.navigate('/kana')} />
       </View>
     </ScrollView>
   );
