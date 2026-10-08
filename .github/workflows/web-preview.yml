@@ -18,14 +18,18 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
       - run: npm ci
+
+      # expo-env.d.ts 平常由 `npx expo start` 自動產生（已被 .gitignore 排除），CI 需要自己建立
+      - name: Generate Expo type declarations
+        run: printf '/// <reference types="expo/types" />\n' > expo-env.d.ts
 
       - run: npx tsc --noEmit
 
