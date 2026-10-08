@@ -28,7 +28,7 @@ export default function TabTwoScreen() {
     },
     web: {
       paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
+      paddingBottom: insets.bottom,
     },
   });
 

@@ -1,0 +1,58 @@
+# 把網頁版打包並發佈到 gh-pages 分支，讓沒有電腦時也能用手機瀏覽器預覽。
+# 注意：這是網頁版，原生畫面（例如底部分頁）和 Expo Go 會有些差異。
+name: Web preview
+
+on:
+  push:
+    branches: [main, setup/expo-sdk57]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx tsc --noEmit
+
+      # GitHub Pages 的網址是 https://<user>.github.io/<repo>/，所以只在打包時加上 baseUrl，
+      # 不寫進 app.json，避免影響 Expo Go。
+      - name: Set web base URL
+        run: |
+          node -e '
+            const fs = require("fs");
+            const config = JSON.parse(fs.readFileSync("app.json", "utf8"));
+            config.expo.experiments = { ...config.expo.experiments, baseUrl: "/${{ github.event.repository.name }}" };
+            fs.writeFileSync("app.json", JSON.stringify(config, null, 2));
+          '
+
+      - run: npx expo export --platform web --output-dir dist
+
+      - name: Prepare Pages files
+        run: |
+          touch dist/.nojekyll
+          if [ -f dist/+not-found.html ]; then cp dist/+not-found.html dist/404.html; fi
+
+      - name: Push to gh-pages branch
+        run: |
+          cd dist
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Deploy web preview from ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
