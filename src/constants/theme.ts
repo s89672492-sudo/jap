@@ -7,22 +7,38 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
+/**
+ * 偵探風格配色：深藍西裝外套、紅色領結、金色放大鏡、泛黃案件檔案紙。
+ */
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#14213D',
+    background: '#F5EFE0',
+    backgroundElement: '#FFFBF2',
+    backgroundSelected: '#E9DFC7',
+    textSecondary: '#5B6478',
+    primary: '#1F3A93',
+    accent: '#C8102E',
+    gold: '#B8860B',
+    border: '#D9CBA8',
+    onPrimary: '#FFFFFF',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F5EFE0',
+    background: '#0B1426',
+    backgroundElement: '#16223A',
+    backgroundSelected: '#22314F',
+    textSecondary: '#A9B3C7',
+    primary: '#3D6FD6',
+    accent: '#E63946',
+    gold: '#F2C94C',
+    border: '#2C3B5A',
+    onPrimary: '#FFFFFF',
   },
 } as const;
+
+/** 啟動畫面背景色（深藍），與 app.json 的 splash 設定一致 */
+export const SplashBackground = '#14213D';
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 

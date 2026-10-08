@@ -1,98 +1,81 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import { CaseCard } from '@/components/detective/case-card';
+import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
+import { PrimaryButton } from '@/components/ui/primary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { useTheme } from '@/hooks/use-theme';
 
 export default function HomeScreen() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+    <ScrollView
+      style={{ backgroundColor: theme.background }}
+      contentContainerStyle={[
+        styles.content,
+        {
+          paddingTop: insets.top + Spacing.four,
+          paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
+          paddingLeft: insets.left + Spacing.three,
+          paddingRight: insets.right + Spacing.three,
+        },
+      ]}>
+      <View style={styles.inner}>
+        <View style={styles.hero}>
+          <DetectiveEmblem />
+          <ThemedText type="subtitle" style={styles.title}>
+            偵探事務所
           </ThemedText>
-        </ThemedView>
+          <View style={[styles.taglineBox, { borderColor: theme.gold }]}>
+            <ThemedText type="smallBold" style={[styles.tagline, { color: theme.gold }]}>
+              真相只有一個！
+            </ThemedText>
+          </View>
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <CaseCard label="CASE 001" title="事務所開張">
+          <ThemedText type="small" themeColor="textSecondary">
+            偵探風格的配色、卡片和按鈕已經準備好，接下來會依照你的需求加入功能。
+          </ThemedText>
+        </CaseCard>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <PrimaryButton label="開始調查" onPress={() => router.navigate('/explore')} />
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+  content: {
+    flexGrow: 1,
+    alignItems: 'center',
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+  inner: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    gap: Spacing.four,
+  },
+  hero: {
     alignItems: 'center',
     gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    paddingVertical: Spacing.four,
   },
   title: {
     textAlign: 'center',
+    letterSpacing: 4,
   },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
+  taglineBox: {
+    borderWidth: 1.5,
+    borderRadius: Spacing.five,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingVertical: Spacing.one,
+  },
+  tagline: {
+    letterSpacing: 2,
   },
 });
