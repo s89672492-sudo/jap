@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ExamQuestionView } from './exam-question-view';
@@ -6,13 +7,27 @@ import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
 
 import { ThemedText } from '@/components/themed-text';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
-import { EXAM_BY_LEVEL, EXAM_TYPE_LABELS } from '@/data/exam';
+import {
+  EXAM_BY_LEVEL,
+  EXAM_SECTION_TYPES,
+  EXAM_TYPE_LABELS,
+  type ExamSection,
+} from '@/data/exam';
 import type { JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildExamRound } from '@/lib/quiz';
 import { addMistake } from '@/stores/mistakes-store';
 import { useSettings } from '@/stores/settings-store';
+
+const SECTION_OPTIONS: { value: ExamSection; label: string }[] = [
+  { value: 'all', label: '全部' },
+  { value: 'vocabulary', label: '語彙' },
+  { value: 'grammar', label: '文法' },
+  { value: 'reading', label: '讀解' },
+  { value: 'listening', label: '聽解' },
+];
 
 type ExamQuizProps = {
   level: JlptLevel;
@@ -25,25 +40,42 @@ type ExamQuizProps = {
 /** 模擬試題：依 JLPT 題型自編的原創題；答錯的題目會加入錯題本 */
 export function ExamQuiz({ level, onAnswered, onNext }: ExamQuizProps) {
   const { roundSize } = useSettings();
+  // 像 JLPT 分科一樣，只練某一種題型
+  const [section, setSection] = useState<ExamSection>('all');
   const quiz = useQuizRound(
-    () => buildExamRound(EXAM_BY_LEVEL[level], roundSize),
+    () => {
+      const questions = EXAM_BY_LEVEL[level];
+      const pool =
+        section === 'all'
+          ? questions
+          : questions.filter((q) => EXAM_SECTION_TYPES[section].includes(q.type));
+      return buildExamRound(pool, roundSize);
+    },
     (q) => q.answer,
-    [level, roundSize],
+    [level, roundSize, section],
     (q, correct) => {
       if (!correct) addMistake(q.question.id);
     },
   );
 
-  if (!quiz.ready) return null;
+  const sectionPicker = (
+    <SegmentedControl options={SECTION_OPTIONS} value={section} onChange={setSection} />
+  );
+
+  if (!quiz.ready) return sectionPicker;
 
   if (quiz.finished || !quiz.current) {
     return (
-      <QuizResult level={level} score={quiz.score} total={quiz.total} onRetry={quiz.restart} />
+      <View style={styles.container}>
+        {sectionPicker}
+        <QuizResult level={level} score={quiz.score} total={quiz.total} onRetry={quiz.restart} />
+      </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      {sectionPicker}
       <QuizProgress
         label={EXAM_TYPE_LABELS[quiz.current.question.type]}
         index={quiz.index}

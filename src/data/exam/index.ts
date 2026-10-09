@@ -7,8 +7,14 @@ import { N4_EXAM } from './n4';
 import { N5_EXAM } from './n5';
 import type { ExamQuestion } from './types';
 
-export { EXAM_TYPE_LABELS, EXAM_TYPE_PROMPTS } from './types';
-export type { ExamQuestion, ExamQuestionType } from './types';
+export { EXAM_SECTION_TYPES, EXAM_TYPE_LABELS, EXAM_TYPE_PROMPTS } from './types';
+export type {
+  ExamQuestion,
+  ExamQuestionType,
+  ExamSection,
+  ScriptLine,
+  ScriptSpeaker,
+} from './types';
 
 export const EXAM_BY_LEVEL: Record<JlptLevel, ExamQuestion[]> = {
   N5: N5_EXAM,

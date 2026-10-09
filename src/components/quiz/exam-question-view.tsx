@@ -2,6 +2,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { AnswerOption, type AnswerState } from './answer-option';
 import { ExamSentence } from './exam-sentence';
+import { ListeningPlayer } from './listening-player';
+import { PassageCard } from './passage-card';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -16,7 +18,7 @@ type ExamQuestionViewProps = {
   onPick: (option: string) => void;
 };
 
-/** 一題模擬試題：題目句子、四個選項，作答後顯示解說 */
+/** 一題模擬試題：（讀解的文章或聽解的播放器）、題目、四個選項，作答後顯示解說 */
 export function ExamQuestionView({ item, picked, getState, onPick }: ExamQuestionViewProps) {
   const theme = useTheme();
   const { question, options } = item;
@@ -26,6 +28,15 @@ export function ExamQuestionView({ item, picked, getState, onPick }: ExamQuestio
       <ThemedText type="smallBold" themeColor="textSecondary">
         {EXAM_TYPE_PROMPTS[question.type]}
       </ThemedText>
+      {question.passage && <PassageCard passage={question.passage} />}
+      {question.script && (
+        <ListeningPlayer
+          questionId={question.id}
+          script={question.script}
+          question={question.sentence}
+          showTranscript={picked !== null}
+        />
+      )}
       <ExamSentence sentence={question.sentence} />
       <View style={styles.options}>
         {options.map((option) => (
