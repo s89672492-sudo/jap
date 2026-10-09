@@ -1,0 +1,88 @@
+import type { GrammarPoint } from './types';
+
+export const N2_GRAMMAR: GrammarPoint[] = [
+  {
+    id: 'n2-g01',
+    pattern: '〜以上（は）',
+    connection: '普通形 ＋ 以上（は）',
+    meaning: '既然〜就〜',
+    example: { ja: '約束した以上は、守らなければならない。', zh: '既然約好了，就必須遵守。', highlight: '約束した以上は' },
+  },
+  {
+    id: 'n2-g02',
+    pattern: '〜わけにはいかない',
+    connection: '動詞辭書形 ＋ わけにはいかない',
+    meaning: '不能〜（基於道理）',
+    example: { ja: '証拠がない以上、彼を逮捕するわけにはいかない。', zh: '既然沒有證據，就不能逮捕他。', highlight: '逮捕するわけにはいかない' },
+  },
+  {
+    id: 'n2-g03',
+    pattern: '〜ざるを得ない',
+    connection: '動詞ない形 ＋ ざるを得ない',
+    meaning: '不得不〜',
+    example: { ja: '証拠がそろった以上、彼を疑わざるを得ない。', zh: '證據都齊了，不得不懷疑他。', highlight: '疑わざるを得ない' },
+  },
+  {
+    id: 'n2-g04',
+    pattern: '〜にもかかわらず',
+    connection: '普通形／名詞 ＋ にもかかわらず',
+    meaning: '儘管〜',
+    example: { ja: '雨にもかかわらず、たくさんの人が集まった。', zh: '儘管下雨，還是聚集了很多人。', highlight: 'にもかかわらず' },
+  },
+  {
+    id: 'n2-g05',
+    pattern: '〜に違いない',
+    connection: '普通形 ＋ に違いない',
+    meaning: '一定是〜',
+    example: { ja: '犯人はこの部屋にいたに違いない。', zh: '犯人一定在這個房間待過。', highlight: 'いたに違いない' },
+  },
+  {
+    id: 'n2-g06',
+    pattern: '〜をきっかけに',
+    connection: '名詞 ＋ をきっかけに',
+    meaning: '以〜為契機',
+    example: { ja: '留学をきっかけに、料理を始めた。', zh: '以留學為契機開始學做菜。', highlight: '留学をきっかけに' },
+  },
+  {
+    id: 'n2-g07',
+    pattern: '〜一方だ',
+    connection: '動詞辭書形 ＋ 一方だ',
+    meaning: '越來越〜（單向變化）',
+    example: { ja: '事件の謎は深まる一方だ。', zh: '事件的謎團越來越深。', highlight: '深まる一方だ' },
+  },
+  {
+    id: 'n2-g08',
+    pattern: '〜あげく',
+    connection: '動詞た形／名詞の ＋ あげく',
+    meaning: '〜的結果（最後）',
+    example: { ja: 'さんざん迷ったあげく、何も買わなかった。', zh: '猶豫了半天，結果什麼都沒買。', highlight: '迷ったあげく' },
+  },
+  {
+    id: 'n2-g09',
+    pattern: '〜からには',
+    connection: '普通形 ＋ からには',
+    meaning: '既然〜就一定〜',
+    example: { ja: '引き受けたからには、最後までやる。', zh: '既然接下了，就要做到最後。', highlight: '引き受けたからには' },
+  },
+  {
+    id: 'n2-g10',
+    pattern: '〜ものの',
+    connection: '普通形 ＋ ものの',
+    meaning: '雖然〜但是〜',
+    example: { ja: '犯人はわかったものの、証拠がない。', zh: '雖然知道犯人是誰，卻沒有證據。', highlight: 'わかったものの' },
+  },
+  {
+    id: 'n2-g11',
+    pattern: '〜かねない',
+    connection: '動詞ます形 ＋ かねない',
+    meaning: '很可能〜（負面）',
+    example: { ja: 'このままでは事故になりかねない。', zh: '再這樣下去很可能會出事。', highlight: 'なりかねない' },
+  },
+  {
+    id: 'n2-g12',
+    pattern: '〜をめぐって',
+    connection: '名詞 ＋ をめぐって',
+    meaning: '圍繞著〜',
+    example: { ja: '遺産をめぐって、家族が争っている。', zh: '家人圍繞著遺產發生爭執。', highlight: '遺産をめぐって' },
+  },
+];

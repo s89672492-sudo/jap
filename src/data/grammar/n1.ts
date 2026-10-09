@@ -1,0 +1,88 @@
+import type { GrammarPoint } from './types';
+
+export const N1_GRAMMAR: GrammarPoint[] = [
+  {
+    id: 'n1-g01',
+    pattern: '〜ずにはおかない',
+    connection: '動詞ない形 ＋ ずにはおかない',
+    meaning: '必定會〜；非〜不可',
+    example: { ja: 'この映画は見る人を感動させずにはおかない。', zh: '這部電影必定會讓觀眾感動。', highlight: '感動させずにはおかない' },
+  },
+  {
+    id: 'n1-g02',
+    pattern: '〜までもない',
+    connection: '動詞辭書形 ＋ までもない',
+    meaning: '用不著〜',
+    example: { ja: 'そんな簡単なことは、説明するまでもない。', zh: '那麼簡單的事，用不著說明。', highlight: '説明するまでもない' },
+  },
+  {
+    id: 'n1-g03',
+    pattern: '〜ともなれば',
+    connection: '名詞／動詞辭書形 ＋ ともなれば',
+    meaning: '一旦到了〜（的地位、程度）',
+    example: { ja: '名探偵ともなれば、どんな嘘も見抜く。', zh: '到了名偵探的程度，什麼謊都看得穿。', highlight: '名探偵ともなれば' },
+  },
+  {
+    id: 'n1-g04',
+    pattern: '〜をものともせず',
+    connection: '名詞 ＋ をものともせず',
+    meaning: '不把〜放在眼裡',
+    example: { ja: '彼は危険をものともせず、現場に向かった。', zh: '他不顧危險，前往現場。', highlight: '危険をものともせず' },
+  },
+  {
+    id: 'n1-g05',
+    pattern: '〜べくもない',
+    connection: '動詞辭書形 ＋ べくもない',
+    meaning: '無從〜；根本不可能〜',
+    example: { ja: '素人の推理では、名探偵に勝つべくもない。', zh: '外行人的推理根本不可能贏過名偵探。', highlight: '勝つべくもない' },
+  },
+  {
+    id: 'n1-g06',
+    pattern: '〜に至って',
+    connection: '名詞／動詞辭書形 ＋ に至って',
+    meaning: '直到〜（才）',
+    example: { ja: '事件が起きるに至って、ようやく対策が取られた。', zh: '直到事件發生，才終於採取對策。', highlight: '起きるに至って' },
+  },
+  {
+    id: 'n1-g07',
+    pattern: '〜ならでは',
+    connection: '名詞 ＋ ならでは',
+    meaning: '只有〜才有的',
+    example: { ja: 'これは名探偵ならではの推理だ。', zh: '這是只有名偵探才做得出的推理。', highlight: '名探偵ならでは' },
+  },
+  {
+    id: 'n1-g08',
+    pattern: '〜といえども',
+    connection: '名詞／普通形 ＋ といえども',
+    meaning: '即使是〜也',
+    example: { ja: '名探偵といえども、間違えることはある。', zh: '即使是名偵探，也會有出錯的時候。', highlight: '名探偵といえども' },
+  },
+  {
+    id: 'n1-g09',
+    pattern: '〜をもって',
+    connection: '名詞 ＋ をもって',
+    meaning: '以〜；在〜（時間點）',
+    example: { ja: '本日をもって、捜査を終了します。', zh: '搜查於今天結束。', highlight: '本日をもって' },
+  },
+  {
+    id: 'n1-g10',
+    pattern: '〜きらいがある',
+    connection: '動詞辭書形／名詞の ＋ きらいがある',
+    meaning: '有〜的傾向（負面）',
+    example: { ja: '彼は物事を悪く考えるきらいがある。', zh: '他有把事情往壞處想的傾向。', highlight: '考えるきらいがある' },
+  },
+  {
+    id: 'n1-g11',
+    pattern: '〜を皮切りに',
+    connection: '名詞 ＋ を皮切りに',
+    meaning: '以〜為開端',
+    example: { ja: '東京を皮切りに、全国で事件が起きた。', zh: '從東京開始，全國各地都發生了事件。', highlight: '東京を皮切りに' },
+  },
+  {
+    id: 'n1-g12',
+    pattern: '〜とあって',
+    connection: '名詞／普通形 ＋ とあって',
+    meaning: '因為是〜（特殊情況）',
+    example: { ja: '人気の映画とあって、会場は満員だった。', zh: '因為是熱門電影，會場座無虛席。', highlight: '映画とあって' },
+  },
+];

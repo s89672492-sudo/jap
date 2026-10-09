@@ -6,8 +6,10 @@ import { AppBackground } from '@/components/app-background';
 import { ThemedText } from '@/components/themed-text';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { FlashcardDeck } from '@/components/vocab/flashcard-deck';
+import { GrammarCard } from '@/components/vocab/grammar-card';
 import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { GRAMMAR_BY_LEVEL } from '@/data/grammar';
 import {
   JLPT_LEVELS,
   PART_OF_SPEECH_LABELS,
@@ -19,7 +21,7 @@ import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
 const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
 
-type VocabMode = 'list' | 'flashcard';
+type VocabMode = 'list' | 'flashcard' | 'grammar';
 
 type PosFilter = 'all' | PartOfSpeech;
 
@@ -34,6 +36,7 @@ const POS_OPTIONS: { value: PosFilter; label: string }[] = [
 const MODE_OPTIONS: { value: VocabMode; label: string }[] = [
   { value: 'list', label: '列表' },
   { value: 'flashcard', label: '單字卡' },
+  { value: 'grammar', label: '文法' },
 ];
 
 export default function VocabScreen() {
@@ -76,10 +79,12 @@ export default function VocabScreen() {
         <View style={styles.inner}>
           <View style={styles.titleRow}>
             <ThemedText type="subtitle" style={styles.title}>
-              單字
+              {mode === 'grammar' ? '文法' : '單字'}
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {level}・{words.length} 個
+              {mode === 'grammar'
+                ? `${level}・${GRAMMAR_BY_LEVEL[level].length} 個文法`
+                : `${level}・${words.length} 個`}
             </ThemedText>
           </View>
           <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
@@ -87,7 +92,17 @@ export default function VocabScreen() {
         </View>
       </View>
 
-      {mode === 'list' ? (
+      {mode === 'grammar' && (
+        <FlatList
+          key={`grammar-${level}`}
+          data={GRAMMAR_BY_LEVEL[level]}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <GrammarCard item={item} />}
+          contentContainerStyle={[styles.list, contentPadding]}
+          ItemSeparatorComponent={Separator}
+        />
+      )}
+      {mode === 'list' && (
         <FlatList
           // 切換等級或詞性時從頂端重新開始
           key={`${level}-${pos}`}
@@ -98,7 +113,8 @@ export default function VocabScreen() {
           contentContainerStyle={[styles.list, contentPadding]}
           ItemSeparatorComponent={Separator}
         />
-      ) : (
+      )}
+      {mode === 'flashcard' && (
         <ScrollView contentContainerStyle={[styles.list, contentPadding]}>
           {posFilter}
           <FlashcardDeck level={level} words={words} />

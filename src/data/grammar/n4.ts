@@ -1,0 +1,88 @@
+import type { GrammarPoint } from './types';
+
+export const N4_GRAMMAR: GrammarPoint[] = [
+  {
+    id: 'n4-g01',
+    pattern: '〜たことがある',
+    connection: '動詞た形 ＋ ことがある',
+    meaning: '曾經〜過',
+    example: { ja: 'わたしは富士山に登ったことがあります。', zh: '我曾經爬過富士山。', highlight: '登ったことがあります' },
+  },
+  {
+    id: 'n4-g02',
+    pattern: '〜つもりだ',
+    connection: '動詞辭書形／ない形 ＋ つもりだ',
+    meaning: '打算〜',
+    example: { ja: '来年、日本へ留学するつもりです。', zh: '我打算明年去日本留學。', highlight: '留学するつもりです' },
+  },
+  {
+    id: 'n4-g03',
+    pattern: '〜ようになる',
+    connection: '動詞辭書形／可能形 ＋ ようになる',
+    meaning: '變得能夠〜',
+    example: { ja: '日本語が話せるようになりました。', zh: '變得會說日文了。', highlight: '話せるようになりました' },
+  },
+  {
+    id: 'n4-g04',
+    pattern: '〜てしまう',
+    connection: '動詞て形 ＋ しまう',
+    meaning: '（不小心）〜了；做完',
+    example: { ja: '電車に傘を忘れてしまいました。', zh: '把傘忘在電車上了。', highlight: '忘れてしまいました' },
+  },
+  {
+    id: 'n4-g05',
+    pattern: '〜ておく',
+    connection: '動詞て形 ＋ おく',
+    meaning: '事先做好〜',
+    example: { ja: '旅行の前に、ホテルを予約しておきます。', zh: '旅行前先把飯店訂好。', highlight: '予約しておきます' },
+  },
+  {
+    id: 'n4-g06',
+    pattern: '〜そうだ（樣態）',
+    connection: '動詞ます形／い形容詞去い ＋ そうだ',
+    meaning: '看起來好像〜',
+    example: { ja: '空が暗いですね。雨が降りそうです。', zh: '天色好暗，好像要下雨了。', highlight: '降りそうです' },
+  },
+  {
+    id: 'n4-g07',
+    pattern: '〜たら',
+    connection: '動詞た形 ＋ ら',
+    meaning: '如果〜的話；〜之後',
+    example: { ja: '駅に着いたら、電話してください。', zh: '到了車站請打電話給我。', highlight: '着いたら' },
+  },
+  {
+    id: 'n4-g08',
+    pattern: '〜ば',
+    connection: '動詞ば形',
+    meaning: '如果〜就〜',
+    example: { ja: '急げば、間に合います。', zh: '快一點的話就來得及。', highlight: '急げば' },
+  },
+  {
+    id: 'n4-g09',
+    pattern: '〜のに',
+    connection: '普通形 ＋ のに',
+    meaning: '明明〜卻〜',
+    example: { ja: 'たくさん勉強したのに、試験に落ちた。', zh: '明明很用功讀書，考試卻沒過。', highlight: '勉強したのに' },
+  },
+  {
+    id: 'n4-g10',
+    pattern: '〜やすい',
+    connection: '動詞ます形 ＋ やすい',
+    meaning: '容易〜',
+    example: { ja: 'このペンはとても書きやすいです。', zh: '這支筆非常好寫。', highlight: '書きやすい' },
+  },
+  {
+    id: 'n4-g11',
+    pattern: '〜ために',
+    connection: '動詞辭書形／名詞の ＋ ために',
+    meaning: '為了〜',
+    example: { ja: '留学するために、お金をためています。', zh: '為了留學正在存錢。', highlight: '留学するために' },
+  },
+  {
+    id: 'n4-g12',
+    pattern: '〜られる（被動）',
+    connection: '動詞被動形',
+    meaning: '被〜',
+    example: { ja: '電車の中で足を踏まれました。', zh: '在電車裡被踩到腳了。', highlight: '踏まれました' },
+  },
+];

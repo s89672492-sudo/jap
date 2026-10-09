@@ -1,0 +1,88 @@
+import type { GrammarPoint } from './types';
+
+export const N3_GRAMMAR: GrammarPoint[] = [
+  {
+    id: 'n3-g01',
+    pattern: '〜わけだ',
+    connection: '普通形 ＋ わけだ',
+    meaning: '難怪〜；也就是說〜',
+    example: { ja: '十年住んでいたのか。日本語が上手なわけだ。', zh: '住了十年啊，難怪日文這麼好。', highlight: '上手なわけだ' },
+  },
+  {
+    id: 'n3-g02',
+    pattern: '〜はずだ',
+    connection: '普通形 ＋ はずだ',
+    meaning: '應該〜（推測）',
+    example: { ja: '彼は今日休みだから、家にいるはずだ。', zh: '他今天休假，應該在家。', highlight: 'いるはずだ' },
+  },
+  {
+    id: 'n3-g03',
+    pattern: '〜ようとする',
+    connection: '動詞意向形 ＋ とする',
+    meaning: '正想要〜',
+    example: { ja: '出かけようとしたとき、電話が鳴った。', zh: '正要出門的時候，電話響了。', highlight: '出かけようとした' },
+  },
+  {
+    id: 'n3-g04',
+    pattern: '〜うちに',
+    connection: '動詞辭書形／ない形 ＋ うちに',
+    meaning: '趁〜的時候',
+    example: { ja: '忘れないうちに、メモしておこう。', zh: '趁還沒忘記先記下來吧。', highlight: '忘れないうちに' },
+  },
+  {
+    id: 'n3-g05',
+    pattern: '〜たとたん',
+    connection: '動詞た形 ＋ とたん',
+    meaning: '一〜就（馬上）',
+    example: { ja: '警察が来たとたん、犯人は逃げ出した。', zh: '警察一來，犯人就逃走了。', highlight: '来たとたん' },
+  },
+  {
+    id: 'n3-g06',
+    pattern: '〜くせに',
+    connection: '普通形 ＋ くせに',
+    meaning: '明明〜卻（帶責備）',
+    example: { ja: '知っているくせに、何も言わない。', zh: '明明知道卻什麼也不說。', highlight: '知っているくせに' },
+  },
+  {
+    id: 'n3-g07',
+    pattern: '〜ばかり',
+    connection: '動詞て形 ＋ ばかりいる',
+    meaning: '老是〜',
+    example: { ja: '弟はゲームをしてばかりいる。', zh: '弟弟老是在玩遊戲。', highlight: 'してばかりいる' },
+  },
+  {
+    id: 'n3-g08',
+    pattern: '〜によって',
+    connection: '名詞 ＋ によって',
+    meaning: '依〜而（不同）；由於〜',
+    example: { ja: '国によって習慣が違う。', zh: '習慣因國家而異。', highlight: '国によって' },
+  },
+  {
+    id: 'n3-g09',
+    pattern: '〜に対して',
+    connection: '名詞 ＋ に対して',
+    meaning: '對於〜',
+    example: { ja: '先生の質問に対して、はっきり答えた。', zh: '對老師的問題清楚地回答了。', highlight: '質問に対して' },
+  },
+  {
+    id: 'n3-g10',
+    pattern: '〜として',
+    connection: '名詞 ＋ として',
+    meaning: '作為〜',
+    example: { ja: '彼は探偵として有名だ。', zh: '他作為偵探很有名。', highlight: '探偵として' },
+  },
+  {
+    id: 'n3-g11',
+    pattern: '〜おかげで',
+    connection: '普通形／名詞の ＋ おかげで',
+    meaning: '多虧〜',
+    example: { ja: '先生のおかげで、合格できました。', zh: '多虧老師，我考上了。', highlight: 'おかげで' },
+  },
+  {
+    id: 'n3-g12',
+    pattern: '〜せいで',
+    connection: '普通形／名詞の ＋ せいで',
+    meaning: '都怪〜',
+    example: { ja: '雨のせいで、試合が中止になった。', zh: '都怪下雨，比賽取消了。', highlight: 'せいで' },
+  },
+];

@@ -1,0 +1,88 @@
+import type { GrammarPoint } from './types';
+
+export const N5_GRAMMAR: GrammarPoint[] = [
+  {
+    id: 'n5-g01',
+    pattern: '〜たい',
+    connection: '動詞ます形 ＋ たい',
+    meaning: '想要做〜',
+    example: { ja: '日本へ行きたいです。', zh: '我想去日本。', highlight: '行きたい' },
+  },
+  {
+    id: 'n5-g02',
+    pattern: '〜てください',
+    connection: '動詞て形 ＋ ください',
+    meaning: '請〜',
+    example: { ja: 'ここに名前を書いてください。', zh: '請在這裡寫名字。', highlight: '書いてください' },
+  },
+  {
+    id: 'n5-g03',
+    pattern: '〜ないでください',
+    connection: '動詞ない形 ＋ でください',
+    meaning: '請不要〜',
+    example: { ja: 'ここで写真を撮らないでください。', zh: '請不要在這裡拍照。', highlight: '撮らないでください' },
+  },
+  {
+    id: 'n5-g04',
+    pattern: '〜ている',
+    connection: '動詞て形 ＋ いる',
+    meaning: '正在〜；（狀態）',
+    example: { ja: '弟は今、テレビを見ています。', zh: '弟弟現在正在看電視。', highlight: '見ています' },
+  },
+  {
+    id: 'n5-g05',
+    pattern: '〜てもいい',
+    connection: '動詞て形 ＋ もいい',
+    meaning: '可以〜',
+    example: { ja: '窓を開けてもいいですか。', zh: '可以打開窗戶嗎？', highlight: '開けてもいい' },
+  },
+  {
+    id: 'n5-g06',
+    pattern: '〜てはいけない',
+    connection: '動詞て形 ＋ はいけない',
+    meaning: '不可以〜',
+    example: { ja: 'ここでたばこを吸ってはいけません。', zh: '這裡不可以抽菸。', highlight: '吸ってはいけません' },
+  },
+  {
+    id: 'n5-g07',
+    pattern: '〜ましょう',
+    connection: '動詞ます形 ＋ ましょう',
+    meaning: '一起〜吧',
+    example: { ja: 'いっしょに帰りましょう。', zh: '一起回家吧。', highlight: '帰りましょう' },
+  },
+  {
+    id: 'n5-g08',
+    pattern: '〜から',
+    connection: '普通形／丁寧形 ＋ から',
+    meaning: '因為〜',
+    example: { ja: '雨ですから、出かけません。', zh: '因為下雨，所以不出門。', highlight: 'ですから' },
+  },
+  {
+    id: 'n5-g09',
+    pattern: 'AよりBのほうが',
+    connection: '名詞 ＋ より、名詞 ＋ のほうが',
+    meaning: 'B 比 A 更〜',
+    example: { ja: 'バスより電車のほうが速いです。', zh: '電車比公車快。', highlight: 'より電車のほうが' },
+  },
+  {
+    id: 'n5-g10',
+    pattern: '〜がほしい',
+    connection: '名詞 ＋ がほしい',
+    meaning: '想要（東西）',
+    example: { ja: '新しいかばんがほしいです。', zh: '我想要新包包。', highlight: 'がほしい' },
+  },
+  {
+    id: 'n5-g11',
+    pattern: '〜前に',
+    connection: '動詞辭書形／名詞の ＋ 前に',
+    meaning: '在〜之前',
+    example: { ja: '寝る前に歯をみがきます。', zh: '睡覺前刷牙。', highlight: '寝る前に' },
+  },
+  {
+    id: 'n5-g12',
+    pattern: '〜たり〜たりする',
+    connection: '動詞た形 ＋ り',
+    meaning: '又〜又〜（列舉動作）',
+    example: { ja: '日曜日は本を読んだり、映画を見たりします。', zh: '星期天會看看書、看看電影。', highlight: '読んだり' },
+  },
+];
