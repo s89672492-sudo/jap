@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -6,15 +5,16 @@ import { ThemedText } from '@/components/themed-text';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { JLPT_LEVELS, VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { JLPT_LEVELS, VOCAB_BY_LEVEL } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
+import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
 const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
 
 export default function VocabScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [level, setLevel] = useState<JlptLevel>('N5');
+  const level = useJlptLevel();
   const words = VOCAB_BY_LEVEL[level];
 
   return (
@@ -39,7 +39,7 @@ export default function VocabScreen() {
               {level}・{words.length} 個
             </ThemedText>
           </View>
-          <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setLevel} />
+          <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setJlptLevel} />
         </View>
       </View>
 

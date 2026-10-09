@@ -9,37 +9,36 @@ import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { JLPT_LEVELS, VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { JLPT_LEVELS, VOCAB_BY_LEVEL } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { buildRound, type QuizQuestion } from '@/lib/quiz';
+import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
 const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
 
 export default function QuizScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [level, setLevel] = useState<JlptLevel>('N5');
+  const level = useJlptLevel();
   // 題目是隨機的，等畫面載入後才抽題，避免網頁版預先產生的 HTML 和實際畫面不一致
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [score, setScore] = useState(0);
+  // 按「再調查一輪」時加一，觸發重新出題
+  const [round, setRound] = useState(0);
 
   const ready = questions.length > 0;
   const finished = ready && index >= questions.length;
   const question = questions[index];
 
-  const startRound = (nextLevel: JlptLevel) => {
-    setLevel(nextLevel);
-    setQuestions(buildRound(VOCAB_BY_LEVEL[nextLevel]));
+  // 等級改變（包含在單字頁切換、或讀回上次的等級）或再來一輪時，重新出題
+  useEffect(() => {
+    setQuestions(buildRound(VOCAB_BY_LEVEL[level]));
     setIndex(0);
     setPicked(null);
     setScore(0);
-  };
-
-  useEffect(() => {
-    setQuestions(buildRound(VOCAB_BY_LEVEL.N5));
-  }, []);
+  }, [level, round]);
 
   const handlePick = (option: string) => {
     if (picked !== null) return;
@@ -83,7 +82,7 @@ export default function QuizScreen() {
             )}
           </View>
           {/* 切換等級會重新開始一輪 */}
-          <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={startRound} />
+          <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setJlptLevel} />
         </View>
       </View>
 
@@ -102,7 +101,7 @@ export default function QuizScreen() {
               level={level}
               score={score}
               total={questions.length}
-              onRetry={() => startRound(level)}
+              onRetry={() => setRound((r) => r + 1)}
             />
           ) : (
             <>
