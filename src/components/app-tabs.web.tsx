@@ -26,6 +26,9 @@ export default function AppTabs() {
           <TabTrigger name="quiz" href="/quiz" asChild>
             <TabButton>測驗</TabButton>
           </TabTrigger>
+          <TabTrigger name="settings" href="/settings" asChild>
+            <TabButton>設定</TabButton>
+          </TabTrigger>
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -46,6 +49,7 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
         ]}>
         <ThemedText
           type="smallBold"
+          numberOfLines={1}
           style={{ color: isFocused ? theme.accent : theme.textSecondary }}>
           {children}
         </ThemedText>
@@ -96,7 +100,8 @@ const styles = StyleSheet.create({
   },
   indicator: {
     paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.three,
+    // 五個分頁在 320 寬的小螢幕上也要排得下
+    paddingHorizontal: Spacing.two,
     borderRadius: Spacing.three,
   },
   pressed: {

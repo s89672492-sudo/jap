@@ -1,7 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
 
 import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
@@ -35,6 +35,11 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="quiz">
         <NativeTabs.Trigger.Label>推理測驗</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="questionmark.circle" md="quiz" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Label>設定</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );

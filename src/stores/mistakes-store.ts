@@ -39,3 +39,7 @@ export function useMistakes(): MistakeIds {
 export function useMistakesLoaded(): boolean {
   return usePersistedStoreLoaded(mistakesStore);
 }
+
+export function clearMistakes() {
+  mistakesStore.update(() => EMPTY);
+}

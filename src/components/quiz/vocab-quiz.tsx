@@ -10,6 +10,7 @@ import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildRound } from '@/lib/quiz';
 import { addMistake } from '@/stores/mistakes-store';
+import { useSettings } from '@/stores/settings-store';
 
 type VocabQuizProps = {
   level: JlptLevel;
@@ -21,10 +22,11 @@ type VocabQuizProps = {
 
 /** 單字測驗：看日文單字，選中文意思；答錯的單字會加入錯題本 */
 export function VocabQuiz({ level, onAnswered, onNext }: VocabQuizProps) {
+  const { roundSize } = useSettings();
   const quiz = useQuizRound(
-    () => buildRound(VOCAB_BY_LEVEL[level]),
+    () => buildRound(VOCAB_BY_LEVEL[level], roundSize),
     (q) => q.word.meaning,
-    [level],
+    [level, roundSize],
     (q, correct) => {
       if (!correct) addMistake(q.word.id);
     },

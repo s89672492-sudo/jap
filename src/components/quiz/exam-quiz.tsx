@@ -12,6 +12,7 @@ import type { JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildExamRound } from '@/lib/quiz';
 import { addMistake } from '@/stores/mistakes-store';
+import { useSettings } from '@/stores/settings-store';
 
 type ExamQuizProps = {
   level: JlptLevel;
@@ -23,10 +24,11 @@ type ExamQuizProps = {
 
 /** 模擬試題：依 JLPT 題型自編的原創題；答錯的題目會加入錯題本 */
 export function ExamQuiz({ level, onAnswered, onNext }: ExamQuizProps) {
+  const { roundSize } = useSettings();
   const quiz = useQuizRound(
-    () => buildExamRound(EXAM_BY_LEVEL[level]),
+    () => buildExamRound(EXAM_BY_LEVEL[level], roundSize),
     (q) => q.answer,
-    [level],
+    [level, roundSize],
     (q, correct) => {
       if (!correct) addMistake(q.question.id);
     },

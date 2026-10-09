@@ -16,11 +16,11 @@ import {
   buildExamRound,
   buildRound,
   shuffle,
-  QUESTIONS_PER_ROUND,
   type ExamRoundQuestion,
   type QuizQuestion,
 } from '@/lib/quiz';
 import { removeMistake, useMistakes, useMistakesLoaded } from '@/stores/mistakes-store';
+import { useSettings } from '@/stores/settings-store';
 
 type ReviewItem =
   | { kind: 'vocab'; id: string; question: QuizQuestion }
@@ -35,6 +35,7 @@ type ReviewQuizProps = {
 /** 錯題本：從這個等級答錯過的單字和試題出題，答對就從錯題本移除 */
 export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
   const mistakes = useMistakes();
+  const { roundSize } = useSettings();
   const loaded = useMistakesLoaded();
 
   const words = VOCAB_BY_LEVEL[level];
@@ -50,11 +51,11 @@ export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
       const examItems: ReviewItem[] = buildExamRound(missedExam, missedExam.length).map(
         (item) => ({ kind: 'exam', id: item.question.id, item }),
       );
-      return shuffle([...vocabItems, ...examItems]).slice(0, QUESTIONS_PER_ROUND);
+      return shuffle([...vocabItems, ...examItems]).slice(0, roundSize);
     },
     (r) => (r.kind === 'vocab' ? r.question.word.meaning : r.item.answer),
     // 錯題要等從手機讀回後才能出題；作答中錯題本變動不會重新出題
-    [level, loaded],
+    [level, loaded, roundSize],
     (r, correct) => {
       if (correct) removeMistake(r.id);
     },
