@@ -23,8 +23,8 @@ export default function AppTabs() {
           <TabTrigger name="vocab" href="/vocab" asChild>
             <TabButton>單字</TabButton>
           </TabTrigger>
-          <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>調查</TabButton>
+          <TabTrigger name="quiz" href="/quiz" asChild>
+            <TabButton>測驗</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

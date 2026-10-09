@@ -22,6 +22,7 @@ export const Colors = {
     gold: '#B8860B',
     border: '#D9CBA8',
     onPrimary: '#FFFFFF',
+    success: '#2E7D32',
   },
   dark: {
     text: '#F5EFE0',
@@ -34,6 +35,7 @@ export const Colors = {
     gold: '#F2C94C',
     border: '#2C3B5A',
     onPrimary: '#FFFFFF',
+    success: '#4CAF50',
   },
 } as const;
 

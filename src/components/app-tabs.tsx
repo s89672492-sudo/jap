@@ -32,12 +32,9 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf="book.closed" md="menu_book" />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>調查</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
-        />
+      <NativeTabs.Trigger name="quiz">
+        <NativeTabs.Trigger.Label>推理測驗</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="questionmark.circle" md="quiz" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );
