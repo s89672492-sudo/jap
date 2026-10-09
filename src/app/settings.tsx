@@ -1,6 +1,8 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppBackground } from '@/components/app-background';
+import { BackgroundPicker } from '@/components/settings/background-picker';
 import { ClearMistakes } from '@/components/settings/clear-mistakes';
 import { SettingsSection } from '@/components/settings/settings-section';
 import { ThemedText } from '@/components/themed-text';
@@ -42,65 +44,77 @@ export default function SettingsScreen() {
   const settings = useSettings();
 
   return (
-    <ScrollView
-      style={{ backgroundColor: theme.background }}
-      contentContainerStyle={[
-        styles.content,
-        {
-          paddingTop: insets.top + Spacing.three,
-          paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
-          paddingLeft: insets.left + Spacing.three,
-          paddingRight: insets.right + Spacing.three,
-        },
-      ]}>
-      <View style={styles.inner}>
-        <ThemedText type="subtitle" style={styles.title}>
-          設定
-        </ThemedText>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
+      <AppBackground />
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: insets.top + Spacing.three,
+            paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
+            paddingLeft: insets.left + Spacing.three,
+            paddingRight: insets.right + Spacing.three,
+          },
+        ]}>
+        <View style={styles.inner}>
+          <ThemedText type="subtitle" style={styles.title}>
+            設定
+          </ThemedText>
 
-        <SettingsSection title="發音速度" description="單字、五十音和聽力測驗的日文語音速度。">
-          <SegmentedControl
-            options={SPEED_OPTIONS}
-            value={settings.speechSpeed}
-            onChange={(speechSpeed) => updateSettings({ speechSpeed })}
-          />
-          <View style={styles.sampleRow}>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.sampleText}>
-              試聽：{SAMPLE_SENTENCE}
-            </ThemedText>
-            <SpeakButton text={SAMPLE_SENTENCE} />
-          </View>
-        </SettingsSection>
+          <SettingsSection title="發音速度" description="單字、五十音和聽力測驗的日文語音速度。">
+            <SegmentedControl
+              options={SPEED_OPTIONS}
+              value={settings.speechSpeed}
+              onChange={(speechSpeed) => updateSettings({ speechSpeed })}
+            />
+            <View style={styles.sampleRow}>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.sampleText}>
+                試聽：{SAMPLE_SENTENCE}
+              </ThemedText>
+              <SpeakButton text={SAMPLE_SENTENCE} />
+            </View>
+          </SettingsSection>
 
-        <SettingsSection title="每輪題數" description="測驗分頁裡每種模式每一輪的題數。">
-          <SegmentedControl
-            options={ROUND_OPTIONS}
-            value={`${settings.roundSize}`}
-            onChange={(value) => updateSettings({ roundSize: Number(value) as RoundSize })}
-          />
-        </SettingsSection>
+          <SettingsSection title="每輪題數" description="測驗分頁裡每種模式每一輪的題數。">
+            <SegmentedControl
+              options={ROUND_OPTIONS}
+              value={`${settings.roundSize}`}
+              onChange={(value) => updateSettings({ roundSize: Number(value) as RoundSize })}
+            />
+          </SettingsSection>
 
-        <SettingsSection title="外觀">
-          <SegmentedControl
-            options={THEME_OPTIONS}
-            value={settings.themeMode}
-            onChange={(themeMode) => updateSettings({ themeMode })}
-          />
-        </SettingsSection>
+          <SettingsSection title="外觀">
+            <SegmentedControl
+              options={THEME_OPTIONS}
+              value={settings.themeMode}
+              onChange={(themeMode) => updateSettings({ themeMode })}
+            />
+          </SettingsSection>
 
-        <SettingsSection title="錯題本">
-          <ClearMistakes />
-        </SettingsSection>
+          <SettingsSection
+            title="背景圖片"
+            description="從相簿選一張自己的圖片當背景。圖片只存在這支手機裡，不會上傳，也不會出現在別人打開的網站上。">
+            <BackgroundPicker />
+          </SettingsSection>
 
-        <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
-          設定、選過的等級和錯題本都存在這支手機裡；換手機或清除瀏覽器資料後會重新開始。
-        </ThemedText>
-      </View>
-    </ScrollView>
+          <SettingsSection title="錯題本">
+            <ClearMistakes />
+          </SettingsSection>
+
+          <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
+            設定、背景圖片、選過的等級和錯題本都存在這支手機裡；換手機或清除瀏覽器資料後會重新開始。
+          </ThemedText>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   content: {
     alignItems: 'center',
   },

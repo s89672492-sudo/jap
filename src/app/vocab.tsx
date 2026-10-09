@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppBackground } from '@/components/app-background';
 import { ThemedText } from '@/components/themed-text';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { FlashcardDeck } from '@/components/vocab/flashcard-deck';
@@ -35,6 +36,7 @@ export default function VocabScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
+      <AppBackground />
       {/* 標題和等級切換固定在上方 */}
       <View
         style={[

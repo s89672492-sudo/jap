@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppBackground } from '@/components/app-background';
 import { ExamQuiz } from '@/components/quiz/exam-quiz';
 import { ListeningQuiz } from '@/components/quiz/listening-quiz';
 import { ReviewQuiz } from '@/components/quiz/review-quiz';
@@ -38,6 +39,7 @@ export default function QuizScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
+      <AppBackground />
       <View
         style={[
           styles.header,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppBackground } from '@/components/app-background';
 import { KanaDetailCard } from '@/components/kana/kana-detail-card';
 import { KanaGrid } from '@/components/kana/kana-grid';
 import { ThemedText } from '@/components/themed-text';
@@ -29,6 +30,7 @@ export default function KanaScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
+      <AppBackground />
       {/* 標題、切換和詳細卡片固定在上方，捲動時不會消失 */}
       <View
         style={[
