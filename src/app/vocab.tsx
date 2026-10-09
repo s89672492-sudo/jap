@@ -34,8 +34,9 @@ const POS_OPTIONS: { value: PosFilter; label: string }[] = [
   })),
 ];
 
-/** 單字列表每頁幾個，避免一頁太長要一直滑 */
+/** 每頁幾個，避免一頁太長要一直滑（文法卡比較高，所以少一點） */
 const PAGE_SIZE = 20;
+const GRAMMAR_PAGE_SIZE = 10;
 
 const MODE_OPTIONS: { value: VocabMode; label: string }[] = [
   { value: 'list', label: '列表' },
@@ -54,13 +55,18 @@ export default function VocabScreen() {
     return pos === 'all' ? all : all.filter((word) => word.pos === pos);
   }, [level, pos]);
 
-  // 換等級或詞性時回到第一頁
+  // 換模式、等級或詞性時回到第一頁
   const [page, setPage] = useState(0);
   useEffect(() => {
     setPage(0);
-  }, [level, pos]);
+  }, [mode, level, pos]);
   const pageCount = Math.ceil(words.length / PAGE_SIZE);
   const pageWords = words.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const grammar = GRAMMAR_BY_LEVEL[level];
+  const grammarPageCount = Math.ceil(grammar.length / GRAMMAR_PAGE_SIZE);
+  const pageGrammar = grammar.slice(page * GRAMMAR_PAGE_SIZE, (page + 1) * GRAMMAR_PAGE_SIZE);
+  const grammarPager = <Pager page={page} pageCount={grammarPageCount} onChange={setPage} />;
 
   const posFilter = (
     <View style={styles.posFilter}>
@@ -97,7 +103,7 @@ export default function VocabScreen() {
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
               {mode === 'grammar'
-                ? `${level}・${GRAMMAR_BY_LEVEL[level].length} 個文法`
+                ? `${level}・${grammar.length} 個文法`
                 : `${level}・${words.length} 個`}
             </ThemedText>
           </View>
@@ -108,8 +114,10 @@ export default function VocabScreen() {
 
       {mode === 'grammar' && (
         <FlatList
-          key={`grammar-${level}`}
-          data={GRAMMAR_BY_LEVEL[level]}
+          key={`grammar-${level}-${page}`}
+          ListHeaderComponent={<View style={styles.listHeader}>{grammarPager}</View>}
+          ListFooterComponent={<View style={styles.listFooter}>{grammarPager}</View>}
+          data={pageGrammar}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <GrammarCard item={item} />}
           contentContainerStyle={[styles.list, contentPadding]}
