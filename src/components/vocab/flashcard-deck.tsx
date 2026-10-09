@@ -7,6 +7,7 @@ import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
 import type { JlptLevel, VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
@@ -19,6 +20,13 @@ type FlashcardDeckProps = {
   words: VocabWord[];
 };
 
+type Direction = 'ja-zh' | 'zh-ja';
+
+const DIRECTION_OPTIONS: { value: Direction; label: string }[] = [
+  { value: 'ja-zh', label: '日文 → 中文' },
+  { value: 'zh-ja', label: '中文 → 日文' },
+];
+
 /** 單字卡模式：一次一張，翻面後自評「記住了／還不熟」；還不熟的單字會加入錯題本 */
 export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
   const theme = useTheme();
@@ -28,6 +36,7 @@ export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState(0);
   const [round, setRound] = useState(0);
+  const [direction, setDirection] = useState<Direction>('ja-zh');
 
   useEffect(() => {
     setDeck(shuffle(words));
@@ -68,8 +77,14 @@ export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
     setIndex((i) => i + 1);
   };
 
+  const changeDirection = (next: Direction) => {
+    setDirection(next);
+    setFlipped(false);
+  };
+
   return (
     <View style={styles.container}>
+      <SegmentedControl options={DIRECTION_OPTIONS} value={direction} onChange={changeDirection} />
       <View style={styles.progressRow}>
         <ThemedText type="small" themeColor="textSecondary" style={styles.count}>
           第 {index + 1} / {deck.length} 張
@@ -88,7 +103,13 @@ export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
       </View>
 
       {/* 換卡時用 key 重新建立，新卡片會直接是正面 */}
-      <Flashcard key={word.id} word={word} flipped={flipped} onFlip={() => setFlipped(true)} />
+      <Flashcard
+        key={`${word.id}-${direction}`}
+        word={word}
+        flipped={flipped}
+        onFlip={() => setFlipped(true)}
+        reverse={direction === 'zh-ja'}
+      />
 
       {flipped ? (
         <View style={styles.answerRow}>

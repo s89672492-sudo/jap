@@ -19,16 +19,18 @@ type FlashcardProps = {
   word: VocabWord;
   flipped: boolean;
   onFlip: () => void;
+  /** 反向：正面顯示中文，想出日文後再翻面 */
+  reverse?: boolean;
 };
 
 const CARD_HEIGHT = 380;
 const FLIP_DURATION = 350;
 
 /**
- * 單字卡：正面只有日文，翻到背面才看到讀音和中文。
+ * 單字卡：正面只有日文（反向時只有中文），翻到背面才看到完整的讀音、日文和中文。
  * 換下一張時請用 key 重新建立元件，卡片才會直接回到正面、不播翻轉動畫。
  */
-export function Flashcard({ word, flipped, onFlip }: FlashcardProps) {
+export function Flashcard({ word, flipped, onFlip, reverse = false }: FlashcardProps) {
   const theme = useTheme();
   const reduceMotion = useReducedMotion();
   // 0 = 正面，1 = 背面
@@ -60,16 +62,25 @@ export function Flashcard({ word, flipped, onFlip }: FlashcardProps) {
         importantForAccessibility={flipped ? 'no-hide-descendants' : 'auto'}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${word.word}，點一下翻面`}
-          accessibilityHint="翻到背面看讀音和意思"
+          accessibilityLabel={`${reverse ? word.meaning : word.word}，點一下翻面`}
+          accessibilityHint={reverse ? '翻到背面看日文' : '翻到背面看讀音和意思'}
           onPress={onFlip}
           style={styles.faceContent}>
           <View style={[styles.stripe, { backgroundColor: theme.accent }]} />
-          <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
-            {word.word}
-          </ThemedText>
+          {reverse ? (
+            <ThemedText
+              style={[styles.frontMeaning, { color: theme.accent }]}
+              adjustsFontSizeToFit
+              numberOfLines={3}>
+              {word.meaning}
+            </ThemedText>
+          ) : (
+            <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
+              {word.word}
+            </ThemedText>
+          )}
           <ThemedText type="small" themeColor="textSecondary">
-            點一下翻面
+            {reverse ? '想想日文怎麼說，再點一下翻面' : '點一下翻面'}
           </ThemedText>
         </Pressable>
       </Animated.View>
@@ -127,6 +138,12 @@ const styles = StyleSheet.create({
     fontSize: 56,
     lineHeight: 72,
     fontWeight: 700,
+  },
+  frontMeaning: {
+    fontSize: 32,
+    lineHeight: 44,
+    fontWeight: 700,
+    textAlign: 'center',
   },
   backWord: {
     fontSize: 40,

@@ -1,4 +1,5 @@
 import type { ExamQuestion } from '@/data/exam';
+import type { GrammarPoint } from '@/data/grammar';
 import type { VocabWord } from '@/data/vocab';
 
 export type QuizQuestion = {
@@ -110,5 +111,37 @@ export function buildReadingRound(
     const distractors = [...similar, ...others.filter((r) => !similar.includes(r))].slice(0, 3);
 
     return { word, options: shuffle([word.reading, ...distractors]) };
+  });
+}
+
+export type GrammarQuestion = {
+  point: GrammarPoint;
+  /** 例句中挖空的部分（正確答案） */
+  answer: string;
+  /** 四個選項（已打亂），其中一個是 answer */
+  options: string[];
+};
+
+/**
+ * 文法測驗：例句挖空，選出正確的文法部分。
+ * 錯誤選項取自同等級其他文法的標示部分，優先選長度相近的。
+ */
+export function buildGrammarRound(
+  points: GrammarPoint[],
+  count = QUESTIONS_PER_ROUND,
+): GrammarQuestion[] {
+  const highlights = [...new Set(points.map((point) => point.example.highlight))];
+  const targets = shuffle(points).slice(0, Math.min(count, points.length));
+
+  return targets.map((point) => {
+    const answer = point.example.highlight;
+    // 和答案互相包含的選項會讓題目有兩個答案，排除
+    const others = shuffle(
+      highlights.filter((h) => h !== answer && !h.includes(answer) && !answer.includes(h)),
+    );
+    const similar = others.filter((h) => Math.abs(h.length - answer.length) <= 3);
+    const distractors = [...similar, ...others.filter((h) => !similar.includes(h))].slice(0, 3);
+
+    return { point, answer, options: shuffle([answer, ...distractors]) };
   });
 }
