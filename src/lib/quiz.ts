@@ -1,3 +1,4 @@
+import type { ExamQuestion } from '@/data/exam';
 import type { VocabWord } from '@/data/vocab';
 
 export type QuizQuestion = {
@@ -9,7 +10,7 @@ export type QuizQuestion = {
 /** 每一輪的題數 */
 export const QUESTIONS_PER_ROUND = 10;
 
-function shuffle<T>(items: T[]): T[] {
+export function shuffle<T>(items: T[]): T[] {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -32,4 +33,25 @@ export function buildRound(words: VocabWord[], count = QUESTIONS_PER_ROUND): Qui
 
     return { word, options: shuffle([word.meaning, ...distractors]) };
   });
+}
+
+export type ExamRoundQuestion = {
+  question: ExamQuestion;
+  /** 打亂後的選項 */
+  options: string[];
+  answer: string;
+};
+
+/** 模擬試題：打亂題目順序和每題的選項順序 */
+export function buildExamRound(
+  questions: ExamQuestion[],
+  count = QUESTIONS_PER_ROUND,
+): ExamRoundQuestion[] {
+  return shuffle(questions)
+    .slice(0, Math.min(count, questions.length))
+    .map((question) => ({
+      question,
+      options: shuffle([...question.options]),
+      answer: question.options[0],
+    }));
 }
