@@ -1,28 +1,32 @@
-import { useEffect, useMemo, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { useDeferredValue, useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
 import { ThemedText } from '@/components/themed-text';
-import { Pager } from '@/components/ui/pager';
+import { PagedList } from '@/components/ui/paged-list';
+import { SearchBox } from '@/components/ui/search-box';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { FlashcardDeck } from '@/components/vocab/flashcard-deck';
 import { GrammarCard } from '@/components/vocab/grammar-card';
 import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { GRAMMAR_BY_LEVEL } from '@/data/grammar';
+import { GRAMMAR_BY_LEVEL, type GrammarPoint } from '@/data/grammar';
 import {
   JLPT_LEVELS,
   PART_OF_SPEECH_LABELS,
   VOCAB_BY_LEVEL,
   type PartOfSpeech,
+  type VocabWord,
 } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
+import { ALL_GRAMMAR, ALL_WORDS, searchGrammar, searchWords } from '@/lib/search';
+import { useBookmarks } from '@/stores/bookmarks-store';
 import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
 const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
 
-type VocabMode = 'list' | 'flashcard' | 'grammar';
+type VocabMode = 'list' | 'flashcard' | 'grammar' | 'saved';
 
 type PosFilter = 'all' | PartOfSpeech;
 
@@ -42,50 +46,77 @@ const MODE_OPTIONS: { value: VocabMode; label: string }[] = [
   { value: 'list', label: '列表' },
   { value: 'flashcard', label: '單字卡' },
   { value: 'grammar', label: '文法' },
+  { value: 'saved', label: '收藏' },
 ];
+
+/** 收藏列表裡混合了單字和文法 */
+type SavedItem = { kind: 'word'; item: VocabWord } | { kind: 'grammar'; item: GrammarPoint };
 
 export default function VocabScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const level = useJlptLevel();
+  const bookmarks = useBookmarks();
   const [mode, setMode] = useState<VocabMode>('list');
   const [pos, setPos] = useState<PosFilter>('all');
+  const [query, setQuery] = useState('');
+  // 打字時先更新輸入框，搜尋結果稍後再算，打字不會卡
+  const deferredQuery = useDeferredValue(query.trim());
+  const searching = deferredQuery.length > 0 && (mode === 'list' || mode === 'grammar');
+
   const words = useMemo(() => {
     const all = VOCAB_BY_LEVEL[level];
     return pos === 'all' ? all : all.filter((word) => word.pos === pos);
   }, [level, pos]);
 
-  // 換模式、等級或詞性時回到第一頁
-  const [page, setPage] = useState(0);
-  useEffect(() => {
-    setPage(0);
-  }, [mode, level, pos]);
-  const pageCount = Math.ceil(words.length / PAGE_SIZE);
-  const pageWords = words.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  const grammar = GRAMMAR_BY_LEVEL[level];
-  const grammarPageCount = Math.ceil(grammar.length / GRAMMAR_PAGE_SIZE);
-  const pageGrammar = grammar.slice(page * GRAMMAR_PAGE_SIZE, (page + 1) * GRAMMAR_PAGE_SIZE);
-  const grammarPager = <Pager page={page} pageCount={grammarPageCount} onChange={setPage} />;
-
-  const posFilter = (
-    <View style={styles.posFilter}>
-      <SegmentedControl options={POS_OPTIONS} value={pos} onChange={setPos} />
-    </View>
+  const wordResults = useMemo(
+    () => (searching && mode === 'list' ? searchWords(deferredQuery) : []),
+    [searching, mode, deferredQuery],
+  );
+  const grammarResults = useMemo(
+    () => (searching && mode === 'grammar' ? searchGrammar(deferredQuery) : []),
+    [searching, mode, deferredQuery],
   );
 
-  const pager = <Pager page={page} pageCount={pageCount} onChange={setPage} />;
+  const saved = useMemo<SavedItem[]>(
+    () => [
+      ...ALL_WORDS.filter((word) => bookmarks.has(word.id)).map(
+        (item) => ({ kind: 'word', item }) as const,
+      ),
+      ...ALL_GRAMMAR.filter((point) => bookmarks.has(point.id)).map(
+        (item) => ({ kind: 'grammar', item }) as const,
+      ),
+    ],
+    [bookmarks],
+  );
+
+  const grammar = GRAMMAR_BY_LEVEL[level];
+
+  const subtitle = (() => {
+    if (searching) {
+      const count = mode === 'list' ? wordResults.length : grammarResults.length;
+      return `全部等級・找到 ${count} 個`;
+    }
+    if (mode === 'saved') return `${saved.length} 個收藏`;
+    if (mode === 'grammar') return `${level}・${grammar.length} 個文法`;
+    return `${level}・${words.length} 個`;
+  })();
+
+  const title = { list: '單字', flashcard: '單字', grammar: '文法', saved: '收藏' }[mode];
+
+  const posFilter = <SegmentedControl options={POS_OPTIONS} value={pos} onChange={setPos} />;
 
   const contentPadding = {
     paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
     paddingLeft: insets.left + Spacing.three,
     paddingRight: insets.right + Spacing.three,
   };
+  const listStyle = [styles.list, contentPadding];
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <AppBackground />
-      {/* 標題和等級切換固定在上方 */}
+      {/* 標題、模式、等級和搜尋固定在上方 */}
       <View
         style={[
           styles.header,
@@ -99,61 +130,85 @@ export default function VocabScreen() {
         <View style={styles.inner}>
           <View style={styles.titleRow}>
             <ThemedText type="subtitle" style={styles.title}>
-              {mode === 'grammar' ? '文法' : '單字'}
+              {title}
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {mode === 'grammar'
-                ? `${level}・${grammar.length} 個文法`
-                : `${level}・${words.length} 個`}
+              {subtitle}
             </ThemedText>
           </View>
           <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
-          <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setJlptLevel} />
+          {mode !== 'saved' && !searching && (
+            <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setJlptLevel} />
+          )}
+          {(mode === 'list' || mode === 'grammar') && (
+            <SearchBox
+              value={query}
+              onChange={setQuery}
+              placeholder={mode === 'list' ? '搜尋單字：日文、假名或中文' : '搜尋文法：句型或中文'}
+            />
+          )}
         </View>
       </View>
 
+      {mode === 'list' &&
+        (searching ? (
+          <PagedList
+            items={wordResults}
+            pageSize={PAGE_SIZE}
+            keyExtractor={(item) => item.id}
+            renderItem={(item) => <VocabCard item={item} showLevel />}
+            resetKey={`search-${deferredQuery}`}
+            emptyText="找不到符合的單字"
+            contentContainerStyle={listStyle}
+          />
+        ) : (
+          <PagedList
+            items={words}
+            pageSize={PAGE_SIZE}
+            keyExtractor={(item) => item.id}
+            renderItem={(item) => <VocabCard item={item} />}
+            resetKey={`${level}-${pos}`}
+            header={posFilter}
+            emptyText="這個分類沒有單字"
+            contentContainerStyle={listStyle}
+          />
+        ))}
       {mode === 'grammar' && (
-        <FlatList
-          key={`grammar-${level}-${page}`}
-          ListHeaderComponent={<View style={styles.listHeader}>{grammarPager}</View>}
-          ListFooterComponent={<View style={styles.listFooter}>{grammarPager}</View>}
-          data={pageGrammar}
+        <PagedList
+          items={searching ? grammarResults : grammar}
+          pageSize={GRAMMAR_PAGE_SIZE}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <GrammarCard item={item} />}
-          contentContainerStyle={[styles.list, contentPadding]}
-          ItemSeparatorComponent={Separator}
+          renderItem={(item) => <GrammarCard item={item} showLevel={searching} />}
+          resetKey={searching ? `search-${deferredQuery}` : `grammar-${level}`}
+          emptyText="找不到符合的文法"
+          contentContainerStyle={listStyle}
         />
       )}
-      {mode === 'list' && (
-        <FlatList
-          // 切換等級、詞性或頁數時從頂端開始
-          key={`${level}-${pos}-${page}`}
-          ListHeaderComponent={
-            <View style={styles.listHeader}>
-              {posFilter}
-              {pager}
-            </View>
+      {mode === 'saved' && (
+        <PagedList
+          items={saved}
+          pageSize={PAGE_SIZE}
+          keyExtractor={(entry) => entry.item.id}
+          renderItem={(entry) =>
+            entry.kind === 'word' ? (
+              <VocabCard item={entry.item} showLevel />
+            ) : (
+              <GrammarCard item={entry.item} showLevel />
+            )
           }
-          ListFooterComponent={<View style={styles.listFooter}>{pager}</View>}
-          data={pageWords}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <VocabCard item={item} />}
-          contentContainerStyle={[styles.list, contentPadding]}
-          ItemSeparatorComponent={Separator}
+          resetKey="saved"
+          emptyText="還沒有收藏。在單字或文法卡片上點 ☆ 就能加入這裡。"
+          contentContainerStyle={listStyle}
         />
       )}
       {mode === 'flashcard' && (
-        <ScrollView contentContainerStyle={[styles.list, contentPadding]}>
-          {posFilter}
+        <ScrollView contentContainerStyle={listStyle}>
+          <View style={styles.posFilter}>{posFilter}</View>
           <FlashcardDeck level={level} words={words} />
         </ScrollView>
       )}
     </View>
   );
-}
-
-function Separator() {
-  return <View style={styles.separator} />;
 }
 
 const styles = StyleSheet.create({
@@ -174,6 +229,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
+    gap: Spacing.two,
   },
   title: {
     letterSpacing: 4,
@@ -186,14 +242,5 @@ const styles = StyleSheet.create({
   },
   posFilter: {
     marginBottom: Spacing.three,
-  },
-  listHeader: {
-    marginBottom: Spacing.three,
-  },
-  listFooter: {
-    marginTop: Spacing.three,
-  },
-  separator: {
-    height: Spacing.two,
   },
 });

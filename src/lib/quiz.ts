@@ -82,3 +82,33 @@ export function buildListeningRound(
     return { word, options: shuffle([word.word, ...distractors]) };
   });
 }
+
+export type ReadingQuestion = {
+  word: VocabWord;
+  /** 四個假名讀音（已打亂），其中一個是 word.reading */
+  options: string[];
+};
+
+/** 含漢字的單字才適合考讀音 */
+const HAS_KANJI = /[一-鿿々]/;
+
+/**
+ * 漢字讀音測驗：看漢字選假名讀音。
+ * 錯誤選項優先選長度相近的讀音，避免一眼就看出答案。
+ */
+export function buildReadingRound(
+  words: VocabWord[],
+  count = QUESTIONS_PER_ROUND,
+): ReadingQuestion[] {
+  const kanjiWords = words.filter((word) => HAS_KANJI.test(word.word));
+  const readings = [...new Set(kanjiWords.map((word) => word.reading))];
+  const targets = shuffle(kanjiWords).slice(0, Math.min(count, kanjiWords.length));
+
+  return targets.map((word) => {
+    const others = shuffle(readings.filter((reading) => reading !== word.reading));
+    const similar = others.filter((reading) => Math.abs(reading.length - word.reading.length) <= 1);
+    const distractors = [...similar, ...others.filter((r) => !similar.includes(r))].slice(0, 3);
+
+    return { word, options: shuffle([word.reading, ...distractors]) };
+  });
+}

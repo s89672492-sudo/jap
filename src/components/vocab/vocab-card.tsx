@@ -2,6 +2,8 @@ import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { BookmarkButton } from '@/components/ui/bookmark-button';
+import { LevelTag } from '@/components/ui/level-tag';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
@@ -10,10 +12,12 @@ import { useTheme } from '@/hooks/use-theme';
 
 type VocabCardProps = {
   item: VocabWord;
+  /** 搜尋、收藏這種混合等級的列表才顯示等級 */
+  showLevel?: boolean;
 };
 
 /** 單字卡：漢字、讀音、中文意思和發音按鈕，下方是例句 */
-export const VocabCard = memo(function VocabCard({ item }: VocabCardProps) {
+export const VocabCard = memo(function VocabCard({ item, showLevel = false }: VocabCardProps) {
   const theme = useTheme();
   // 單字本身就是假名時，不重複顯示讀音
   const showReading = item.reading !== item.word;
@@ -29,6 +33,7 @@ export const VocabCard = memo(function VocabCard({ item }: VocabCardProps) {
         <View style={styles.wordRow}>
           <View style={styles.text}>
             <View style={styles.metaRow}>
+              {showLevel && <LevelTag id={item.id} />}
               {showReading && (
                 <ThemedText type="small" themeColor="textSecondary">
                   {item.reading}
@@ -45,7 +50,10 @@ export const VocabCard = memo(function VocabCard({ item }: VocabCardProps) {
               {item.meaning}
             </ThemedText>
           </View>
-          <SpeakButton text={item.reading} />
+          <View style={styles.actions}>
+            <BookmarkButton id={item.id} />
+            <SpeakButton text={item.reading} />
+          </View>
         </View>
         <ExampleSentence word={item} />
       </View>
@@ -72,7 +80,11 @@ const styles = StyleSheet.create({
   wordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.three,
+    gap: Spacing.two,
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   text: {
     flex: 1,
@@ -80,6 +92,7 @@ const styles = StyleSheet.create({
   },
   metaRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: Spacing.two,
   },
