@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
 import { ThemedText } from '@/components/themed-text';
+import { Pager } from '@/components/ui/pager';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { FlashcardDeck } from '@/components/vocab/flashcard-deck';
 import { GrammarCard } from '@/components/vocab/grammar-card';
@@ -33,6 +34,9 @@ const POS_OPTIONS: { value: PosFilter; label: string }[] = [
   })),
 ];
 
+/** 單字列表每頁幾個，避免一頁太長要一直滑 */
+const PAGE_SIZE = 20;
+
 const MODE_OPTIONS: { value: VocabMode; label: string }[] = [
   { value: 'list', label: '列表' },
   { value: 'flashcard', label: '單字卡' },
@@ -50,11 +54,21 @@ export default function VocabScreen() {
     return pos === 'all' ? all : all.filter((word) => word.pos === pos);
   }, [level, pos]);
 
+  // 換等級或詞性時回到第一頁
+  const [page, setPage] = useState(0);
+  useEffect(() => {
+    setPage(0);
+  }, [level, pos]);
+  const pageCount = Math.ceil(words.length / PAGE_SIZE);
+  const pageWords = words.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
   const posFilter = (
     <View style={styles.posFilter}>
       <SegmentedControl options={POS_OPTIONS} value={pos} onChange={setPos} />
     </View>
   );
+
+  const pager = <Pager page={page} pageCount={pageCount} onChange={setPage} />;
 
   const contentPadding = {
     paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
@@ -104,10 +118,16 @@ export default function VocabScreen() {
       )}
       {mode === 'list' && (
         <FlatList
-          // 切換等級或詞性時從頂端重新開始
-          key={`${level}-${pos}`}
-          ListHeaderComponent={posFilter}
-          data={words}
+          // 切換等級、詞性或頁數時從頂端開始
+          key={`${level}-${pos}-${page}`}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              {posFilter}
+              {pager}
+            </View>
+          }
+          ListFooterComponent={<View style={styles.listFooter}>{pager}</View>}
+          data={pageWords}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <VocabCard item={item} />}
           contentContainerStyle={[styles.list, contentPadding]}
@@ -158,6 +178,12 @@ const styles = StyleSheet.create({
   },
   posFilter: {
     marginBottom: Spacing.three,
+  },
+  listHeader: {
+    marginBottom: Spacing.three,
+  },
+  listFooter: {
+    marginTop: Spacing.three,
   },
   separator: {
     height: Spacing.two,
