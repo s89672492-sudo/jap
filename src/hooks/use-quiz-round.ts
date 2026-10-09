@@ -11,6 +11,8 @@ export function useQuizRound<Q>(
   build: () => Q[],
   getAnswer: (question: Q) => string,
   deps: readonly unknown[],
+  /** 每次作答後呼叫，用來記錄錯題 */
+  onAnswer?: (question: Q, correct: boolean) => void,
 ) {
   const [questions, setQuestions] = useState<Q[]>([]);
   const [index, setIndex] = useState(0);
@@ -35,7 +37,9 @@ export function useQuizRound<Q>(
   const pick = (option: string) => {
     if (picked !== null || current === undefined) return;
     setPicked(option);
-    if (option === getAnswer(current)) setScore((s) => s + 1);
+    const correct = option === getAnswer(current);
+    if (correct) setScore((s) => s + 1);
+    onAnswer?.(current, correct);
   };
 
   const next = () => {

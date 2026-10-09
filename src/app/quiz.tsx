@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ExamQuiz } from '@/components/quiz/exam-quiz';
+import { ReviewQuiz } from '@/components/quiz/review-quiz';
 import { VocabQuiz } from '@/components/quiz/vocab-quiz';
 import { ThemedText } from '@/components/themed-text';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -11,11 +12,12 @@ import { JLPT_LEVELS } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
-type QuizMode = 'vocab' | 'exam';
+type QuizMode = 'vocab' | 'exam' | 'review';
 
 const MODE_OPTIONS: { value: QuizMode; label: string }[] = [
   { value: 'vocab', label: '單字測驗' },
   { value: 'exam', label: '模擬試題' },
+  { value: 'review', label: '錯題本' },
 ];
 
 const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
@@ -65,10 +67,14 @@ export default function QuizScreen() {
           },
         ]}>
         <View style={styles.inner}>
-          {mode === 'vocab' ? (
+          {mode === 'vocab' && (
             <VocabQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          ) : (
+          )}
+          {mode === 'exam' && (
             <ExamQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
+          )}
+          {mode === 'review' && (
+            <ReviewQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
           )}
         </View>
       </ScrollView>

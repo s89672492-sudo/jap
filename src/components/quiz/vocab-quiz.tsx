@@ -1,31 +1,33 @@
 import { StyleSheet, View } from 'react-native';
 
-import { AnswerOption } from './answer-option';
-import { QuestionCard } from './question-card';
+import { NextButton } from './next-button';
 import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
+import { VocabQuestionView } from './vocab-question-view';
 
-import { ThemedText } from '@/components/themed-text';
-import { PrimaryButton } from '@/components/ui/primary-button';
 import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildRound } from '@/lib/quiz';
+import { addMistake } from '@/stores/mistakes-store';
 
 type VocabQuizProps = {
   level: JlptLevel;
-  /** 作答後呼叫，讓外層把畫面捲到解說和「下一題」 */
+  /** 作答後呼叫，讓外層把畫面捲到「下一題」 */
   onAnswered?: () => void;
   /** 換下一題時呼叫，讓外層捲回最上面 */
   onNext?: () => void;
 };
 
-/** 單字測驗：看日文單字，選中文意思 */
+/** 單字測驗：看日文單字，選中文意思；答錯的單字會加入錯題本 */
 export function VocabQuiz({ level, onAnswered, onNext }: VocabQuizProps) {
   const quiz = useQuizRound(
     () => buildRound(VOCAB_BY_LEVEL[level]),
     (q) => q.word.meaning,
     [level],
+    (q, correct) => {
+      if (!correct) addMistake(q.word.id);
+    },
   );
 
   if (!quiz.ready) return null;
@@ -36,32 +38,21 @@ export function VocabQuiz({ level, onAnswered, onNext }: VocabQuizProps) {
     );
   }
 
-  const { word, options } = quiz.current;
-
   return (
     <View style={styles.container}>
       <QuizProgress label="單字" index={quiz.index} total={quiz.total} score={quiz.score} />
-      <ThemedText type="smallBold" themeColor="textSecondary">
-        這個單字是什麼意思？
-      </ThemedText>
-      <QuestionCard word={word} revealReading={quiz.picked !== null} />
-      <View style={styles.options}>
-        {options.map((option) => (
-          <AnswerOption
-            key={option}
-            label={option}
-            state={quiz.getState(option)}
-            disabled={quiz.picked !== null}
-            onPress={() => {
-              quiz.pick(option);
-              onAnswered?.();
-            }}
-          />
-        ))}
-      </View>
+      <VocabQuestionView
+        question={quiz.current}
+        picked={quiz.picked}
+        getState={quiz.getState}
+        onPick={(option) => {
+          quiz.pick(option);
+          onAnswered?.();
+        }}
+      />
       {quiz.picked !== null && (
-        <PrimaryButton
-          label={quiz.index + 1 < quiz.total ? '下一題' : '查看調查報告'}
+        <NextButton
+          isLast={quiz.index + 1 >= quiz.total}
           onPress={() => {
             quiz.next();
             onNext?.();
@@ -75,8 +66,5 @@ export function VocabQuiz({ level, onAnswered, onNext }: VocabQuizProps) {
 const styles = StyleSheet.create({
   container: {
     gap: Spacing.three,
-  },
-  options: {
-    gap: Spacing.two,
   },
 });

@@ -23,8 +23,13 @@ export function shuffle<T>(items: T[]): T[] {
  * 從同一個等級的單字出一輪題目：看日文選中文。
  * 錯誤選項取自同等級的其他單字，且不會和正確答案重複。
  */
-export function buildRound(words: VocabWord[], count = QUESTIONS_PER_ROUND): QuizQuestion[] {
-  const targets = shuffle(words).slice(0, Math.min(count, words.length));
+export function buildRound(
+  words: VocabWord[],
+  count = QUESTIONS_PER_ROUND,
+  /** 只從這些單字出題（例如錯題）；錯誤選項仍取自整個 words */
+  candidates: VocabWord[] = words,
+): QuizQuestion[] {
+  const targets = shuffle(candidates).slice(0, Math.min(count, candidates.length));
 
   return targets.map((word) => {
     const distractors = shuffle(
