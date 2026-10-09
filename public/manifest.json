@@ -1,7 +1,7 @@
 {
   "name": "偵探日語",
   "short_name": "偵探日語",
-  "description": "偵探風格的日文學習 App：五十音、N5～N1 單字、單字卡與 JLPT 題型模擬試題。",
+  "description": "偵探風格的日文學習 App：N5～N1 單字、文法、單字卡與 JLPT 題型模擬試題。",
   "lang": "zh-Hant",
   "start_url": "./",
   "scope": "./",
