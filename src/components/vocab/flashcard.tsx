@@ -10,6 +10,7 @@ import Animated, {
 
 import { ThemedText } from '@/components/themed-text';
 import { SpeakButton } from '@/components/ui/speak-button';
+import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
 import type { VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
@@ -20,7 +21,7 @@ type FlashcardProps = {
   onFlip: () => void;
 };
 
-const CARD_HEIGHT = 280;
+const CARD_HEIGHT = 380;
 const FLIP_DURATION = 350;
 
 /**
@@ -90,6 +91,7 @@ export function Flashcard({ word, flipped, onFlip }: FlashcardProps) {
           </ThemedText>
           <ThemedText style={[styles.meaning, { color: theme.accent }]}>{word.meaning}</ThemedText>
           <SpeakButton text={word.reading} size="large" />
+          <ExampleSentence word={word} />
         </View>
       </Animated.View>
     </View>

@@ -1,5 +1,12 @@
 export type JlptLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
+export type VocabExample = {
+  /** 日文例句 */
+  ja: string;
+  /** 中文翻譯 */
+  zh: string;
+};
+
 export type VocabWord = {
   /** 唯一識別碼，例如 "n5-001" */
   id: string;
@@ -9,4 +16,5 @@ export type VocabWord = {
   reading: string;
   /** 中文意思 */
   meaning: string;
+  example?: VocabExample;
 };

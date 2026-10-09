@@ -4,6 +4,7 @@ import { AnswerOption, type AnswerState } from './answer-option';
 import { QuestionCard } from './question-card';
 
 import { ThemedText } from '@/components/themed-text';
+import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
 import type { QuizQuestion } from '@/lib/quiz';
 
@@ -33,6 +34,7 @@ export function VocabQuestionView({ question, picked, getState, onPick }: VocabQ
           />
         ))}
       </View>
+      {picked !== null && <ExampleSentence word={question.word} />}
     </>
   );
 }
