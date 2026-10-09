@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { SpeakButton } from '@/components/ui/speak-button';
 import { Spacing } from '@/constants/theme';
 import type { Kana, KanaScript } from '@/data/kana';
 import { useTheme } from '@/hooks/use-theme';
@@ -36,11 +37,12 @@ export function KanaDetailCard({ kana, script }: KanaDetailCardProps) {
               {otherScript === 'katakana' ? '片假名' : '平假名'}：{kana[otherScript]}
             </ThemedText>
           </View>
+          <SpeakButton text={kana.hiragana} size="large" />
         </View>
       ) : (
         <View style={styles.body}>
           <ThemedText type="small" themeColor="textSecondary" style={styles.placeholder}>
-            點選下方任一個假名，查看它的讀音和另一種寫法。
+            點選下方任一個假名，聽它的發音，並查看讀音和另一種寫法。
           </ThemedText>
         </View>
       )}

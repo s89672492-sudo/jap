@@ -9,6 +9,7 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { KANA_SECTIONS, type Kana, type KanaScript } from '@/data/kana';
 import { useTheme } from '@/hooks/use-theme';
+import { speakJapanese } from '@/lib/speech';
 
 const SCRIPT_OPTIONS: { value: KanaScript; label: string }[] = [
   { value: 'hiragana', label: '平假名' },
@@ -20,6 +21,11 @@ export default function KanaScreen() {
   const insets = useSafeAreaInsets();
   const [script, setScript] = useState<KanaScript>('hiragana');
   const [selected, setSelected] = useState<Kana | null>(null);
+
+  const handleSelect = (kana: Kana) => {
+    setSelected(kana);
+    speakJapanese(kana.hiragana);
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -59,7 +65,7 @@ export default function KanaScreen() {
               section={section}
               script={script}
               selected={selected}
-              onSelect={setSelected}
+              onSelect={handleSelect}
             />
           ))}
         </View>
