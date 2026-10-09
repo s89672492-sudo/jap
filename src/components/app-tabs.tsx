@@ -27,6 +27,11 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf="character.book.closed" md="translate" />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="vocab">
+        <NativeTabs.Trigger.Label>單字</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="book.closed" md="menu_book" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="explore">
         <NativeTabs.Trigger.Label>調查</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
