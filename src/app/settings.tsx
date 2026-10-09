@@ -62,7 +62,7 @@ export default function SettingsScreen() {
             設定
           </ThemedText>
 
-          <SettingsSection title="發音速度" description="單字、五十音和聽力測驗的日文語音速度。">
+          <SettingsSection title="發音速度" description="單字、文法和聽力測驗的日文語音速度。">
             <SegmentedControl
               options={SPEED_OPTIONS}
               value={settings.speechSpeed}

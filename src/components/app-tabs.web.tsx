@@ -17,9 +17,6 @@ export default function AppTabs() {
           <TabTrigger name="home" href="/" asChild>
             <TabButton>事務所</TabButton>
           </TabTrigger>
-          <TabTrigger name="kana" href="/kana" asChild>
-            <TabButton>五十音</TabButton>
-          </TabTrigger>
           <TabTrigger name="vocab" href="/vocab" asChild>
             <TabButton>單字</TabButton>
           </TabTrigger>

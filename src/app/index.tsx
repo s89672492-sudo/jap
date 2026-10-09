@@ -41,13 +41,13 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <CaseCard label="CASE 001" title="五十音之謎">
+          <CaseCard label="CASE 001" title="單字之謎">
             <ThemedText type="small" themeColor="textSecondary">
-              每位偵探的第一步：認得平假名和片假名。先從五十音表開始調查吧！
+              每位偵探的第一步：蒐集線索。從 N5～N1 的單字和文法開始調查吧！
             </ThemedText>
           </CaseCard>
 
-          <PrimaryButton label="開始調查五十音" onPress={() => router.navigate('/kana')} />
+          <PrimaryButton label="開始調查單字" onPress={() => router.navigate('/vocab')} />
         </View>
       </ScrollView>
     </View>

@@ -22,11 +22,6 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="kana">
-        <NativeTabs.Trigger.Label>五十音</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="character.book.closed" md="translate" />
-      </NativeTabs.Trigger>
-
       <NativeTabs.Trigger name="vocab">
         <NativeTabs.Trigger.Label>單字</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="book.closed" md="menu_book" />
