@@ -72,7 +72,7 @@ export default function SettingsScreen() {
           </View>
         </SettingsSection>
 
-        <SettingsSection title="每輪題數" description="單字測驗、模擬試題、聽力測驗和錯題本每一輪的題數。">
+        <SettingsSection title="每輪題數" description="測驗分頁裡每種模式每一輪的題數。">
           <SegmentedControl
             options={ROUND_OPTIONS}
             value={`${settings.roundSize}`}

@@ -49,7 +49,7 @@ export function FlashcardDeck({ level }: FlashcardDeckProps) {
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
           {unsure > 0
-            ? `還不熟的 ${unsure} 個單字已加入錯題本，可以到「測驗 → 錯題本」複習。`
+            ? `還不熟的 ${unsure} 個單字已加入錯題本，可以到「測驗 → 錯題」複習。`
             : '全部都記住了，真是名偵探！'}
         </ThemedText>
         <PrimaryButton label="再翻一輪" onPress={() => setRound((r) => r + 1)} />

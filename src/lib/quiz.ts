@@ -60,3 +60,25 @@ export function buildExamRound(
       answer: question.options[0],
     }));
 }
+
+export type ListeningQuestion = {
+  word: VocabWord;
+  /** 四個日文單字寫法（已打亂），其中一個是 word.word */
+  options: string[];
+};
+
+/** 聽力測驗：聽日文發音，從同等級的四個單字中選出聽到的那一個 */
+export function buildListeningRound(
+  words: VocabWord[],
+  count = QUESTIONS_PER_ROUND,
+): ListeningQuestion[] {
+  const targets = shuffle(words).slice(0, Math.min(count, words.length));
+
+  return targets.map((word) => {
+    const distractors = shuffle(
+      [...new Set(words.map((w) => w.word))].filter((w) => w !== word.word),
+    ).slice(0, 3);
+
+    return { word, options: shuffle([word.word, ...distractors]) };
+  });
+}

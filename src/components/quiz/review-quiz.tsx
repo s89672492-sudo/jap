@@ -68,7 +68,7 @@ export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
         <DetectiveEmblem />
         <ThemedText style={styles.emptyTitle}>{level} 錯題本是空的</ThemedText>
         <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-          在「單字測驗」或「模擬試題」答錯的題目會自動記在這裡。答對之後就會從錯題本移除。
+          在「單字」「試題」「聽力」答錯的題目，以及單字卡選「還不熟」的單字，都會自動記在這裡。答對之後就會從錯題本移除。
         </ThemedText>
       </View>
     );

@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ExamQuiz } from '@/components/quiz/exam-quiz';
+import { ListeningQuiz } from '@/components/quiz/listening-quiz';
 import { ReviewQuiz } from '@/components/quiz/review-quiz';
 import { VocabQuiz } from '@/components/quiz/vocab-quiz';
 import { ThemedText } from '@/components/themed-text';
@@ -12,12 +13,13 @@ import { JLPT_LEVELS } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
-type QuizMode = 'vocab' | 'exam' | 'review';
+type QuizMode = 'vocab' | 'exam' | 'listening' | 'review';
 
 const MODE_OPTIONS: { value: QuizMode; label: string }[] = [
-  { value: 'vocab', label: '單字測驗' },
-  { value: 'exam', label: '模擬試題' },
-  { value: 'review', label: '錯題本' },
+  { value: 'vocab', label: '單字' },
+  { value: 'exam', label: '試題' },
+  { value: 'listening', label: '聽力' },
+  { value: 'review', label: '錯題' },
 ];
 
 const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
@@ -72,6 +74,9 @@ export default function QuizScreen() {
           )}
           {mode === 'exam' && (
             <ExamQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
+          )}
+          {mode === 'listening' && (
+            <ListeningQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
           )}
           {mode === 'review' && (
             <ReviewQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
