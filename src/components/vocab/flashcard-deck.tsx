@@ -8,17 +8,19 @@ import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
-import { VOCAB_BY_LEVEL, type JlptLevel, type VocabWord } from '@/data/vocab';
+import type { JlptLevel, VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { shuffle } from '@/lib/quiz';
 import { addMistake } from '@/stores/mistakes-store';
 
 type FlashcardDeckProps = {
   level: JlptLevel;
+  /** 這一疊要翻的單字（可能已依詞性篩選） */
+  words: VocabWord[];
 };
 
 /** 單字卡模式：一次一張，翻面後自評「記住了／還不熟」；還不熟的單字會加入錯題本 */
-export function FlashcardDeck({ level }: FlashcardDeckProps) {
+export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
   const theme = useTheme();
   // 順序是隨機的，等畫面載入後才洗牌，避免網頁版預先產生的 HTML 和實際畫面不一致
   const [deck, setDeck] = useState<VocabWord[]>([]);
@@ -28,11 +30,11 @@ export function FlashcardDeck({ level }: FlashcardDeckProps) {
   const [round, setRound] = useState(0);
 
   useEffect(() => {
-    setDeck(shuffle(VOCAB_BY_LEVEL[level]));
+    setDeck(shuffle(words));
     setIndex(0);
     setFlipped(false);
     setKnown(0);
-  }, [level, round]);
+  }, [words, round]);
 
   if (deck.length === 0) return null;
 

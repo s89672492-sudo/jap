@@ -42,7 +42,13 @@ export function SegmentedControl<T extends string>({
             ]}>
             <ThemedText
               type="smallBold"
-              style={[styles.label, { color: selected ? theme.onPrimary : theme.textSecondary }]}>
+              numberOfLines={1}
+              style={[
+                styles.label,
+                // 選項多時（例如五個）縮小字距，小螢幕上也能排成一行
+                options.length >= 5 && styles.compactLabel,
+                { color: selected ? theme.onPrimary : theme.textSecondary },
+              ]}>
               {option.label}
             </ThemedText>
           </Pressable>
@@ -65,11 +71,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: Spacing.two,
+    paddingHorizontal: Spacing.one,
   },
   label: {
     fontSize: 15,
     letterSpacing: 1,
+  },
+  compactLabel: {
+    fontSize: 14,
+    letterSpacing: 0,
   },
   pressed: {
     opacity: 0.7,

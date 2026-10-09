@@ -10,7 +10,8 @@ import { N4_WORDS } from './n4';
 import { N5_WORDS } from './n5';
 import type { JlptLevel, VocabExample, VocabWord } from './types';
 
-export type { JlptLevel, VocabExample, VocabWord } from './types';
+export { PART_OF_SPEECH_LABELS } from './types';
+export type { JlptLevel, PartOfSpeech, VocabExample, VocabWord } from './types';
 
 /** 由簡單到難排列，給切換按鈕使用 */
 export const JLPT_LEVELS: JlptLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1'];
