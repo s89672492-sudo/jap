@@ -1,8 +1,6 @@
 import { Image } from 'expo-image';
 import { StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
-import { SceneIllustration } from './scene-illustration';
-
 import { ThemedText } from '@/components/themed-text';
 import { JapaneseText } from '@/components/ui/japanese-text';
 import { SpeakButton } from '@/components/ui/speak-button';
@@ -13,11 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
 type ReadingParagraphProps = {
   paragraph: Paragraph;
   showTranslation: boolean;
-  /** 這段的插圖：表情符號會擺進插畫風的場景裡 */
-  scene?: string[];
-  /** 這段的主角和心情 */
-  cast?: [string | null, string | null];
-  /** 這段的插畫；有的話就用插畫，不用表情符號場景 */
+  /** 這段的插畫 */
   image?: ImageSourcePropType;
 };
 
@@ -25,15 +19,13 @@ type ReadingParagraphProps = {
 export function ReadingParagraph({
   paragraph,
   showTranslation,
-  scene,
-  cast,
   image,
 }: ReadingParagraphProps) {
   const theme = useTheme();
 
   return (
     <View style={styles.block}>
-      {image ? (
+      {image && (
         <Image
           source={image}
           style={styles.image}
@@ -42,17 +34,6 @@ export function ReadingParagraph({
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
         />
-      ) : (
-        scene &&
-        scene.length > 0 && (
-          <SceneIllustration
-            // 主角已經站在前面，插圖裡同樣的角色就不再畫一次
-            emojis={scene.filter((emoji) => emoji !== cast?.[0])}
-            who={cast?.[0]}
-            mood={cast?.[1]}
-            height={140}
-          />
-        )
       )}
       <JapaneseText text={paragraph.ja} fontSize={18} style={styles.ja} />
       {showTranslation && (

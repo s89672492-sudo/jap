@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { JapaneseText } from '@/components/ui/japanese-text';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
-import { PARAGRAPH_CAST, PARAGRAPH_SCENES, VOCAB_ICONS } from '@/data/reading/illustrations';
+import { VOCAB_ICONS } from '@/data/reading/illustrations';
 import { PARAGRAPH_IMAGES } from '@/data/reading/paragraph-images';
 import type { ReadingArticle } from '@/data/reading/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -27,8 +27,6 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
   const [showTranslation, setShowTranslation] = useState(false);
   const length = article.paragraphs.reduce((sum, p) => sum + p.ja.length, 0);
   const tint = TOPIC_TINTS[article.topic];
-  const scenes = PARAGRAPH_SCENES[article.id];
-  const cast = PARAGRAPH_CAST[article.id];
   const images = PARAGRAPH_IMAGES[article.id];
 
   return (
@@ -74,8 +72,6 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
             key={index}
             paragraph={paragraph}
             showTranslation={showTranslation}
-            scene={scenes?.[index]}
-            cast={cast?.[index]}
             image={images?.[index]}
           />
         ))}
