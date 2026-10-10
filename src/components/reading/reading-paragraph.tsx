@@ -13,15 +13,25 @@ type ReadingParagraphProps = {
   showTranslation: boolean;
   /** 這段的插圖：表情符號會擺進插畫風的場景裡 */
   scene?: string[];
+  /** 這段的主角和心情 */
+  cast?: [string | null, string | null];
 };
 
 /** 文章的一段：日文佔滿整行（小螢幕比較好讀），下面是朗讀按鈕；打開翻譯時顯示中文 */
-export function ReadingParagraph({ paragraph, showTranslation, scene }: ReadingParagraphProps) {
+export function ReadingParagraph({ paragraph, showTranslation, scene, cast }: ReadingParagraphProps) {
   const theme = useTheme();
 
   return (
     <View style={styles.block}>
-      {scene && scene.length > 0 && <SceneIllustration emojis={scene} height={130} />}
+      {scene && scene.length > 0 && (
+        <SceneIllustration
+          // 主角已經站在前面，插圖裡同樣的角色就不再畫一次
+          emojis={scene.filter((emoji) => emoji !== cast?.[0])}
+          who={cast?.[0]}
+          mood={cast?.[1]}
+          height={140}
+        />
+      )}
       <ThemedText style={styles.ja}>{paragraph.ja}</ThemedText>
       {showTranslation && (
         <View style={[styles.zhBox, { borderLeftColor: theme.gold }]}>

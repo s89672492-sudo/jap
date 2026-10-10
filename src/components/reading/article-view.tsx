@@ -9,7 +9,7 @@ import { ReadingVocabList } from './reading-vocab-list';
 import { ThemedText } from '@/components/themed-text';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
-import { PARAGRAPH_SCENES, VOCAB_ICONS } from '@/data/reading/illustrations';
+import { PARAGRAPH_CAST, PARAGRAPH_SCENES, VOCAB_ICONS } from '@/data/reading/illustrations';
 import type { ReadingArticle } from '@/data/reading/types';
 import { useTheme } from '@/hooks/use-theme';
 import { markArticleRead } from '@/stores/reading-store';
@@ -26,6 +26,7 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
   const length = article.paragraphs.reduce((sum, p) => sum + p.ja.length, 0);
   const tint = TOPIC_TINTS[article.topic];
   const scenes = PARAGRAPH_SCENES[article.id];
+  const cast = PARAGRAPH_CAST[article.id];
 
   return (
     <View style={styles.container}>
@@ -65,6 +66,7 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
             paragraph={paragraph}
             showTranslation={showTranslation}
             scene={scenes?.[index]}
+            cast={cast?.[index]}
           />
         ))}
       </View>
