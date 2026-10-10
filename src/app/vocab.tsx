@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { PagedList } from '@/components/ui/paged-list';
 import { SearchBox } from '@/components/ui/search-box';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { AutoPlayer } from '@/components/vocab/auto-player';
 import { FlashcardDeck } from '@/components/vocab/flashcard-deck';
 import { GrammarCard } from '@/components/vocab/grammar-card';
 import { VocabCard } from '@/components/vocab/vocab-card';
@@ -26,7 +27,7 @@ import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
 const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
 
-type VocabMode = 'list' | 'flashcard' | 'grammar' | 'saved';
+type VocabMode = 'list' | 'flashcard' | 'autoplay' | 'grammar' | 'saved';
 
 type PosFilter = 'all' | PartOfSpeech;
 
@@ -45,6 +46,7 @@ const GRAMMAR_PAGE_SIZE = 10;
 const MODE_OPTIONS: { value: VocabMode; label: string }[] = [
   { value: 'list', label: '列表' },
   { value: 'flashcard', label: '單字卡' },
+  { value: 'autoplay', label: '播放' },
   { value: 'grammar', label: '文法' },
   { value: 'saved', label: '收藏' },
 ];
@@ -102,7 +104,7 @@ export default function VocabScreen() {
     return `${level}・${words.length} 個`;
   })();
 
-  const title = { list: '單字', flashcard: '單字', grammar: '文法', saved: '收藏' }[mode];
+  const title = { list: '單字', flashcard: '單字', autoplay: '單字', grammar: '文法', saved: '收藏' }[mode];
 
   const posFilter = <SegmentedControl options={POS_OPTIONS} value={pos} onChange={setPos} />;
 
@@ -200,6 +202,12 @@ export default function VocabScreen() {
           emptyText="還沒有收藏。在單字或文法卡片上點 ☆ 就能加入這裡。"
           contentContainerStyle={listStyle}
         />
+      )}
+      {mode === 'autoplay' && (
+        <ScrollView contentContainerStyle={listStyle}>
+          <View style={styles.posFilter}>{posFilter}</View>
+          <AutoPlayer words={words} />
+        </ScrollView>
       )}
       {mode === 'flashcard' && (
         <ScrollView contentContainerStyle={listStyle}>

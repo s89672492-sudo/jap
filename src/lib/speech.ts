@@ -40,3 +40,19 @@ export async function speakScript(lines: ScriptLine[], question: string) {
 export function stopSpeaking() {
   Speech.stop();
 }
+
+/**
+ * 唸出文字並等到唸完（自動播放用）。
+ * 有些裝置不會回報唸完，所以依字數設一個最長等待時間，時間到就繼續。
+ */
+export function speakAndWait(text: string, language: 'ja-JP' | 'zh-TW' = 'ja-JP'): Promise<void> {
+  return new Promise((resolve) => {
+    const rate = SPEECH_RATES[getSettings().speechSpeed];
+    const timeout = setTimeout(resolve, (1500 + text.length * 350) / rate);
+    const done = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+    Speech.speak(text, { language, rate, onDone: done, onStopped: done, onError: done });
+  });
+}
