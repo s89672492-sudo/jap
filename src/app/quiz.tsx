@@ -8,6 +8,7 @@ import { GrammarQuiz } from '@/components/quiz/grammar-quiz';
 import { ListeningQuiz } from '@/components/quiz/listening-quiz';
 import { ReadingQuiz } from '@/components/quiz/reading-quiz';
 import { ReviewQuiz } from '@/components/quiz/review-quiz';
+import { SpeakingPractice } from '@/components/quiz/speaking-practice';
 import { TimedChallenge } from '@/components/quiz/timed-challenge';
 import { VocabQuiz } from '@/components/quiz/vocab-quiz';
 import { ThemedText } from '@/components/themed-text';
@@ -17,7 +18,15 @@ import { JLPT_LEVELS } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 
-type QuizMode = 'vocab' | 'reading' | 'grammar' | 'listening' | 'exam' | 'timed' | 'review';
+type QuizMode =
+  | 'vocab'
+  | 'reading'
+  | 'grammar'
+  | 'listening'
+  | 'exam'
+  | 'timed'
+  | 'speaking'
+  | 'review';
 
 // 模式太多，小螢幕一排放不下，所以分兩排；兩排合起來只會有一個被選取
 const MODE_ROWS: { value: QuizMode; label: string }[][] = [
@@ -30,6 +39,7 @@ const MODE_ROWS: { value: QuizMode; label: string }[][] = [
   [
     { value: 'exam', label: '試題' },
     { value: 'timed', label: '限時' },
+    { value: 'speaking', label: '口說' },
     { value: 'review', label: '錯題' },
   ],
 ];
@@ -99,6 +109,9 @@ export default function QuizScreen() {
             <GrammarQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
           )}
           {mode === 'timed' && <TimedChallenge level={level} onStart={scrollToTop} />}
+          {mode === 'speaking' && (
+            <SpeakingPractice level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
+          )}
           {mode === 'exam' && (
             <ExamQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
           )}
