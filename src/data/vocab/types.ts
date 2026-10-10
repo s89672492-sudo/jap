@@ -14,6 +14,8 @@ export type VocabExample = {
   ja: string;
   /** 中文翻譯 */
   zh: string;
+  /** 加了假名注音的日文例句，格式見 lib/furigana.ts */
+  furigana?: string;
 };
 
 export type VocabWord = {

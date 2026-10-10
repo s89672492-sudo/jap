@@ -38,6 +38,11 @@ const THEME_OPTIONS: { value: ThemeMode; label: string }[] = [
 
 const SAMPLE_SENTENCE = 'しんじつは いつも ひとつ';
 
+const FURIGANA_OPTIONS: { value: 'on' | 'off'; label: string }[] = [
+  { value: 'on', label: '顯示' },
+  { value: 'off', label: '隱藏' },
+];
+
 export default function SettingsScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -74,6 +79,14 @@ export default function SettingsScreen() {
               </ThemedText>
               <SpeakButton text={SAMPLE_SENTENCE} />
             </View>
+          </SettingsSection>
+
+          <SettingsSection title="例句假名注音" description="在單字例句的漢字上方顯示讀音（自動產生，少數讀音可能不準）。">
+            <SegmentedControl
+              options={FURIGANA_OPTIONS}
+              value={settings.furigana ? 'on' : 'off'}
+              onChange={(value) => updateSettings({ furigana: value === 'on' })}
+            />
           </SettingsSection>
 
           <SettingsSection title="每輪題數" description="測驗分頁裡每種模式每一輪的題數。">

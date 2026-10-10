@@ -10,12 +10,15 @@ export type Settings = {
   speechSpeed: SpeechSpeed;
   roundSize: RoundSize;
   themeMode: ThemeMode;
+  /** 例句上方顯示假名注音 */
+  furigana: boolean;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
   speechSpeed: 'normal',
   roundSize: 10,
   themeMode: 'system',
+  furigana: true,
 };
 
 /** expo-speech 的 rate：1.0 是正常語速 */
@@ -44,6 +47,7 @@ const settingsStore = createPersistedStore<Settings>({
         themeMode: ['system', 'light', 'dark'].includes(saved.themeMode as string)
           ? (saved.themeMode as ThemeMode)
           : DEFAULT_SETTINGS.themeMode,
+        furigana: typeof saved.furigana === 'boolean' ? saved.furigana : DEFAULT_SETTINGS.furigana,
       };
     } catch {
       return null;
