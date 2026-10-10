@@ -8,16 +8,24 @@ import { useTheme } from '@/hooks/use-theme';
 
 type ReadingVocabListProps = {
   vocab: ReadingVocab[];
+  /** 單字 → 小圖示 */
+  icons?: Record<string, string>;
+  tint: string;
 };
 
 /** 文章的重點單字：日文、讀音、中文，可點喇叭聽發音 */
-export function ReadingVocabList({ vocab }: ReadingVocabListProps) {
+export function ReadingVocabList({ vocab, icons, tint }: ReadingVocabListProps) {
   const theme = useTheme();
 
   return (
     <View style={styles.list}>
       {vocab.map((item) => (
         <View key={item.word} style={[styles.row, { borderBottomColor: theme.border }]}>
+          {icons?.[item.word] && (
+            <View style={[styles.icon, { backgroundColor: tint }]}>
+              <ThemedText style={styles.iconEmoji}>{icons[item.word]}</ThemedText>
+            </View>
+          )}
           <View style={styles.text}>
             <ThemedText style={styles.word}>
               {item.word}
@@ -52,6 +60,17 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
+  },
+  icon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconEmoji: {
+    fontSize: 24,
+    lineHeight: 30,
   },
   word: {
     fontSize: 18,

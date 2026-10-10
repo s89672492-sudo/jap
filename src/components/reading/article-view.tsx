@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { ArticleCover } from './article-cover';
+import { ArticleCover, TOPIC_TINTS } from './article-cover';
 import { ArticleQuestions } from './article-questions';
 import { ReadingParagraph } from './reading-paragraph';
 import { ReadingVocabList } from './reading-vocab-list';
@@ -9,6 +9,7 @@ import { ReadingVocabList } from './reading-vocab-list';
 import { ThemedText } from '@/components/themed-text';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
+import { PARAGRAPH_SCENES, VOCAB_ICONS } from '@/data/reading/illustrations';
 import type { ReadingArticle } from '@/data/reading/types';
 import { useTheme } from '@/hooks/use-theme';
 import { markArticleRead } from '@/stores/reading-store';
@@ -23,6 +24,8 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
   const theme = useTheme();
   const [showTranslation, setShowTranslation] = useState(false);
   const length = article.paragraphs.reduce((sum, p) => sum + p.ja.length, 0);
+  const tint = TOPIC_TINTS[article.topic];
+  const scenes = PARAGRAPH_SCENES[article.id];
 
   return (
     <View style={styles.container}>
@@ -57,14 +60,20 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
       <View
         style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
         {article.paragraphs.map((paragraph, index) => (
-          <ReadingParagraph key={index} paragraph={paragraph} showTranslation={showTranslation} />
+          <ReadingParagraph
+            key={index}
+            paragraph={paragraph}
+            showTranslation={showTranslation}
+            scene={scenes?.[index]}
+            tint={tint}
+          />
         ))}
       </View>
 
       <ThemedText type="smallBold" style={[styles.section, { color: theme.accent }]}>
         重點單字
       </ThemedText>
-      <ReadingVocabList vocab={article.vocab} />
+      <ReadingVocabList vocab={article.vocab} icons={VOCAB_ICONS[article.id]} tint={tint} />
 
       <ThemedText type="smallBold" style={[styles.section, { color: theme.accent }]}>
         閱讀理解
