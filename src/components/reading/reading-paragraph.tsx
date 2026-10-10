@@ -11,36 +11,33 @@ type ReadingParagraphProps = {
   showTranslation: boolean;
 };
 
-/** 文章的一段：日文、朗讀按鈕，打開翻譯時在下方顯示中文 */
+/** 文章的一段：日文佔滿整行（小螢幕比較好讀），下面是朗讀按鈕；打開翻譯時顯示中文 */
 export function ReadingParagraph({ paragraph, showTranslation }: ReadingParagraphProps) {
   const theme = useTheme();
 
   return (
-    <View style={styles.row}>
-      <View style={styles.text}>
-        <ThemedText style={styles.ja}>{paragraph.ja}</ThemedText>
-        {showTranslation && (
-          <View style={[styles.zhBox, { borderLeftColor: theme.gold }]}>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.zh}>
-              {paragraph.zh}
-            </ThemedText>
-          </View>
-        )}
+    <View style={styles.block}>
+      <ThemedText style={styles.ja}>{paragraph.ja}</ThemedText>
+      {showTranslation && (
+        <View style={[styles.zhBox, { borderLeftColor: theme.gold }]}>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.zh}>
+            {paragraph.zh}
+          </ThemedText>
+        </View>
+      )}
+      <View style={styles.actions}>
+        <SpeakButton text={paragraph.ja} />
       </View>
-      <SpeakButton text={paragraph.ja} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  block: {
     gap: Spacing.two,
   },
-  text: {
-    flex: 1,
-    gap: Spacing.two,
+  actions: {
+    alignItems: 'flex-end',
   },
   ja: {
     fontSize: 18,
