@@ -1,4 +1,5 @@
-import { StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, View, type ImageSourcePropType } from 'react-native';
 
 import { SceneIllustration } from './scene-illustration';
 
@@ -15,15 +16,26 @@ type ReadingParagraphProps = {
   scene?: string[];
   /** 這段的主角和心情 */
   cast?: [string | null, string | null];
+  /** 這段的插畫；有的話就用插畫，不用表情符號場景 */
+  image?: ImageSourcePropType;
 };
 
 /** 文章的一段：日文佔滿整行（小螢幕比較好讀），下面是朗讀按鈕；打開翻譯時顯示中文 */
-export function ReadingParagraph({ paragraph, showTranslation, scene, cast }: ReadingParagraphProps) {
+export function ReadingParagraph({ paragraph, showTranslation, scene, cast, image }: ReadingParagraphProps) {
   const theme = useTheme();
 
   return (
     <View style={styles.block}>
-      {scene && scene.length > 0 && (
+      {image ? (
+        <Image
+          source={image}
+          style={styles.image}
+          contentFit="cover"
+          transition={200}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        />
+      ) : scene && scene.length > 0 && (
         <SceneIllustration
           // 主角已經站在前面，插圖裡同樣的角色就不再畫一次
           emojis={scene.filter((emoji) => emoji !== cast?.[0])}
@@ -50,6 +62,11 @@ export function ReadingParagraph({ paragraph, showTranslation, scene, cast }: Re
 const styles = StyleSheet.create({
   block: {
     gap: Spacing.two,
+  },
+  image: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: Spacing.three,
   },
   actions: {
     alignItems: 'flex-end',
