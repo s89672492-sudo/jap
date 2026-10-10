@@ -4,6 +4,7 @@ import { StyleSheet, View, type ImageSourcePropType } from 'react-native';
 import { SceneIllustration } from './scene-illustration';
 
 import { ThemedText } from '@/components/themed-text';
+import { JapaneseText } from '@/components/ui/japanese-text';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { Spacing } from '@/constants/theme';
 import type { ReadingParagraph as Paragraph } from '@/data/reading/types';
@@ -21,7 +22,13 @@ type ReadingParagraphProps = {
 };
 
 /** 文章的一段：日文佔滿整行（小螢幕比較好讀），下面是朗讀按鈕；打開翻譯時顯示中文 */
-export function ReadingParagraph({ paragraph, showTranslation, scene, cast, image }: ReadingParagraphProps) {
+export function ReadingParagraph({
+  paragraph,
+  showTranslation,
+  scene,
+  cast,
+  image,
+}: ReadingParagraphProps) {
   const theme = useTheme();
 
   return (
@@ -35,16 +42,19 @@ export function ReadingParagraph({ paragraph, showTranslation, scene, cast, imag
           accessibilityElementsHidden
           importantForAccessibility="no-hide-descendants"
         />
-      ) : scene && scene.length > 0 && (
-        <SceneIllustration
-          // 主角已經站在前面，插圖裡同樣的角色就不再畫一次
-          emojis={scene.filter((emoji) => emoji !== cast?.[0])}
-          who={cast?.[0]}
-          mood={cast?.[1]}
-          height={140}
-        />
+      ) : (
+        scene &&
+        scene.length > 0 && (
+          <SceneIllustration
+            // 主角已經站在前面，插圖裡同樣的角色就不再畫一次
+            emojis={scene.filter((emoji) => emoji !== cast?.[0])}
+            who={cast?.[0]}
+            mood={cast?.[1]}
+            height={140}
+          />
+        )
       )}
-      <ThemedText style={styles.ja}>{paragraph.ja}</ThemedText>
+      <JapaneseText text={paragraph.ja} fontSize={18} style={styles.ja} />
       {showTranslation && (
         <View style={[styles.zhBox, { borderLeftColor: theme.gold }]}>
           <ThemedText type="small" themeColor="textSecondary" style={styles.zh}>

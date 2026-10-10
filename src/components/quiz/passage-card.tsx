@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
+import { JapaneseText } from '@/components/ui/japanese-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -10,9 +10,12 @@ export function PassageCard({ passage }: { passage: string }) {
 
   return (
     <View
-      style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      style={[
+        styles.card,
+        { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+      ]}>
       <View style={[styles.stripe, { backgroundColor: theme.gold }]} />
-      <ThemedText style={styles.text}>{passage}</ThemedText>
+      <JapaneseText text={passage} fontSize={17} style={styles.text} />
     </View>
   );
 }

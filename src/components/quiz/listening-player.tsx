@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { JapaneseText } from '@/components/ui/japanese-text';
 import { Spacing } from '@/constants/theme';
 import type { ScriptLine } from '@/data/exam';
 import { useTheme } from '@/hooks/use-theme';
@@ -24,7 +25,12 @@ const SPEAKER_LABELS: Record<ScriptLine['speaker'], string> = {
 };
 
 /** 聽解題的播放器：換題時自動播放，可以再聽一次，作答後顯示逐字稿 */
-export function ListeningPlayer({ questionId, script, question, showTranscript }: ListeningPlayerProps) {
+export function ListeningPlayer({
+  questionId,
+  script,
+  question,
+  showTranscript,
+}: ListeningPlayerProps) {
   const theme = useTheme();
 
   useEffect(() => {
@@ -37,7 +43,10 @@ export function ListeningPlayer({ questionId, script, question, showTranscript }
 
   return (
     <View
-      style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      style={[
+        styles.card,
+        { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+      ]}>
       <View style={styles.playRow}>
         <Pressable
           accessibilityRole="button"
@@ -49,7 +58,11 @@ export function ListeningPlayer({ questionId, script, question, showTranscript }
             pressed && styles.pressed,
           ]}>
           <SymbolView
-            name={{ ios: 'speaker.wave.3.fill', android: 'volume_up', web: 'volume_up' }}
+            name={{
+              ios: 'speaker.wave.3.fill',
+              android: 'volume_up',
+              web: 'volume_up',
+            }}
             size={30}
             tintColor={theme.onPrimary}
           />
@@ -71,12 +84,17 @@ export function ListeningPlayer({ questionId, script, question, showTranscript }
             <View key={i} style={styles.line}>
               <ThemedText
                 type="smallBold"
-                style={[styles.speaker, { color: line.speaker === 'narrator' ? theme.textSecondary : theme.accent }]}>
+                style={[
+                  styles.speaker,
+                  {
+                    color: line.speaker === 'narrator' ? theme.textSecondary : theme.accent,
+                  },
+                ]}>
                 {SPEAKER_LABELS[line.speaker]}
               </ThemedText>
-              <ThemedText type="small" style={styles.lineText}>
-                {line.text}
-              </ThemedText>
+              <View style={styles.lineText}>
+                <JapaneseText text={line.text} fontSize={14} />
+              </View>
             </View>
           ))}
         </View>

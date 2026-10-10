@@ -3,10 +3,13 @@ import { StyleSheet, View } from 'react-native';
 import { AnswerOption, type AnswerState } from './answer-option';
 
 import { ThemedText } from '@/components/themed-text';
+import { FuriganaText } from '@/components/vocab/furigana-text';
 import { GrammarCard } from '@/components/vocab/grammar-card';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { lookupFurigana } from '@/lib/furigana';
 import type { GrammarQuestion } from '@/lib/quiz';
+import { useSettings } from '@/stores/settings-store';
 
 type GrammarQuestionViewProps = {
   question: GrammarQuestion;
@@ -18,12 +21,20 @@ type GrammarQuestionViewProps = {
 const BLANK = '＿＿＿';
 
 /** 一題文法題：例句挖空，看中文翻譯選出空格的部分；作答後顯示完整的文法卡 */
-export function GrammarQuestionView({ question, picked, getState, onPick }: GrammarQuestionViewProps) {
+export function GrammarQuestionView({
+  question,
+  picked,
+  getState,
+  onPick,
+}: GrammarQuestionViewProps) {
   const theme = useTheme();
   const { point, answer } = question;
   const index = point.example.ja.indexOf(answer);
   const before = point.example.ja.slice(0, index);
   const after = point.example.ja.slice(index + answer.length);
+  const { furigana } = useSettings();
+  const annotated = furigana ? lookupFurigana(point.example.ja) : undefined;
+  const range: [number, number] = [index, index + answer.length];
 
   return (
     <>
@@ -31,14 +42,28 @@ export function GrammarQuestionView({ question, picked, getState, onPick }: Gram
         空格裡應該填入哪一個？
       </ThemedText>
       <View
-        style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-        <ThemedText style={styles.sentence}>
-          {before}
-          <ThemedText style={[styles.sentence, styles.blank, { color: theme.accent }]}>
-            {picked === null ? BLANK : answer}
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.border,
+          },
+        ]}>
+        {annotated ? (
+          <FuriganaText
+            annotated={annotated}
+            fontSize={20}
+            {...(picked === null ? { replace: { range, text: BLANK } } : { highlight: range })}
+          />
+        ) : (
+          <ThemedText style={styles.sentence}>
+            {before}
+            <ThemedText style={[styles.sentence, styles.blank, { color: theme.accent }]}>
+              {picked === null ? BLANK : answer}
+            </ThemedText>
+            {after}
           </ThemedText>
-          {after}
-        </ThemedText>
+        )}
         <ThemedText type="small" themeColor="textSecondary">
           {point.example.zh}
         </ThemedText>
@@ -51,6 +76,7 @@ export function GrammarQuestionView({ question, picked, getState, onPick }: Gram
             state={getState(option)}
             disabled={picked !== null}
             onPress={() => onPick(option)}
+            japanese
           />
         ))}
       </View>

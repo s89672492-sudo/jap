@@ -1,14 +1,14 @@
-import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { ThemedText } from "@/components/themed-text";
-import { ExampleSentence } from "@/components/vocab/example-sentence";
-import { Spacing } from "@/constants/theme";
-import type { VocabWord } from "@/data/vocab";
-import { useTheme } from "@/hooks/use-theme";
-import { shuffle } from "@/lib/quiz";
-import { speakAndWait, stopSpeaking } from "@/lib/speech";
+import { ThemedText } from '@/components/themed-text';
+import { ExampleSentence } from '@/components/vocab/example-sentence';
+import { Spacing } from '@/constants/theme';
+import type { VocabWord } from '@/data/vocab';
+import { useTheme } from '@/hooks/use-theme';
+import { shuffle } from '@/lib/quiz';
+import { speakAndWait, stopSpeaking } from '@/lib/speech';
 
 type AutoPlayerProps = {
   /** 要播放的單字（已依等級、詞性篩選） */
@@ -78,7 +78,7 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
       if (!alive()) return;
       setRevealed(true);
       if (options.chinese) {
-        await speakAndWait(word.meaning, "zh-TW");
+        await speakAndWait(word.meaning, 'zh-TW');
         if (!alive()) return;
       }
       if (options.example && word.example) {
@@ -121,23 +121,14 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
   return (
     <View style={styles.container}>
       <View style={styles.progressRow}>
-        <ThemedText
-          type="small"
-          themeColor="textSecondary"
-          style={styles.tabular}
-        >
+        <ThemedText type="small" themeColor="textSecondary" style={styles.tabular}>
           {index + 1} / {order.length}
         </ThemedText>
-        <ThemedText
-          type="small"
-          style={{ color: playing ? theme.accent : theme.textSecondary }}
-        >
-          {playing ? "● 播放中" : "已暫停"}
+        <ThemedText type="small" style={{ color: playing ? theme.accent : theme.textSecondary }}>
+          {playing ? '● 播放中' : '已暫停'}
         </ThemedText>
       </View>
-      <View
-        style={[styles.track, { backgroundColor: theme.backgroundSelected }]}
-      >
+      <View style={[styles.track, { backgroundColor: theme.backgroundSelected }]}>
         <View
           style={[
             styles.trackFill,
@@ -156,24 +147,14 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
             backgroundColor: theme.backgroundElement,
             borderColor: theme.border,
           },
-        ]}
-      >
-        <ThemedText
-          type="small"
-          themeColor="textSecondary"
-          style={styles.reading}
-        >
-          {revealed && word.reading !== word.word ? word.reading : " "}
+        ]}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.reading}>
+          {revealed && word.reading !== word.word ? word.reading : ' '}
         </ThemedText>
         <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
           {word.word}
         </ThemedText>
-        <ThemedText
-          style={[
-            styles.meaning,
-            { color: revealed ? theme.accent : "transparent" },
-          ]}
-        >
+        <ThemedText style={[styles.meaning, { color: revealed ? theme.accent : 'transparent' }]}>
           {word.meaning}
         </ThemedText>
         {revealed && <ExampleSentence word={word} />}
@@ -188,16 +169,15 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
         />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={playing ? "暫停" : "播放"}
+          accessibilityLabel={playing ? '暫停' : '播放'}
           onPress={toggle}
           style={({ pressed }) => [
             styles.play,
             { backgroundColor: theme.primary, borderColor: theme.gold },
             pressed && styles.pressed,
-          ]}
-        >
+          ]}>
           <ThemedText style={[styles.playIcon, { color: theme.onPrimary }]}>
-            {playing ? "❚❚" : "▶"}
+            {playing ? '❚❚' : '▶'}
           </ThemedText>
         </Pressable>
         <ControlButton
@@ -209,26 +189,10 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
       </View>
 
       <View style={styles.chips}>
-        <Chip
-          label="唸例句"
-          active={options.example}
-          onPress={() => setOption("example")}
-        />
-        <Chip
-          label="唸中文"
-          active={options.chinese}
-          onPress={() => setOption("chinese")}
-        />
-        <Chip
-          label="隨機順序"
-          active={options.random}
-          onPress={() => setOption("random")}
-        />
-        <Chip
-          label="慢慢來"
-          active={options.slow}
-          onPress={() => setOption("slow")}
-        />
+        <Chip label="唸例句" active={options.example} onPress={() => setOption('example')} />
+        <Chip label="唸中文" active={options.chinese} onPress={() => setOption('chinese')} />
+        <Chip label="隨機順序" active={options.random} onPress={() => setOption('random')} />
+        <Chip label="慢慢來" active={options.slow} onPress={() => setOption('slow')} />
       </View>
       <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
         每個單字會先唸日文，停一下讓你回想，再顯示意思。手機螢幕關掉或切到別的分頁時會暫停。
@@ -261,24 +225,13 @@ function ControlButton({
         { backgroundColor: theme.backgroundElement, borderColor: theme.border },
         disabled && styles.disabled,
         pressed && styles.pressed,
-      ]}
-    >
-      <ThemedText style={[styles.controlIcon, { color: theme.primary }]}>
-        {label}
-      </ThemedText>
+      ]}>
+      <ThemedText style={[styles.controlIcon, { color: theme.primary }]}>{label}</ThemedText>
     </Pressable>
   );
 }
 
-function Chip({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
+function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   const theme = useTheme();
   return (
     <Pressable
@@ -292,13 +245,11 @@ function Chip({
           backgroundColor: active ? theme.primary : theme.backgroundElement,
         },
         pressed && styles.pressed,
-      ]}
-    >
+      ]}>
       <ThemedText
         type="smallBold"
-        style={{ color: active ? theme.onPrimary : theme.textSecondary }}
-      >
-        {active ? "✓ " : ""}
+        style={{ color: active ? theme.onPrimary : theme.textSecondary }}>
+        {active ? '✓ ' : ''}
         {label}
       </ThemedText>
     </Pressable>
@@ -310,29 +261,29 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   center: {
-    textAlign: "center",
+    textAlign: 'center',
     paddingVertical: Spacing.five,
   },
   progressRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   tabular: {
-    fontVariant: ["tabular-nums"],
+    fontVariant: ['tabular-nums'],
   },
   track: {
     height: 6,
     borderRadius: 3,
-    overflow: "hidden",
+    overflow: 'hidden',
     marginTop: -Spacing.two,
   },
   trackFill: {
-    height: "100%",
+    height: '100%',
   },
   card: {
     borderWidth: 1,
     borderRadius: Spacing.three,
-    alignItems: "center",
+    alignItems: 'center',
     paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.three,
     gap: Spacing.two,
@@ -350,12 +301,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 30,
     fontWeight: 700,
-    textAlign: "center",
+    textAlign: 'center',
   },
   controls: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.four,
   },
   control: {
@@ -363,8 +314,8 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   controlIcon: {
     fontSize: 22,
@@ -375,8 +326,8 @@ const styles = StyleSheet.create({
     height: 76,
     borderRadius: 38,
     borderWidth: 3,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   playIcon: {
     fontSize: 28,
@@ -384,20 +335,20 @@ const styles = StyleSheet.create({
     fontWeight: 700,
   },
   chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.two,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   chip: {
     minHeight: 44,
     borderWidth: 1.5,
     borderRadius: 22,
     paddingHorizontal: Spacing.three,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   note: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   disabled: {
     opacity: 0.35,

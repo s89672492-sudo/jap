@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AnswerOption, type AnswerState } from '@/components/quiz/answer-option';
 import { ThemedText } from '@/components/themed-text';
+import { JapaneseText } from '@/components/ui/japanese-text';
 import { Spacing } from '@/constants/theme';
 import type { ReadingQuestion } from '@/data/reading/types';
 import { useTheme } from '@/hooks/use-theme';
@@ -51,7 +52,12 @@ export function ArticleQuestions({ questions, onFinish }: ArticleQuestionsProps)
           <ThemedText type="smallBold" style={{ color: theme.accent }}>
             問 {index + 1}
           </ThemedText>
-          <ThemedText style={styles.prompt}>{question.question}</ThemedText>
+          <JapaneseText
+            text={question.question}
+            fontSize={17}
+            fontWeight={700}
+            style={styles.prompt}
+          />
           <ThemedText type="small" themeColor="textSecondary">
             {question.questionZh}
           </ThemedText>
@@ -63,6 +69,7 @@ export function ArticleQuestions({ questions, onFinish }: ArticleQuestionsProps)
                 state={stateOf(index, option)}
                 disabled={picked[index] !== null}
                 onPress={() => pick(index, option)}
+                japanese
               />
             ))}
           </View>

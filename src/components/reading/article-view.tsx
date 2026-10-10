@@ -7,6 +7,7 @@ import { ReadingParagraph } from './reading-paragraph';
 import { ReadingVocabList } from './reading-vocab-list';
 
 import { ThemedText } from '@/components/themed-text';
+import { JapaneseText } from '@/components/ui/japanese-text';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
 import { PARAGRAPH_CAST, PARAGRAPH_SCENES, VOCAB_ICONS } from '@/data/reading/illustrations';
@@ -49,7 +50,7 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
         <ThemedText type="small" themeColor="textSecondary">
           {article.id.slice(0, 2).toUpperCase()}・{article.topic}・{length} 字
         </ThemedText>
-        <ThemedText style={styles.title}>{article.title}</ThemedText>
+        <JapaneseText text={article.title} fontSize={24} fontWeight={700} style={styles.title} />
         <ThemedText type="small" themeColor="textSecondary">
           {article.titleZh}
         </ThemedText>
@@ -61,7 +62,13 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
       />
 
       <View
-        style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.border,
+          },
+        ]}>
         {article.paragraphs.map((paragraph, index) => (
           <ReadingParagraph
             key={index}
@@ -82,7 +89,10 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
       <ThemedText type="smallBold" style={[styles.section, { color: theme.accent }]}>
         閱讀理解
       </ThemedText>
-      <ArticleQuestions questions={article.questions} onFinish={() => markArticleRead(article.id)} />
+      <ArticleQuestions
+        questions={article.questions}
+        onFinish={() => markArticleRead(article.id)}
+      />
 
       <SecondaryButton label="返回文章列表" onPress={onBack} />
     </View>

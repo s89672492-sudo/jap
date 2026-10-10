@@ -1,3 +1,5 @@
+import { FURIGANA_MAP } from '@/data/furigana-map';
+
 /**
  * 例句的假名注音格式：[漢字|かんじ]，例如「[毎朝|まいあさ]、[水|みず]を飲みます。」
  * 資料裡存的是加了注音的句子，顯示和朗讀時再拆開。
@@ -28,4 +30,9 @@ export function parseRuby(annotated: string): RubySegment[] {
   }
   if (last < annotated.length) segments.push({ text: annotated.slice(last) });
   return segments;
+}
+
+/** 查一句話的注音版本；沒有漢字或沒收錄的句子回傳 undefined */
+export function lookupFurigana(text: string): string | undefined {
+  return FURIGANA_MAP[text];
 }

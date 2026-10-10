@@ -46,6 +46,7 @@ export function ExamQuestionView({ item, picked, getState, onPick }: ExamQuestio
             state={getState(option)}
             disabled={picked !== null}
             onPress={() => onPick(option)}
+            japanese={question.type !== 'kanji-reading' && question.type !== 'orthography'}
           />
         ))}
       </View>

@@ -5,9 +5,12 @@ import { ThemedText } from '@/components/themed-text';
 import { BookmarkButton } from '@/components/ui/bookmark-button';
 import { LevelTag } from '@/components/ui/level-tag';
 import { SpeakButton } from '@/components/ui/speak-button';
+import { FuriganaText } from '@/components/vocab/furigana-text';
 import { Spacing } from '@/constants/theme';
 import type { GrammarPoint } from '@/data/grammar';
 import { useTheme } from '@/hooks/use-theme';
+import { lookupFurigana } from '@/lib/furigana';
+import { useSettings } from '@/stores/settings-store';
 
 type GrammarCardProps = {
   item: GrammarPoint;
@@ -16,14 +19,22 @@ type GrammarCardProps = {
 };
 
 /** 文法卡：句型、中文意思、接續方式，下方是例句（句型以強調色標出） */
-export const GrammarCard = memo(function GrammarCard({ item, showLevel = false }: GrammarCardProps) {
+export const GrammarCard = memo(function GrammarCard({
+  item,
+  showLevel = false,
+}: GrammarCardProps) {
   const theme = useTheme();
   const { ja, zh, highlight } = item.example;
   const index = ja.indexOf(highlight);
+  const { furigana } = useSettings();
+  const annotated = furigana ? lookupFurigana(ja) : undefined;
 
   return (
     <View
-      style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      style={[
+        styles.card,
+        { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+      ]}>
       <View style={[styles.stripe, { backgroundColor: theme.gold }]} />
       <View style={styles.body}>
         <View style={styles.patternRow}>
@@ -43,19 +54,26 @@ export const GrammarCard = memo(function GrammarCard({ item, showLevel = false }
         </View>
         <View style={[styles.exampleRow, { borderTopColor: theme.border }]}>
           <View style={styles.exampleText}>
-            <ThemedText style={styles.ja}>
-              {index >= 0 ? (
-                <>
-                  {ja.slice(0, index)}
-                  <ThemedText style={[styles.ja, styles.highlight, { color: theme.accent }]}>
-                    {highlight}
-                  </ThemedText>
-                  {ja.slice(index + highlight.length)}
-                </>
-              ) : (
-                ja
-              )}
-            </ThemedText>
+            {annotated ? (
+              <FuriganaText
+                annotated={annotated}
+                highlight={index >= 0 ? [index, index + highlight.length] : undefined}
+              />
+            ) : (
+              <ThemedText style={styles.ja}>
+                {index >= 0 ? (
+                  <>
+                    {ja.slice(0, index)}
+                    <ThemedText style={[styles.ja, styles.highlight, { color: theme.accent }]}>
+                      {highlight}
+                    </ThemedText>
+                    {ja.slice(index + highlight.length)}
+                  </>
+                ) : (
+                  ja
+                )}
+              </ThemedText>
+            )}
             <ThemedText type="small" themeColor="textSecondary">
               {zh}
             </ThemedText>

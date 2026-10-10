@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { SpeakButton } from '@/components/ui/speak-button';
+import { FuriganaText } from '@/components/vocab/furigana-text';
 import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel, type VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
@@ -49,7 +50,7 @@ const ERROR_MESSAGES: Record<RecognitionError, string> = {
 /** 口說練習：聽標準發音 → 按麥克風說日文 → 比對辨識結果，標出唸錯的字 */
 export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPracticeProps) {
   const theme = useTheme();
-  const { roundSize } = useSettings();
+  const { roundSize, furigana } = useSettings();
   const [target, setTarget] = useState<Target>('word');
   const [supported, setSupported] = useState<boolean | null>(null);
   const [items, setItems] = useState<VocabWord[]>([]);
@@ -161,9 +162,17 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
       <SegmentedControl options={TARGET_OPTIONS} value={target} onChange={setTarget} />
 
       {!supported && (
-        <View style={[styles.notice, { borderColor: theme.gold, backgroundColor: theme.backgroundElement }]}>
+        <View
+          style={[
+            styles.notice,
+            {
+              borderColor: theme.gold,
+              backgroundColor: theme.backgroundElement,
+            },
+          ]}>
           <ThemedText type="small" themeColor="textSecondary">
-            這個裝置不支援語音辨識，只能聽發音跟著唸。請用手機或電腦的 Chrome 打開網站版，就能辨識你有沒有說對。
+            這個裝置不支援語音辨識，只能聽發音跟著唸。請用手機或電腦的 Chrome
+            打開網站版，就能辨識你有沒有說對。
           </ThemedText>
         </View>
       )}
@@ -177,7 +186,14 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
         </ThemedText>
       </View>
 
-      <View style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.border,
+          },
+        ]}>
         {target === 'word' ? (
           <>
             {word.reading !== word.word && (
@@ -194,7 +210,11 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
           </>
         ) : (
           <>
-            <ThemedText style={styles.sentence}>{word.example?.ja}</ThemedText>
+            {furigana && word.example?.furigana ? (
+              <FuriganaText annotated={word.example.furigana} fontSize={20} center />
+            ) : (
+              <ThemedText style={styles.sentence}>{word.example?.ja}</ThemedText>
+            )}
             <ThemedText type="small" themeColor="textSecondary">
               {word.example?.zh}
             </ThemedText>
@@ -209,7 +229,10 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
               onPress={listen}
               style={({ pressed }) => [
                 styles.mic,
-                { backgroundColor: listening ? theme.accent : theme.primary, borderColor: theme.gold },
+                {
+                  backgroundColor: listening ? theme.accent : theme.primary,
+                  borderColor: theme.gold,
+                },
                 pressed && styles.pressed,
               ]}>
               <ThemedText style={styles.micIcon}>🎤</ThemedText>
@@ -218,7 +241,9 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
         </View>
         {supported && (
           <ThemedText type="small" themeColor="textSecondary">
-            {listening ? `聽取中…${partial ? `「${partial}」` : ''}（再按一次停止）` : '按 🎤 開始說'}
+            {listening
+              ? `聽取中…${partial ? `「${partial}」` : ''}（再按一次停止）`
+              : '按 🎤 開始說'}
           </ThemedText>
         )}
       </View>
@@ -230,12 +255,26 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
       )}
 
       {result && judged && (
-        <View style={[styles.result, { borderColor: theme.border, backgroundColor: theme.backgroundElement }]}>
+        <View
+          style={[
+            styles.result,
+            {
+              borderColor: theme.border,
+              backgroundColor: theme.backgroundElement,
+            },
+          ]}>
           <View style={styles.resultHeader}>
             <ThemedText
               style={[
                 styles.mark,
-                { color: judged.level === 'good' ? theme.success : judged.level === 'close' ? theme.gold : theme.accent },
+                {
+                  color:
+                    judged.level === 'good'
+                      ? theme.success
+                      : judged.level === 'close'
+                        ? theme.gold
+                        : theme.accent,
+                },
               ]}>
               {judged.mark} {Math.round(result.score * 100)} 分
             </ThemedText>
