@@ -1,9 +1,11 @@
+import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 import { SceneIllustration } from './scene-illustration';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { COVER_IMAGES } from '@/data/reading/covers';
 import { ARTICLE_SCENES, DEFAULT_SCENE } from '@/data/reading/scenes';
 import type { ReadingTopic } from '@/data/reading/types';
 
@@ -24,9 +26,23 @@ type ArticleCoverProps = {
   size: 'banner' | 'thumb';
 };
 
-/** 文章插圖：列表用主題色底的小圖示，文章頁用插畫風的大場景 */
+/** 文章插圖：有封面插畫就用插畫；沒有的話，列表用主題色底的小圖示，文章頁用會動的場景 */
 export function ArticleCover({ id, topic, size }: ArticleCoverProps) {
   const [main, left, right] = ARTICLE_SCENES[id] ?? DEFAULT_SCENE;
+  const image = COVER_IMAGES[id];
+
+  if (image) {
+    return (
+      <Image
+        source={image}
+        style={size === 'thumb' ? styles.thumb : styles.banner}
+        contentFit="cover"
+        transition={200}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      />
+    );
+  }
 
   if (size === 'thumb') {
     const background = { backgroundColor: TOPIC_TINTS[topic] };
@@ -51,6 +67,11 @@ export function ArticleCover({ id, topic, size }: ArticleCoverProps) {
 }
 
 const styles = StyleSheet.create({
+  banner: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: Spacing.three,
+  },
   thumb: {
     width: 56,
     height: 56,
