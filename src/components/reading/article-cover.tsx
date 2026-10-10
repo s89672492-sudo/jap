@@ -1,5 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
+import { SceneIllustration } from './scene-illustration';
+
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { ARTICLE_SCENES, DEFAULT_SCENE } from '@/data/reading/scenes';
@@ -22,72 +24,33 @@ type ArticleCoverProps = {
   size: 'banner' | 'thumb';
 };
 
-/** 文章插圖：主題色底，加上表情符號組成的小場景 */
+/** 文章插圖：列表用主題色底的小圖示，文章頁用插畫風的大場景 */
 export function ArticleCover({ id, topic, size }: ArticleCoverProps) {
   const [main, left, right] = ARTICLE_SCENES[id] ?? DEFAULT_SCENE;
-  const background = { backgroundColor: TOPIC_TINTS[topic] };
 
   if (size === 'thumb') {
+    const background = { backgroundColor: TOPIC_TINTS[topic] };
     return (
-      <View style={[styles.thumb, background]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View
+        style={[styles.thumb, background]}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants">
         <ThemedText style={styles.thumbEmoji}>{main}</ThemedText>
       </View>
     );
   }
 
+  // 大插圖用插畫風場景；推理故事一律是夜晚，比較有氣氛
   return (
-    <View
-      style={[styles.banner, background]}
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants">
-      {/* 角落的點點裝飾 */}
-      <ThemedText style={[styles.deco, styles.decoTopLeft]}>·  ·  ·</ThemedText>
-      <ThemedText style={[styles.deco, styles.decoBottomRight]}>·  ·  ·</ThemedText>
-      <ThemedText style={[styles.side, styles.sideLeft]}>{left}</ThemedText>
-      <ThemedText style={styles.main}>{main}</ThemedText>
-      <ThemedText style={[styles.side, styles.sideRight]}>{right}</ThemedText>
-    </View>
+    <SceneIllustration
+      emojis={[main, left, right]}
+      backdrop={topic === '推理' ? 'night' : undefined}
+      height={170}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  banner: {
-    height: 150,
-    borderRadius: Spacing.three,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.four,
-    overflow: 'hidden',
-  },
-  main: {
-    fontSize: 72,
-    lineHeight: 90,
-  },
-  side: {
-    fontSize: 40,
-    lineHeight: 52,
-  },
-  sideLeft: {
-    transform: [{ translateY: 22 }, { rotate: '-12deg' }],
-  },
-  sideRight: {
-    transform: [{ translateY: -22 }, { rotate: '12deg' }],
-  },
-  deco: {
-    position: 'absolute',
-    fontSize: 22,
-    opacity: 0.35,
-    letterSpacing: 2,
-  },
-  decoTopLeft: {
-    top: Spacing.two,
-    left: Spacing.three,
-  },
-  decoBottomRight: {
-    bottom: Spacing.two,
-    right: Spacing.three,
-  },
   thumb: {
     width: 56,
     height: 56,

@@ -65,7 +65,6 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
             paragraph={paragraph}
             showTranslation={showTranslation}
             scene={scenes?.[index]}
-            tint={tint}
           />
         ))}
       </View>
