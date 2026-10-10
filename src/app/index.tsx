@@ -7,12 +7,17 @@ import { CaseCard } from '@/components/detective/case-card';
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { SecondaryButton } from '@/components/ui/secondary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useDailyArticle } from '@/hooks/use-daily-article';
 import { useTheme } from '@/hooks/use-theme';
+import { useJlptLevel } from '@/stores/jlpt-level-store';
 
 export default function HomeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const level = useJlptLevel();
+  const daily = useDailyArticle(level);
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -48,6 +53,23 @@ export default function HomeScreen() {
           </CaseCard>
 
           <PrimaryButton label="開始調查單字" onPress={() => router.navigate('/vocab')} />
+
+          {daily && (
+            <>
+              <CaseCard label="CASE 002" title="今日閱讀">
+                <ThemedText type="small" themeColor="textSecondary">
+                  {level}・{daily.article.title}（{daily.article.titleZh}）
+                </ThemedText>
+                <ThemedText type="smallBold" style={{ color: theme.gold }}>
+                  {daily.doneToday ? '✓ 今天已完成' : '今天還沒讀'}・🔥 連續 {daily.streak} 天
+                </ThemedText>
+              </CaseCard>
+              <SecondaryButton
+                label={daily.doneToday ? '再去閱讀' : '閱讀今日文章'}
+                onPress={() => router.navigate({ pathname: '/reading', params: { open: 'daily' } })}
+              />
+            </>
+          )}
         </View>
       </ScrollView>
     </View>

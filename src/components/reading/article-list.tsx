@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { ArticleCover } from './article-cover';
+
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import type { ReadingArticle } from '@/data/reading/types';
@@ -31,7 +33,9 @@ export function ArticleList({ articles, onOpen }: ArticleListProps) {
               { backgroundColor: theme.backgroundElement, borderColor: theme.border },
               pressed && styles.pressed,
             ]}>
-            <View style={[styles.stripe, { backgroundColor: article.topic === '推理' ? theme.accent : theme.gold }]} />
+            <View style={styles.cover}>
+              <ArticleCover id={article.id} topic={article.topic} size="thumb" />
+            </View>
             <View style={styles.text}>
               <ThemedText type="small" themeColor="textSecondary">
                 {article.topic === '推理' ? '🔍 推理' : article.topic}
@@ -68,9 +72,8 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.7,
   },
-  stripe: {
-    alignSelf: 'stretch',
-    width: 6,
+  cover: {
+    paddingLeft: Spacing.two,
   },
   text: {
     flex: 1,

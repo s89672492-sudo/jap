@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { ArticleCover } from './article-cover';
 import { ArticleQuestions } from './article-questions';
 import { ReadingParagraph } from './reading-paragraph';
 import { ReadingVocabList } from './reading-vocab-list';
@@ -35,6 +36,8 @@ export function ArticleView({ article, onBack }: ArticleViewProps) {
           ‹ 返回列表
         </ThemedText>
       </Pressable>
+
+      <ArticleCover id={article.id} topic={article.topic} size="banner" />
 
       <View style={styles.titleBlock}>
         <ThemedText type="small" themeColor="textSecondary">

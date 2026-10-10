@@ -1,3 +1,4 @@
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { BackHandler, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -5,12 +6,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppBackground } from '@/components/app-background';
 import { ArticleList } from '@/components/reading/article-list';
 import { ArticleView } from '@/components/reading/article-view';
+import { DailyCard } from '@/components/reading/daily-card';
 import { ExternalLinks } from '@/components/reading/external-links';
 import { ThemedText } from '@/components/themed-text';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { READING_BY_LEVEL, type ReadingArticle } from '@/data/reading';
 import { JLPT_LEVELS } from '@/data/vocab';
+import { useDailyArticle } from '@/hooks/use-daily-article';
 import { useTheme } from '@/hooks/use-theme';
 import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
 import { useReadArticles } from '@/stores/reading-store';
@@ -23,6 +26,9 @@ export default function ReadingScreen() {
   const level = useJlptLevel();
   const read = useReadArticles();
   const [article, setArticle] = useState<ReadingArticle | null>(null);
+  const daily = useDailyArticle(level);
+  // 從首頁「閱讀今日文章」進來時，直接打開今日文章
+  const { open: openParam } = useLocalSearchParams<{ open?: string }>();
   const scrollRef = useRef<ScrollView>(null);
 
   const articles = READING_BY_LEVEL[level];
@@ -32,6 +38,13 @@ export default function ReadingScreen() {
     setArticle(next);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
+
+  useEffect(() => {
+    if (openParam !== 'daily' || !daily) return;
+    open(daily.article);
+    router.setParams({ open: undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openParam, daily?.article.id]);
 
   // Android 的返回鍵：在文章裡時先回到列表
   useEffect(() => {
@@ -86,6 +99,7 @@ export default function ReadingScreen() {
             <ArticleView article={article} onBack={() => open(null)} />
           ) : (
             <>
+              {daily && <DailyCard daily={daily} onOpen={() => open(daily.article)} />}
               <ThemedText type="small" themeColor="textSecondary">
                 原創的分級文章，依等級的單字和文法撰寫。讀完做閱讀理解題就會打勾。
               </ThemedText>
