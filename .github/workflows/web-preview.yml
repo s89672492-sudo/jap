@@ -4,19 +4,23 @@ name: Web preview
 
 on:
   push:
-    branches: [main, setup/expo-sdk57]
+    branches: [main, setup/expo-sdk57, feature/local-ai-teacher]
   workflow_dispatch:
 
 permissions:
   contents: write
 
+# 所有分支都寫入同一個 gh-pages，排隊依序部署，不中斷進行中的部署
 concurrency:
   group: web-preview
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      # 功能分支只部署到 /<repo>/ai-preview/ 給手機實測，正式網站 /<repo>/ 不受影響
+      PREVIEW_DIR: ${{ github.ref_name == 'feature/local-ai-teacher' && 'ai-preview' || '' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -40,7 +44,8 @@ jobs:
           node -e '
             const fs = require("fs");
             const config = JSON.parse(fs.readFileSync("app.json", "utf8"));
-            config.expo.experiments = { ...config.expo.experiments, baseUrl: "/${{ github.event.repository.name }}" };
+            const preview = process.env.PREVIEW_DIR ? "/" + process.env.PREVIEW_DIR : "";
+            config.expo.experiments = { ...config.expo.experiments, baseUrl: "/${{ github.event.repository.name }}" + preview };
             fs.writeFileSync("app.json", JSON.stringify(config, null, 2));
           '
 
@@ -56,10 +61,27 @@ jobs:
 
       - name: Push to gh-pages branch
         run: |
-          cd dist
-          git init -q -b gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -q -m "Deploy web preview from ${GITHUB_SHA::7}"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+          REPO_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$PREVIEW_DIR" ]; then
+            # 預覽版：只替換 gh-pages 裡的預覽資料夾，其他檔案（正式網站）保持不變
+            git clone -q --depth 1 -b gh-pages "$REPO_URL" pages
+            rm -rf "pages/$PREVIEW_DIR"
+            cp -r dist "pages/$PREVIEW_DIR"
+            cd pages
+            git add -A
+            git diff --cached --quiet && exit 0
+            git commit -q -m "Deploy $PREVIEW_DIR from ${GITHUB_SHA::7}"
+            git push -q origin gh-pages
+          else
+            # 正式版：整個重新部署，但保留已存在的預覽資料夾
+            if git clone -q --depth 1 -b gh-pages "$REPO_URL" old-pages && [ -d old-pages/ai-preview ]; then
+              cp -r old-pages/ai-preview dist/ai-preview
+            fi
+            cd dist
+            git init -q -b gh-pages
+            git add -A
+            git commit -q -m "Deploy web preview from ${GITHUB_SHA::7}"
+            git push -f "$REPO_URL" gh-pages
+          fi
