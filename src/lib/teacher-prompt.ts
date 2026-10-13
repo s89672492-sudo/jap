@@ -21,9 +21,13 @@ export function buildMessages(level: JlptLevel, history: ChatMessage[]): ChatMes
   return [{ role: 'system', content: systemPrompt(level) }, ...history.slice(-HISTORY_LIMIT)];
 }
 
-/** 模型偶爾會輸出 Markdown 粗體符號，畫面上直接拿掉 */
+/** 模型偶爾會輸出 Markdown 符號或空的思考標記，畫面上直接拿掉 */
 export function cleanReply(text: string): string {
-  return text.replace(/\*\*(.+?)\*\*/g, '$1').replace(/^#{1,6}\s+/gm, '');
+  return text
+    .replace(/<think>[\s\S]*?(<\/think>|$)/g, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .trim();
 }
 
 export const SUGGESTED_QUESTIONS = [
