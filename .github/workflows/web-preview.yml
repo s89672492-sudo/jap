@@ -44,7 +44,10 @@ jobs:
             fs.writeFileSync("app.json", JSON.stringify(config, null, 2));
           '
 
-      - run: npx expo export --platform web --output-dir dist
+      # 網頁版保留日文、中文原字，JS 檔小一半（見 metro.config.js）
+      - run: npx expo export --platform web --output-dir dist --clear
+        env:
+          WEB_KEEP_UNICODE: '1'
 
       - name: Prepare Pages files
         run: |
