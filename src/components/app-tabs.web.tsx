@@ -29,6 +29,8 @@ export default function AppTabs() {
           <TabTrigger name="settings" href="/settings" asChild>
             <TabButton>設定</TabButton>
           </TabTrigger>
+          {/* AI 老師從事務所首頁進入，不佔分頁列的位置 */}
+          <TabTrigger name="teacher" href="/teacher" style={styles.hidden} />
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -106,5 +108,8 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.7,
+  },
+  hidden: {
+    display: 'none',
   },
 });
