@@ -38,7 +38,7 @@ function explainError(error: unknown, online: boolean): string {
     return '下載失敗：請確認網路連線後再試。第一次下載需要網路。';
   }
   if (/memory|device.*lost|OOM|allocation/i.test(message)) {
-    return '記憶體不足：請關掉其他分頁或 App，或改用「輕量」模型。';
+    return '記憶體不足：請關掉其他分頁或 App，或改用「日文專家」模型。';
   }
   if (/quota|storage/i.test(message)) {
     return '儲存空間不足：請清出空間後再試。';

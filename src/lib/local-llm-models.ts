@@ -1,5 +1,5 @@
-/** AI 日文老師可以選的本地模型（WebLLM 內建清單裡的 Qwen 系列，中文和日文都能回答） */
-export type TeacherModelKey = 'light' | 'quality' | 'best';
+/** AI 日文老師可以選的本地模型（WebLLM 內建清單裡的 Gemma 日文版與 Qwen3.5） */
+export type TeacherModelKey = 'japanese' | 'quality' | 'best';
 
 export type TeacherModel = {
   label: string;
@@ -15,29 +15,29 @@ export type TeacherModel = {
 };
 
 export const TEACHER_MODELS: Record<TeacherModelKey, TeacherModel> = {
-  light: {
-    label: '輕量',
-    f16: 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
-    f32: 'Qwen2.5-0.5B-Instruct-q4f32_1-MLC',
-    download: '約 0.3 GB',
-    memoryMB: 945,
-    note: '建議 iPhone 和一般手機使用，回答比較簡單',
+  japanese: {
+    label: '日文專家',
+    f16: 'gemma-2-2b-jpn-it-q4f16_1-MLC',
+    f32: 'gemma-2-2b-jpn-it-q4f32_1-MLC',
+    download: '約 1.4 GB',
+    memoryMB: 1895,
+    note: 'Google Gemma 日文版，日文例句最自然；中文說明比較簡單。三個裡面最省記憶體',
   },
   quality: {
     label: '高品質',
-    f16: 'Qwen3-1.7B-q4f16_1-MLC',
-    f32: 'Qwen3-1.7B-q4f32_1-MLC',
-    download: '約 1.0 GB',
-    memoryMB: 2037,
-    note: 'Qwen3，解說比較完整，建議記憶體 6GB 以上的手機',
+    f16: 'Qwen3.5-2B-q4f16_1-MLC',
+    f32: 'Qwen3.5-2B-q4f32_1-MLC',
+    download: '約 1.2 GB',
+    memoryMB: 2245,
+    note: 'Qwen3.5 新一代，中文解說清楚；建議記憶體 8GB 以上的手機',
   },
   best: {
     label: '最佳',
-    f16: 'Qwen3-4B-q4f16_1-MLC',
-    f32: 'Qwen3-4B-q4f32_1-MLC',
-    download: '約 2.3 GB',
-    memoryMB: 3432,
-    note: 'Qwen3 最大的版本，回答最好；需要記憶體 8GB 以上的新手機、平板或電腦，iPhone 可能會因記憶體不足重新整理',
+    f16: 'Qwen3.5-4B-q4f16_1-MLC',
+    f32: 'Qwen3.5-4B-q4f32_1-MLC',
+    download: '約 2.5 GB',
+    memoryMB: 3868,
+    note: 'Qwen3.5 最大的版本，回答最好；適合平板、電腦或 12GB 記憶體的手機，iPhone 很可能跑不動',
   },
 };
 
