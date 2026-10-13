@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
 import { ChatView } from '@/components/teacher/chat-view';
+import { InterruptedNotice } from '@/components/teacher/interrupted-notice';
 import { ModelPanel, type ModelPhase } from '@/components/teacher/model-panel';
 import { SupportCard } from '@/components/teacher/support-card';
 import { ThemedText } from '@/components/themed-text';
@@ -14,14 +15,19 @@ import { useTheme } from '@/hooks/use-theme';
 import {
   checkSupport,
   deleteModel,
+  hasModelFiles,
   isModelDownloaded,
   loadedModelId,
   loadModel,
   stopGenerating,
   streamChat,
+  takeInterruptedModel,
 } from '@/lib/local-llm';
 import {
   modelIdFor,
+  modelKeyFor,
+  SMALLER_MODEL,
+  TEACHER_MODELS,
   type ChatMessage,
   type LoadProgress,
   type SupportReport,
@@ -59,17 +65,30 @@ export default function TeacherScreen() {
 
   const [report, setReport] = useState<SupportReport | null>(null);
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
+  const [hasFiles, setHasFiles] = useState(false);
   const [phase, setPhase] = useState<ModelPhase>('idle');
   const [progress, setProgress] = useState<LoadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [busy, setBusy] = useState(false);
+  /** 上次被瀏覽器中斷（通常是記憶體不足）的模型，以及自動改用的模型 */
+  const [interrupted, setInterrupted] = useState<{
+    from: TeacherModelKey;
+    to: TeacherModelKey | null;
+  } | null>(null);
   const scrollRef = useRef<ScrollView>(null);
 
   const modelId = report ? modelIdFor(modelKey, report.f16) : null;
 
   useEffect(() => {
     checkSupport().then(setReport);
+    const crashedId = takeInterruptedModel();
+    const from = crashedId ? modelKeyFor(crashedId) : null;
+    if (from) {
+      const to = SMALLER_MODEL[from];
+      if (to) setTeacherModel(to);
+      setInterrupted({ from, to });
+    }
   }, []);
 
   // 換模型時重新確認有沒有下載過；已經載入的話直接可以聊天
@@ -79,8 +98,12 @@ export default function TeacherScreen() {
     setDownloaded(null);
     setError(null);
     setPhase(loadedModelId() === modelId ? 'ready' : 'idle');
+    setHasFiles(false);
     isModelDownloaded(modelId).then((value) => {
       if (!cancelled) setDownloaded(value);
+    });
+    hasModelFiles(modelId).then((value) => {
+      if (!cancelled) setHasFiles(value);
     });
     return () => {
       cancelled = true;
@@ -89,6 +112,17 @@ export default function TeacherScreen() {
 
   const start = useCallback(async () => {
     if (!modelId) return;
+    const model = TEACHER_MODELS[modelKey];
+    if (
+      modelKey === 'best' &&
+      !window.confirm(
+        `「${model.label}」需要約 ${(model.memoryMB / 1024).toFixed(1)} GB 記憶體。` +
+          'iPhone 和多數手機會因記憶體不足讓頁面自動重新整理，建議在平板或電腦使用。確定要繼續嗎？',
+      )
+    ) {
+      return;
+    }
+    setInterrupted(null);
     setPhase('loading');
     setError(null);
     setProgress(null);
@@ -100,14 +134,16 @@ export default function TeacherScreen() {
       setError(explainError(e, navigator.onLine));
       setPhase('error');
       setDownloaded(await isModelDownloaded(modelId));
+      setHasFiles(await hasModelFiles(modelId));
     }
-  }, [modelId]);
+  }, [modelId, modelKey]);
 
   const remove = useCallback(async () => {
     if (!modelId) return;
     if (!window.confirm('要刪除這個模型嗎？之後要用需要重新下載。')) return;
     await deleteModel(modelId);
     setDownloaded(false);
+    setHasFiles(false);
     setPhase('idle');
   }, [modelId]);
 
@@ -175,6 +211,13 @@ export default function TeacherScreen() {
             </ThemedText>
           </View>
 
+          {interrupted && (
+            <InterruptedNotice
+              from={interrupted.from}
+              to={interrupted.to}
+              onDismiss={() => setInterrupted(null)}
+            />
+          )}
           {(!report?.ok || phase !== 'ready') && <SupportCard report={report} />}
           {report?.ok && (
             <ModelPanel
@@ -187,6 +230,7 @@ export default function TeacherScreen() {
               online={online}
               onStart={start}
               onDelete={remove}
+              canDelete={hasFiles}
             />
           )}
           {phase === 'ready' && (

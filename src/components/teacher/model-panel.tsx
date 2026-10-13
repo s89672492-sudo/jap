@@ -25,6 +25,8 @@ type ModelPanelProps = {
   online: boolean;
   onStart: () => void;
   onDelete: () => void;
+  /** 裝置裡有這個模型的檔案（包含下載到一半的），可以刪除 */
+  canDelete: boolean;
 };
 
 const MODEL_OPTIONS = TEACHER_MODEL_KEYS.map((key) => ({
@@ -43,6 +45,7 @@ export function ModelPanel({
   online,
   onStart,
   onDelete,
+  canDelete,
 }: ModelPanelProps) {
   const theme = useTheme();
   const model = TEACHER_MODELS[modelKey];
@@ -121,7 +124,7 @@ export function ModelPanel({
         />
       )}
 
-      {downloaded && !loading && (
+      {(downloaded || canDelete) && !loading && (
         <Pressable
           accessibilityRole="button"
           onPress={onDelete}

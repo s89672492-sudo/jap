@@ -149,6 +149,17 @@ export async function isModelDownloaded(modelId: string): Promise<boolean> {
   }
 }
 
+/** 這個模型有沒有任何檔案存在裝置裡（包含下載到一半的），用來決定能不能刪除 */
+export async function hasModelFiles(modelId: string): Promise<boolean> {
+  try {
+    const cache = await caches.open('webllm/model');
+    const keys = await cache.keys();
+    return keys.some((request) => request.url.includes(`/${modelId}/`));
+  } catch {
+    return false;
+  }
+}
+
 export async function loadModel(
   modelId: string,
   onProgress: (progress: LoadProgress) => void,
@@ -162,10 +173,40 @@ export async function loadModel(
   }
   // 請瀏覽器不要在空間不足時自動清掉模型（不一定會同意）
   navigator.storage?.persist?.().catch(() => {});
-  engine = await lib.CreateMLCEngine(modelId, {
-    initProgressCallback: (report) => onProgress({ progress: report.progress, text: report.text }),
-  });
-  engineModelId = modelId;
+  markBusy(modelId);
+  try {
+    engine = await lib.CreateMLCEngine(modelId, {
+      initProgressCallback: (report) =>
+        onProgress({ progress: report.progress, text: report.text }),
+    });
+    engineModelId = modelId;
+  } finally {
+    markBusy(null);
+  }
+}
+
+/**
+ * 手機記憶體不夠時，瀏覽器會直接把頁面重新整理，程式沒有機會處理錯誤。
+ * 所以在載入模型或回答期間留下記號；重新開啟時記號還在，就表示上次被瀏覽器中斷了。
+ */
+const BUSY_KEY = 'teacher-busy-model';
+
+function markBusy(modelId: string | null) {
+  try {
+    if (modelId) localStorage.setItem(BUSY_KEY, modelId);
+    else localStorage.removeItem(BUSY_KEY);
+  } catch {}
+}
+
+/** 上次載入或回答時頁面被中斷的模型（讀一次就清掉）；沒有就回傳 null */
+export function takeInterruptedModel(): string | null {
+  try {
+    const modelId = localStorage.getItem(BUSY_KEY);
+    localStorage.removeItem(BUSY_KEY);
+    return modelId;
+  } catch {
+    return null;
+  }
 }
 
 export function loadedModelId(): string | null {
@@ -196,9 +237,14 @@ export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<strin
     max_tokens: 800,
     extra_body: qwen3 ? { enable_thinking: false } : undefined,
   });
-  for await (const chunk of chunks) {
-    const text = chunk.choices[0]?.delta?.content;
-    if (text) yield text;
+  markBusy(engineModelId);
+  try {
+    for await (const chunk of chunks) {
+      const text = chunk.choices[0]?.delta?.content;
+      if (text) yield text;
+    }
+  } finally {
+    markBusy(null);
   }
 }
 
@@ -212,6 +258,18 @@ export async function deleteModel(modelId: string): Promise<void> {
     engine = null;
     engineModelId = null;
   }
-  const lib = await loadLib();
-  await lib.deleteModelAllInfoInCache(modelId);
+  try {
+    const lib = await loadLib();
+    await lib.deleteModelAllInfoInCache(modelId);
+  } catch {
+    // 下載到一半或離線時，WebLLM 可能讀不到模型設定而刪除失敗，下面直接清掉
+  }
+  for (const name of ['webllm/model', 'webllm/config']) {
+    try {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) {
+        if (request.url.includes(`/${modelId}/`)) await cache.delete(request);
+      }
+    } catch {}
+  }
 }

@@ -43,6 +43,22 @@ export const TEACHER_MODELS: Record<TeacherModelKey, TeacherModel> = {
 
 export const TEACHER_MODEL_KEYS = Object.keys(TEACHER_MODELS) as TeacherModelKey[];
 
+/** 依模型 id 找回是哪一個選項 */
+export function modelKeyFor(modelId: string): TeacherModelKey | null {
+  return (
+    TEACHER_MODEL_KEYS.find(
+      (key) => TEACHER_MODELS[key].f16 === modelId || TEACHER_MODELS[key].f32 === modelId,
+    ) ?? null
+  );
+}
+
+/** 跑不動時建議改用的較小模型 */
+export const SMALLER_MODEL: Record<TeacherModelKey, TeacherModelKey | null> = {
+  best: 'quality',
+  quality: 'japanese',
+  japanese: null,
+};
+
 export function modelIdFor(key: TeacherModelKey, f16: boolean): string {
   return f16 ? TEACHER_MODELS[key].f16 : TEACHER_MODELS[key].f32;
 }
