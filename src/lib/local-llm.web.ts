@@ -174,14 +174,52 @@ export async function loadModel(
   // 請瀏覽器不要在空間不足時自動清掉模型（不一定會同意）
   navigator.storage?.persist?.().catch(() => {});
   markBusy(modelId);
+  const wakeLock = await keepScreenOn();
   try {
-    engine = await lib.CreateMLCEngine(modelId, {
-      initProgressCallback: (report) =>
-        onProgress({ progress: report.progress, text: report.text }),
-    });
-    engineModelId = modelId;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        engine = await lib.CreateMLCEngine(modelId, {
+          initProgressCallback: (report) =>
+            onProgress({ progress: report.progress, text: report.text }),
+        });
+        engineModelId = modelId;
+        return;
+      } catch (error) {
+        // 網路斷掉時自動重試；已經下載的部分存在 Cache Storage，重試會從斷掉的地方繼續
+        if (attempt >= MAX_RETRIES || !isNetworkError(error) || !navigator.onLine) throw error;
+        onProgress({
+          progress: 0,
+          text: `下載中斷，${RETRY_DELAY_MS / 1000} 秒後自動繼續（第 ${attempt + 1} 次重試）…`,
+        });
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      }
+    }
   } finally {
     markBusy(null);
+    wakeLock?.release().catch(() => {});
+  }
+}
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 3000;
+
+/** 下載被中斷的錯誤（iPhone Safari 是「Load failed」，Chrome 是「Failed to fetch」） */
+function isNetworkError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /load failed|failed to fetch|network|fetch/i.test(message);
+}
+
+type WakeLockSentinel = { release: () => Promise<void> };
+
+/** 下載時讓螢幕保持亮著：iPhone 螢幕一關，Safari 就會中斷下載 */
+async function keepScreenOn(): Promise<WakeLockSentinel | null> {
+  try {
+    const nav = navigator as Navigator & {
+      wakeLock?: { request: (type: 'screen') => Promise<WakeLockSentinel> };
+    };
+    return (await nav.wakeLock?.request('screen')) ?? null;
+  } catch {
+    return null;
   }
 }
 

@@ -99,7 +99,7 @@ export function ModelPanel({
             {progress?.text || '準備中…'}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            下載或載入時請不要關閉這個頁面。
+            下載時請保持螢幕亮著、停在這個頁面，不要切到別的 App。
           </ThemedText>
         </View>
       )}

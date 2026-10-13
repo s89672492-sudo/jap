@@ -40,8 +40,11 @@ import { setTeacherModel, useTeacherModel } from '@/stores/teacher-store';
 /** 把 WebLLM 的錯誤換成看得懂的說明 */
 function explainError(error: unknown, online: boolean): string {
   const message = error instanceof Error ? error.message : String(error);
-  if (!online || /fetch|network/i.test(message)) {
-    return '下載失敗：請確認網路連線後再試。第一次下載需要網路。';
+  if (!online) {
+    return '目前沒有網路：第一次下載模型需要網路，請連上 Wi-Fi 後再試。';
+  }
+  if (/load failed|fetch|network/i.test(message)) {
+    return '下載中斷了（常見原因：螢幕關掉、切到別的 App、網路不穩）。已下載的部分會保留，請保持螢幕亮著、停在這個頁面，再按一次就會接著下載。';
   }
   if (/memory|device.*lost|OOM|allocation/i.test(message)) {
     return '記憶體不足：請關掉其他分頁或 App，或改用「日文專家」模型。';
