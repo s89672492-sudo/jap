@@ -25,11 +25,19 @@ export async function isModelDownloaded(_modelId: string): Promise<boolean> {
   return false;
 }
 
+export async function hasModelFiles(_modelId: string): Promise<boolean> {
+  return false;
+}
+
 export async function loadModel(
   _modelId: string,
   _onProgress: (progress: LoadProgress) => void,
 ): Promise<void> {
   throw new Error('這個環境不支援本地 AI');
+}
+
+export function takeInterruptedModel(): string | null {
+  return null;
 }
 
 export function loadedModelId(): string | null {
@@ -41,5 +49,7 @@ export async function* streamChat(_messages: ChatMessage[]): AsyncGenerator<stri
 }
 
 export async function stopGenerating(): Promise<void> {}
+
+export async function removeRetiredModels(): Promise<void> {}
 
 export async function deleteModel(_modelId: string): Promise<void> {}

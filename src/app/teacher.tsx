@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
 import { ChatView } from '@/components/teacher/chat-view';
+import { InterruptedNotice } from '@/components/teacher/interrupted-notice';
 import { ModelPanel, type ModelPhase } from '@/components/teacher/model-panel';
 import { SupportCard } from '@/components/teacher/support-card';
 import { ThemedText } from '@/components/themed-text';
@@ -14,14 +15,19 @@ import { useTheme } from '@/hooks/use-theme';
 import {
   checkSupport,
   deleteModel,
+  hasModelFiles,
   isModelDownloaded,
   loadedModelId,
   loadModel,
+  removeRetiredModels,
   stopGenerating,
   streamChat,
+  takeInterruptedModel,
 } from '@/lib/local-llm';
 import {
   modelIdFor,
+  modelKeyFor,
+  SMALLER_MODEL,
   type ChatMessage,
   type LoadProgress,
   type SupportReport,
@@ -34,8 +40,11 @@ import { setTeacherModel, useTeacherModel } from '@/stores/teacher-store';
 /** 把 WebLLM 的錯誤換成看得懂的說明 */
 function explainError(error: unknown, online: boolean): string {
   const message = error instanceof Error ? error.message : String(error);
-  if (!online || /fetch|network/i.test(message)) {
-    return '下載失敗：請確認網路連線後再試。第一次下載需要網路。';
+  if (!online) {
+    return '目前沒有網路：第一次下載模型需要網路，請連上 Wi-Fi 後再試。';
+  }
+  if (/load failed|fetch|network/i.test(message)) {
+    return '下載中斷了（常見原因：螢幕關掉、切到別的 App、網路不穩）。已下載的部分會保留，請保持螢幕亮著、停在這個頁面，再按一次就會接著下載。';
   }
   if (/memory|device.*lost|OOM|allocation/i.test(message)) {
     return '記憶體不足：請關掉其他分頁或 App，或改用「日文專家」模型。';
@@ -59,17 +68,31 @@ export default function TeacherScreen() {
 
   const [report, setReport] = useState<SupportReport | null>(null);
   const [downloaded, setDownloaded] = useState<boolean | null>(null);
+  const [hasFiles, setHasFiles] = useState(false);
   const [phase, setPhase] = useState<ModelPhase>('idle');
   const [progress, setProgress] = useState<LoadProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [busy, setBusy] = useState(false);
+  /** 上次被瀏覽器中斷（通常是記憶體不足）的模型，以及自動改用的模型 */
+  const [interrupted, setInterrupted] = useState<{
+    from: TeacherModelKey;
+    to: TeacherModelKey | null;
+  } | null>(null);
   const scrollRef = useRef<ScrollView>(null);
 
   const modelId = report ? modelIdFor(modelKey, report.f16) : null;
 
   useEffect(() => {
     checkSupport().then(setReport);
+    removeRetiredModels();
+    const crashedId = takeInterruptedModel();
+    const from = crashedId ? modelKeyFor(crashedId) : null;
+    if (from) {
+      const to = SMALLER_MODEL[from];
+      if (to) setTeacherModel(to);
+      setInterrupted({ from, to });
+    }
   }, []);
 
   // 換模型時重新確認有沒有下載過；已經載入的話直接可以聊天
@@ -79,8 +102,12 @@ export default function TeacherScreen() {
     setDownloaded(null);
     setError(null);
     setPhase(loadedModelId() === modelId ? 'ready' : 'idle');
+    setHasFiles(false);
     isModelDownloaded(modelId).then((value) => {
       if (!cancelled) setDownloaded(value);
+    });
+    hasModelFiles(modelId).then((value) => {
+      if (!cancelled) setHasFiles(value);
     });
     return () => {
       cancelled = true;
@@ -89,6 +116,7 @@ export default function TeacherScreen() {
 
   const start = useCallback(async () => {
     if (!modelId) return;
+    setInterrupted(null);
     setPhase('loading');
     setError(null);
     setProgress(null);
@@ -100,6 +128,7 @@ export default function TeacherScreen() {
       setError(explainError(e, navigator.onLine));
       setPhase('error');
       setDownloaded(await isModelDownloaded(modelId));
+      setHasFiles(await hasModelFiles(modelId));
     }
   }, [modelId]);
 
@@ -108,6 +137,7 @@ export default function TeacherScreen() {
     if (!window.confirm('要刪除這個模型嗎？之後要用需要重新下載。')) return;
     await deleteModel(modelId);
     setDownloaded(false);
+    setHasFiles(false);
     setPhase('idle');
   }, [modelId]);
 
@@ -175,6 +205,13 @@ export default function TeacherScreen() {
             </ThemedText>
           </View>
 
+          {interrupted && (
+            <InterruptedNotice
+              from={interrupted.from}
+              to={interrupted.to}
+              onDismiss={() => setInterrupted(null)}
+            />
+          )}
           {(!report?.ok || phase !== 'ready') && <SupportCard report={report} />}
           {report?.ok && (
             <ModelPanel
@@ -187,6 +224,7 @@ export default function TeacherScreen() {
               online={online}
               onStart={start}
               onDelete={remove}
+              canDelete={hasFiles}
             />
           )}
           {phase === 'ready' && (

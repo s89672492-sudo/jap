@@ -1,6 +1,12 @@
 import type { MLCEngine } from '@mlc-ai/web-llm';
 
-import type { ChatMessage, LoadProgress, SupportCheck, SupportReport } from './local-llm-models';
+import {
+  RETIRED_MODEL_IDS,
+  type ChatMessage,
+  type LoadProgress,
+  type SupportCheck,
+  type SupportReport,
+} from './local-llm-models';
 
 /**
  * 網頁版本地 AI：用 WebLLM 在瀏覽器裡以 WebGPU 推論，不呼叫任何雲端 AI API。
@@ -99,12 +105,12 @@ export async function checkSupport(): Promise<SupportReport> {
     try {
       const { quota = 0, usage = 0 } = await navigator.storage.estimate();
       const freeGB = Math.floor(((quota - usage) / 1024 / MB) * 10) / 10;
-      // 日文專家約 1.4 GB、高品質約 1.2 GB、最佳約 2.5 GB
+      // 日文專家約 1.4 GB、高品質約 1.2 GB
       const fits =
-        freeGB >= 2.7
-          ? '，任何一個模型都放得下'
+        freeGB >= 2.8
+          ? '，兩個模型都放得下'
           : freeGB >= 1.5
-            ? '，放得下日文專家或高品質模型'
+            ? '，放得下其中一個模型'
             : freeGB >= 1.3
               ? '，只放得下高品質模型'
               : '，可能不夠存放模型';
@@ -124,7 +130,7 @@ export async function checkSupport(): Promise<SupportReport> {
       status: nav.deviceMemory >= 4 ? 'pass' : 'warn',
       detail:
         nav.deviceMemory >= 8
-          ? `約 ${nav.deviceMemory} GB 以上，可以試試高品質或最佳模型`
+          ? `約 ${nav.deviceMemory} GB 以上，兩個模型都可以試試`
           : nav.deviceMemory >= 4
             ? `約 ${nav.deviceMemory} GB，建議使用日文專家模型`
             : `約 ${nav.deviceMemory} GB，可能跑不動；請關掉其他 App 後試試日文專家模型`,
@@ -149,6 +155,17 @@ export async function isModelDownloaded(modelId: string): Promise<boolean> {
   }
 }
 
+/** 這個模型有沒有任何檔案存在裝置裡（包含下載到一半的），用來決定能不能刪除 */
+export async function hasModelFiles(modelId: string): Promise<boolean> {
+  try {
+    const cache = await caches.open('webllm/model');
+    const keys = await cache.keys();
+    return keys.some((request) => request.url.includes(`/${modelId}/`));
+  } catch {
+    return false;
+  }
+}
+
 export async function loadModel(
   modelId: string,
   onProgress: (progress: LoadProgress) => void,
@@ -162,10 +179,78 @@ export async function loadModel(
   }
   // 請瀏覽器不要在空間不足時自動清掉模型（不一定會同意）
   navigator.storage?.persist?.().catch(() => {});
-  engine = await lib.CreateMLCEngine(modelId, {
-    initProgressCallback: (report) => onProgress({ progress: report.progress, text: report.text }),
-  });
-  engineModelId = modelId;
+  markBusy(modelId);
+  const wakeLock = await keepScreenOn();
+  try {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        engine = await lib.CreateMLCEngine(modelId, {
+          initProgressCallback: (report) =>
+            onProgress({ progress: report.progress, text: report.text }),
+        });
+        engineModelId = modelId;
+        return;
+      } catch (error) {
+        // 網路斷掉時自動重試；已經下載的部分存在 Cache Storage，重試會從斷掉的地方繼續
+        if (attempt >= MAX_RETRIES || !isNetworkError(error) || !navigator.onLine) throw error;
+        onProgress({
+          progress: 0,
+          text: `下載中斷，${RETRY_DELAY_MS / 1000} 秒後自動繼續（第 ${attempt + 1} 次重試）…`,
+        });
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      }
+    }
+  } finally {
+    markBusy(null);
+    wakeLock?.release().catch(() => {});
+  }
+}
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 3000;
+
+/** 下載被中斷的錯誤（iPhone Safari 是「Load failed」，Chrome 是「Failed to fetch」） */
+function isNetworkError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /load failed|failed to fetch|network|fetch/i.test(message);
+}
+
+type WakeLockSentinel = { release: () => Promise<void> };
+
+/** 下載時讓螢幕保持亮著：iPhone 螢幕一關，Safari 就會中斷下載 */
+async function keepScreenOn(): Promise<WakeLockSentinel | null> {
+  try {
+    const nav = navigator as Navigator & {
+      wakeLock?: { request: (type: 'screen') => Promise<WakeLockSentinel> };
+    };
+    return (await nav.wakeLock?.request('screen')) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 手機記憶體不夠時，瀏覽器會直接把頁面重新整理，程式沒有機會處理錯誤。
+ * 所以在載入模型或回答期間留下記號；重新開啟時記號還在，就表示上次被瀏覽器中斷了。
+ */
+const BUSY_KEY = 'teacher-busy-model';
+
+function markBusy(modelId: string | null) {
+  try {
+    if (modelId) localStorage.setItem(BUSY_KEY, modelId);
+    else localStorage.removeItem(BUSY_KEY);
+  } catch {}
+}
+
+/** 上次載入或回答時頁面被中斷的模型（讀一次就清掉）；沒有就回傳 null */
+export function takeInterruptedModel(): string | null {
+  try {
+    const modelId = localStorage.getItem(BUSY_KEY);
+    localStorage.removeItem(BUSY_KEY);
+    return modelId;
+  } catch {
+    return null;
+  }
 }
 
 export function loadedModelId(): string | null {
@@ -196,14 +281,33 @@ export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<strin
     max_tokens: 800,
     extra_body: qwen3 ? { enable_thinking: false } : undefined,
   });
-  for await (const chunk of chunks) {
-    const text = chunk.choices[0]?.delta?.content;
-    if (text) yield text;
+  markBusy(engineModelId);
+  try {
+    for await (const chunk of chunks) {
+      const text = chunk.choices[0]?.delta?.content;
+      if (text) yield text;
+    }
+  } finally {
+    markBusy(null);
   }
 }
 
 export async function stopGenerating(): Promise<void> {
   await engine?.interruptGenerate();
+}
+
+/** 清掉已經拿掉的舊模型留在手機裡的檔案（例如 iPhone 跑不動的「最佳」模型） */
+export async function removeRetiredModels(): Promise<void> {
+  for (const name of ['webllm/model', 'webllm/config']) {
+    try {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) {
+        if (RETIRED_MODEL_IDS.some((id) => request.url.includes(`/${id}/`))) {
+          await cache.delete(request);
+        }
+      }
+    } catch {}
+  }
 }
 
 export async function deleteModel(modelId: string): Promise<void> {
@@ -212,6 +316,18 @@ export async function deleteModel(modelId: string): Promise<void> {
     engine = null;
     engineModelId = null;
   }
-  const lib = await loadLib();
-  await lib.deleteModelAllInfoInCache(modelId);
+  try {
+    const lib = await loadLib();
+    await lib.deleteModelAllInfoInCache(modelId);
+  } catch {
+    // 下載到一半或離線時，WebLLM 可能讀不到模型設定而刪除失敗，下面直接清掉
+  }
+  for (const name of ['webllm/model', 'webllm/config']) {
+    try {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) {
+        if (request.url.includes(`/${modelId}/`)) await cache.delete(request);
+      }
+    } catch {}
+  }
 }
