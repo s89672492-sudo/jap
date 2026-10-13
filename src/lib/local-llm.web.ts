@@ -99,18 +99,18 @@ export async function checkSupport(): Promise<SupportReport> {
     try {
       const { quota = 0, usage = 0 } = await navigator.storage.estimate();
       const freeGB = Math.floor(((quota - usage) / 1024 / MB) * 10) / 10;
-      // 輕量約 0.3 GB、高品質約 1.0 GB、最佳約 2.3 GB
+      // 日文專家約 1.4 GB、高品質約 1.2 GB、最佳約 2.5 GB
       const fits =
-        freeGB >= 2.5
-          ? '，三種模型都放得下'
-          : freeGB >= 1.1
-            ? '，放得下輕量和高品質模型'
-            : freeGB >= 0.4
-              ? '，只放得下輕量模型'
+        freeGB >= 2.7
+          ? '，任何一個模型都放得下'
+          : freeGB >= 1.5
+            ? '，放得下日文專家或高品質模型'
+            : freeGB >= 1.3
+              ? '，只放得下高品質模型'
               : '，可能不夠存放模型';
       checks.push({
         label: '儲存空間',
-        status: freeGB >= 1.1 ? 'pass' : 'warn',
+        status: freeGB >= 1.5 ? 'pass' : 'warn',
         detail: `瀏覽器可用約 ${freeGB.toFixed(1)} GB${fits}`,
       });
     } catch {
@@ -124,20 +124,20 @@ export async function checkSupport(): Promise<SupportReport> {
       status: nav.deviceMemory >= 4 ? 'pass' : 'warn',
       detail:
         nav.deviceMemory >= 8
-          ? `約 ${nav.deviceMemory} GB 以上，可以試試最佳模型`
+          ? `約 ${nav.deviceMemory} GB 以上，可以試試高品質或最佳模型`
           : nav.deviceMemory >= 4
-            ? `約 ${nav.deviceMemory} GB，建議使用輕量或高品質模型`
-            : `約 ${nav.deviceMemory} GB，只建議使用輕量模型`,
+            ? `約 ${nav.deviceMemory} GB，建議使用日文專家模型`
+            : `約 ${nav.deviceMemory} GB，可能跑不動；請關掉其他 App 後試試日文專家模型`,
     });
   } else if (ios) {
     checks.push({
       label: '手機記憶體',
       status: 'warn',
-      detail: 'Safari 每個分頁能用的記憶體有限，建議先用輕量或高品質模型，並關掉其他分頁。',
+      detail: 'Safari 每個分頁能用的記憶體有限，建議先用日文專家模型，並關掉其他分頁。',
     });
   }
 
-  return { ok, checks, f16, recommended: 'light' };
+  return { ok, checks, f16, recommended: 'japanese' };
 }
 
 export async function isModelDownloaded(modelId: string): Promise<boolean> {
@@ -172,9 +172,21 @@ export function loadedModelId(): string | null {
   return engineModelId;
 }
 
+function foldSystemPrompt(messages: ChatMessage[]): ChatMessage[] {
+  const system = messages.filter((m) => m.role === 'system').map((m) => m.content);
+  const rest = messages.filter((m) => m.role !== 'system');
+  const firstUser = rest.findIndex((m) => m.role === 'user');
+  if (system.length === 0 || firstUser < 0) return rest;
+  return rest.map((m, i) =>
+    i === firstUser ? { ...m, content: `${system.join('\n')}\n\n學生的問題：${m.content}` } : m,
+  );
+}
+
 export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<string> {
   if (!engine) throw new Error('模型還沒載入');
-  // Qwen3 預設會先「思考」很久才回答，關掉思考模式直接回答，手機上比較快
+  // Gemma 不支援系統指令，把老師的規則放進第一則學生訊息裡
+  if (engineModelId?.startsWith('gemma')) messages = foldSystemPrompt(messages);
+  // Qwen3／Qwen3.5 預設會先「思考」很久才回答，關掉思考模式直接回答，手機上比較快
   const qwen3 = engineModelId?.startsWith('Qwen3') ?? false;
   const chunks = await engine.chat.completions.create({
     messages,
