@@ -1,6 +1,12 @@
 import type { MLCEngine } from '@mlc-ai/web-llm';
 
-import type { ChatMessage, LoadProgress, SupportCheck, SupportReport } from './local-llm-models';
+import {
+  RETIRED_MODEL_IDS,
+  type ChatMessage,
+  type LoadProgress,
+  type SupportCheck,
+  type SupportReport,
+} from './local-llm-models';
 
 /**
  * 網頁版本地 AI：用 WebLLM 在瀏覽器裡以 WebGPU 推論，不呼叫任何雲端 AI API。
@@ -99,12 +105,12 @@ export async function checkSupport(): Promise<SupportReport> {
     try {
       const { quota = 0, usage = 0 } = await navigator.storage.estimate();
       const freeGB = Math.floor(((quota - usage) / 1024 / MB) * 10) / 10;
-      // 日文專家約 1.4 GB、高品質約 1.2 GB、最佳約 2.5 GB
+      // 日文專家約 1.4 GB、高品質約 1.2 GB
       const fits =
-        freeGB >= 2.7
-          ? '，任何一個模型都放得下'
+        freeGB >= 2.8
+          ? '，兩個模型都放得下'
           : freeGB >= 1.5
-            ? '，放得下日文專家或高品質模型'
+            ? '，放得下其中一個模型'
             : freeGB >= 1.3
               ? '，只放得下高品質模型'
               : '，可能不夠存放模型';
@@ -124,7 +130,7 @@ export async function checkSupport(): Promise<SupportReport> {
       status: nav.deviceMemory >= 4 ? 'pass' : 'warn',
       detail:
         nav.deviceMemory >= 8
-          ? `約 ${nav.deviceMemory} GB 以上，可以試試高品質或最佳模型`
+          ? `約 ${nav.deviceMemory} GB 以上，兩個模型都可以試試`
           : nav.deviceMemory >= 4
             ? `約 ${nav.deviceMemory} GB，建議使用日文專家模型`
             : `約 ${nav.deviceMemory} GB，可能跑不動；請關掉其他 App 後試試日文專家模型`,
@@ -288,6 +294,20 @@ export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<strin
 
 export async function stopGenerating(): Promise<void> {
   await engine?.interruptGenerate();
+}
+
+/** 清掉已經拿掉的舊模型留在手機裡的檔案（例如 iPhone 跑不動的「最佳」模型） */
+export async function removeRetiredModels(): Promise<void> {
+  for (const name of ['webllm/model', 'webllm/config']) {
+    try {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) {
+        if (RETIRED_MODEL_IDS.some((id) => request.url.includes(`/${id}/`))) {
+          await cache.delete(request);
+        }
+      }
+    } catch {}
+  }
 }
 
 export async function deleteModel(modelId: string): Promise<void> {

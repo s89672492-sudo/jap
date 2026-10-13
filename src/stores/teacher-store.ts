@@ -15,7 +15,7 @@ export function setTeacherModel(key: TeacherModelKey) {
   if (key !== teacherModelStore.get()) teacherModelStore.set(key);
 }
 
-/** AI 老師選用的模型（日文專家／高品質／最佳），會記住到下次開啟 */
+/** AI 老師選用的模型（日文專家／高品質），會記住到下次開啟 */
 export function useTeacherModel(): TeacherModelKey {
   return usePersistedStore(teacherModelStore, DEFAULT_MODEL);
 }

@@ -19,6 +19,7 @@ import {
   isModelDownloaded,
   loadedModelId,
   loadModel,
+  removeRetiredModels,
   stopGenerating,
   streamChat,
   takeInterruptedModel,
@@ -27,7 +28,6 @@ import {
   modelIdFor,
   modelKeyFor,
   SMALLER_MODEL,
-  TEACHER_MODELS,
   type ChatMessage,
   type LoadProgress,
   type SupportReport,
@@ -85,6 +85,7 @@ export default function TeacherScreen() {
 
   useEffect(() => {
     checkSupport().then(setReport);
+    removeRetiredModels();
     const crashedId = takeInterruptedModel();
     const from = crashedId ? modelKeyFor(crashedId) : null;
     if (from) {
@@ -115,16 +116,6 @@ export default function TeacherScreen() {
 
   const start = useCallback(async () => {
     if (!modelId) return;
-    const model = TEACHER_MODELS[modelKey];
-    if (
-      modelKey === 'best' &&
-      !window.confirm(
-        `「${model.label}」需要約 ${(model.memoryMB / 1024).toFixed(1)} GB 記憶體。` +
-          'iPhone 和多數手機會因記憶體不足讓頁面自動重新整理，建議在平板或電腦使用。確定要繼續嗎？',
-      )
-    ) {
-      return;
-    }
     setInterrupted(null);
     setPhase('loading');
     setError(null);
@@ -139,7 +130,7 @@ export default function TeacherScreen() {
       setDownloaded(await isModelDownloaded(modelId));
       setHasFiles(await hasModelFiles(modelId));
     }
-  }, [modelId, modelKey]);
+  }, [modelId]);
 
   const remove = useCallback(async () => {
     if (!modelId) return;

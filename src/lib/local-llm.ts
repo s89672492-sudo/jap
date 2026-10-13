@@ -50,4 +50,6 @@ export async function* streamChat(_messages: ChatMessage[]): AsyncGenerator<stri
 
 export async function stopGenerating(): Promise<void> {}
 
+export async function removeRetiredModels(): Promise<void> {}
+
 export async function deleteModel(_modelId: string): Promise<void> {}

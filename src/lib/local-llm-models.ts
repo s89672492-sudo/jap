@@ -1,5 +1,5 @@
 /** AI 日文老師可以選的本地模型（WebLLM 內建清單裡的 Gemma 日文版與 Qwen3.5） */
-export type TeacherModelKey = 'japanese' | 'quality' | 'best';
+export type TeacherModelKey = 'japanese' | 'quality';
 
 export type TeacherModel = {
   label: string;
@@ -21,7 +21,7 @@ export const TEACHER_MODELS: Record<TeacherModelKey, TeacherModel> = {
     f32: 'gemma-2-2b-jpn-it-q4f32_1-MLC',
     download: '約 1.4 GB',
     memoryMB: 1895,
-    note: 'Google Gemma 日文版，日文例句最自然；中文說明比較簡單。三個裡面最省記憶體',
+    note: 'Google Gemma 日文版，日文例句最自然；中文說明比較簡單；比較省記憶體',
   },
   quality: {
     label: '高品質',
@@ -31,17 +31,23 @@ export const TEACHER_MODELS: Record<TeacherModelKey, TeacherModel> = {
     memoryMB: 2245,
     note: 'Qwen3.5 新一代，中文解說清楚；建議記憶體 8GB 以上的手機',
   },
-  best: {
-    label: '最佳',
-    f16: 'Qwen3.5-4B-q4f16_1-MLC',
-    f32: 'Qwen3.5-4B-q4f32_1-MLC',
-    download: '約 2.5 GB',
-    memoryMB: 3868,
-    note: 'Qwen3.5 最大的版本，回答最好；適合平板、電腦或 12GB 記憶體的手機，iPhone 很可能跑不動',
-  },
 };
 
 export const TEACHER_MODEL_KEYS = Object.keys(TEACHER_MODELS) as TeacherModelKey[];
+
+/** 以前提供過、現在拿掉的模型；手機裡留下的檔案會自動清掉 */
+export const RETIRED_MODEL_IDS = [
+  'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
+  'Qwen2.5-0.5B-Instruct-q4f32_1-MLC',
+  'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
+  'Qwen2.5-1.5B-Instruct-q4f32_1-MLC',
+  'Qwen3-1.7B-q4f16_1-MLC',
+  'Qwen3-1.7B-q4f32_1-MLC',
+  'Qwen3-4B-q4f16_1-MLC',
+  'Qwen3-4B-q4f32_1-MLC',
+  'Qwen3.5-4B-q4f16_1-MLC',
+  'Qwen3.5-4B-q4f32_1-MLC',
+];
 
 /** 依模型 id 找回是哪一個選項 */
 export function modelKeyFor(modelId: string): TeacherModelKey | null {
@@ -54,7 +60,6 @@ export function modelKeyFor(modelId: string): TeacherModelKey | null {
 
 /** 跑不動時建議改用的較小模型 */
 export const SMALLER_MODEL: Record<TeacherModelKey, TeacherModelKey | null> = {
-  best: 'quality',
   quality: 'japanese',
   japanese: null,
 };
