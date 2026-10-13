@@ -99,13 +99,19 @@ export async function checkSupport(): Promise<SupportReport> {
     try {
       const { quota = 0, usage = 0 } = await navigator.storage.estimate();
       const freeGB = Math.floor(((quota - usage) / 1024 / MB) * 10) / 10;
-      // 輕量模型約 0.3 GB、高品質約 0.9 GB
+      // 輕量約 0.3 GB、高品質約 1.0 GB、最佳約 2.3 GB
+      const fits =
+        freeGB >= 2.5
+          ? '，三種模型都放得下'
+          : freeGB >= 1.1
+            ? '，放得下輕量和高品質模型'
+            : freeGB >= 0.4
+              ? '，只放得下輕量模型'
+              : '，可能不夠存放模型';
       checks.push({
         label: '儲存空間',
-        status: freeGB >= 1 ? 'pass' : 'warn',
-        detail:
-          `瀏覽器可用約 ${freeGB.toFixed(1)} GB` +
-          (freeGB >= 1 ? '' : freeGB >= 0.4 ? '，只夠存放輕量模型' : '，可能不夠存放模型'),
+        status: freeGB >= 1.1 ? 'pass' : 'warn',
+        detail: `瀏覽器可用約 ${freeGB.toFixed(1)} GB${fits}`,
       });
     } catch {
       checks.push({ label: '儲存空間', status: 'warn', detail: '無法確認可用空間。' });
@@ -117,15 +123,17 @@ export async function checkSupport(): Promise<SupportReport> {
       label: '手機記憶體',
       status: nav.deviceMemory >= 4 ? 'pass' : 'warn',
       detail:
-        nav.deviceMemory >= 4
-          ? `約 ${nav.deviceMemory} GB 以上`
-          : `約 ${nav.deviceMemory} GB，只建議使用輕量模型`,
+        nav.deviceMemory >= 8
+          ? `約 ${nav.deviceMemory} GB 以上，可以試試最佳模型`
+          : nav.deviceMemory >= 4
+            ? `約 ${nav.deviceMemory} GB，建議使用輕量或高品質模型`
+            : `約 ${nav.deviceMemory} GB，只建議使用輕量模型`,
     });
   } else if (ios) {
     checks.push({
       label: '手機記憶體',
       status: 'warn',
-      detail: 'Safari 每個分頁能用的記憶體有限，建議使用輕量模型並關掉其他分頁。',
+      detail: 'Safari 每個分頁能用的記憶體有限，建議先用輕量或高品質模型，並關掉其他分頁。',
     });
   }
 
@@ -166,11 +174,15 @@ export function loadedModelId(): string | null {
 
 export async function* streamChat(messages: ChatMessage[]): AsyncGenerator<string> {
   if (!engine) throw new Error('模型還沒載入');
+  // Qwen3 預設會先「思考」很久才回答，關掉思考模式直接回答，手機上比較快
+  const qwen3 = engineModelId?.startsWith('Qwen3') ?? false;
   const chunks = await engine.chat.completions.create({
     messages,
     stream: true,
-    temperature: 0.6,
-    max_tokens: 600,
+    temperature: qwen3 ? 0.7 : 0.6,
+    top_p: qwen3 ? 0.8 : undefined,
+    max_tokens: 800,
+    extra_body: qwen3 ? { enable_thinking: false } : undefined,
   });
   for await (const chunk of chunks) {
     const text = chunk.choices[0]?.delta?.content;

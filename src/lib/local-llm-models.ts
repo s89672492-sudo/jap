@@ -1,5 +1,5 @@
-/** AI 日文老師可以選的本地模型（WebLLM 內建清單裡的 Qwen2.5，中文和日文都能回答） */
-export type TeacherModelKey = 'light' | 'quality';
+/** AI 日文老師可以選的本地模型（WebLLM 內建清單裡的 Qwen 系列，中文和日文都能回答） */
+export type TeacherModelKey = 'light' | 'quality' | 'best';
 
 export type TeacherModel = {
   label: string;
@@ -25,11 +25,19 @@ export const TEACHER_MODELS: Record<TeacherModelKey, TeacherModel> = {
   },
   quality: {
     label: '高品質',
-    f16: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
-    f32: 'Qwen2.5-1.5B-Instruct-q4f32_1-MLC',
-    download: '約 0.9 GB',
-    memoryMB: 1630,
-    note: '回答比較好，需要記憶體較多的新手機',
+    f16: 'Qwen3-1.7B-q4f16_1-MLC',
+    f32: 'Qwen3-1.7B-q4f32_1-MLC',
+    download: '約 1.0 GB',
+    memoryMB: 2037,
+    note: 'Qwen3，解說比較完整，建議記憶體 6GB 以上的手機',
+  },
+  best: {
+    label: '最佳',
+    f16: 'Qwen3-4B-q4f16_1-MLC',
+    f32: 'Qwen3-4B-q4f32_1-MLC',
+    download: '約 2.3 GB',
+    memoryMB: 3432,
+    note: 'Qwen3 最大的版本，回答最好；需要記憶體 8GB 以上的新手機、平板或電腦，iPhone 可能會因記憶體不足重新整理',
   },
 };
 
