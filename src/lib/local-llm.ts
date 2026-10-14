@@ -10,7 +10,7 @@ export async function checkSupport(): Promise<SupportReport> {
   return {
     ok: false,
     f16: false,
-    recommended: 'japanese',
+    recommended: 'chinese',
     checks: [
       {
         label: '瀏覽器',

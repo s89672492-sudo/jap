@@ -105,18 +105,18 @@ export async function checkSupport(): Promise<SupportReport> {
     try {
       const { quota = 0, usage = 0 } = await navigator.storage.estimate();
       const freeGB = Math.floor(((quota - usage) / 1024 / MB) * 10) / 10;
-      // 日文專家約 1.4 GB、高品質約 1.2 GB
+      // 中文解說約 0.9 GB、日文專家約 1.4 GB
       const fits =
-        freeGB >= 2.8
+        freeGB >= 2.4
           ? '，兩個模型都放得下'
           : freeGB >= 1.5
             ? '，放得下其中一個模型'
-            : freeGB >= 1.3
-              ? '，只放得下高品質模型'
+            : freeGB >= 1.0
+              ? '，只放得下中文解說模型'
               : '，可能不夠存放模型';
       checks.push({
         label: '儲存空間',
-        status: freeGB >= 1.5 ? 'pass' : 'warn',
+        status: freeGB >= 1.0 ? 'pass' : 'warn',
         detail: `瀏覽器可用約 ${freeGB.toFixed(1)} GB${fits}`,
       });
     } catch {
@@ -132,18 +132,18 @@ export async function checkSupport(): Promise<SupportReport> {
         nav.deviceMemory >= 8
           ? `約 ${nav.deviceMemory} GB 以上，兩個模型都可以試試`
           : nav.deviceMemory >= 4
-            ? `約 ${nav.deviceMemory} GB，建議使用日文專家模型`
-            : `約 ${nav.deviceMemory} GB，可能跑不動；請關掉其他 App 後試試日文專家模型`,
+            ? `約 ${nav.deviceMemory} GB，建議先用中文解說模型`
+            : `約 ${nav.deviceMemory} GB，可能跑不動；請關掉其他 App 後試試中文解說模型`,
     });
   } else if (ios) {
     checks.push({
       label: '手機記憶體',
       status: 'warn',
-      detail: 'Safari 每個分頁能用的記憶體有限，建議先用日文專家模型，並關掉其他分頁。',
+      detail: 'Safari 每個分頁能用的記憶體有限，建議先用中文解說模型，並關掉其他分頁。',
     });
   }
 
-  return { ok, checks, f16, recommended: 'japanese' };
+  return { ok, checks, f16, recommended: 'chinese' };
 }
 
 export async function isModelDownloaded(modelId: string): Promise<boolean> {

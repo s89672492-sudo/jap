@@ -1,5 +1,5 @@
-/** AI 日文老師可以選的本地模型（WebLLM 內建清單裡的 Gemma 日文版與 Qwen3.5） */
-export type TeacherModelKey = 'japanese' | 'quality';
+/** AI 日文老師可以選的本地模型（WebLLM 內建清單裡的 Qwen2.5 與 Gemma 日文版，iPhone 也跑得動） */
+export type TeacherModelKey = 'chinese' | 'japanese';
 
 export type TeacherModel = {
   label: string;
@@ -15,21 +15,21 @@ export type TeacherModel = {
 };
 
 export const TEACHER_MODELS: Record<TeacherModelKey, TeacherModel> = {
+  chinese: {
+    label: '中文解說',
+    f16: 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
+    f32: 'Qwen2.5-1.5B-Instruct-q4f32_1-MLC',
+    download: '約 0.9 GB',
+    memoryMB: 1630,
+    note: 'Qwen2.5，用中文把文法講清楚；最省記憶體，iPhone 建議用這個',
+  },
   japanese: {
     label: '日文專家',
     f16: 'gemma-2-2b-jpn-it-q4f16_1-MLC',
     f32: 'gemma-2-2b-jpn-it-q4f32_1-MLC',
     download: '約 1.4 GB',
     memoryMB: 1895,
-    note: 'Google Gemma 日文版，日文例句最自然；中文說明比較簡單；比較省記憶體',
-  },
-  quality: {
-    label: '高品質',
-    f16: 'Qwen3.5-2B-q4f16_1-MLC',
-    f32: 'Qwen3.5-2B-q4f32_1-MLC',
-    download: '約 1.2 GB',
-    memoryMB: 2245,
-    note: 'Qwen3.5 新一代，中文解說清楚；建議記憶體 8GB 以上的手機',
+    note: 'Google Gemma 日文版，日文例句最自然；中文說明比較簡單，需要的記憶體多一點',
   },
 };
 
@@ -39,14 +39,15 @@ export const TEACHER_MODEL_KEYS = Object.keys(TEACHER_MODELS) as TeacherModelKey
 export const RETIRED_MODEL_IDS = [
   'Qwen2.5-0.5B-Instruct-q4f16_1-MLC',
   'Qwen2.5-0.5B-Instruct-q4f32_1-MLC',
-  'Qwen2.5-1.5B-Instruct-q4f16_1-MLC',
-  'Qwen2.5-1.5B-Instruct-q4f32_1-MLC',
   'Qwen3-1.7B-q4f16_1-MLC',
   'Qwen3-1.7B-q4f32_1-MLC',
   'Qwen3-4B-q4f16_1-MLC',
   'Qwen3-4B-q4f32_1-MLC',
   'Qwen3.5-4B-q4f16_1-MLC',
   'Qwen3.5-4B-q4f32_1-MLC',
+  // iPhone 16 會當機
+  'Qwen3.5-2B-q4f16_1-MLC',
+  'Qwen3.5-2B-q4f32_1-MLC',
 ];
 
 /** 依模型 id 找回是哪一個選項 */
@@ -60,8 +61,8 @@ export function modelKeyFor(modelId: string): TeacherModelKey | null {
 
 /** 跑不動時建議改用的較小模型 */
 export const SMALLER_MODEL: Record<TeacherModelKey, TeacherModelKey | null> = {
-  quality: 'japanese',
-  japanese: null,
+  japanese: 'chinese',
+  chinese: null,
 };
 
 export function modelIdFor(key: TeacherModelKey, f16: boolean): string {
