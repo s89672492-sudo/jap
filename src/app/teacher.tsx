@@ -47,7 +47,7 @@ function explainError(error: unknown, online: boolean): string {
     return '下載中斷了（常見原因：螢幕關掉、切到別的 App、網路不穩）。已下載的部分會保留，請保持螢幕亮著、停在這個頁面，再按一次就會接著下載。';
   }
   if (/memory|device.*lost|OOM|allocation/i.test(message)) {
-    return '記憶體不足：請關掉其他分頁或 App，或改用「日文專家」模型。';
+    return '記憶體不足：請關掉其他分頁或 App，或改用「中文解說」模型。';
   }
   if (/quota|storage/i.test(message)) {
     return '儲存空間不足：請清出空間後再試。';
