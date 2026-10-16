@@ -12,6 +12,8 @@ export type GrammarPoint = {
     /** 例句中要用強調色標出的部分 */
     highlight: string;
   };
+  /** 考試重點：用法差異、容易混淆的句型、JLPT 常見考法 */
+  tip?: string;
   /** 文法測驗用的挖空題；沒有的話測驗會改用舊的出題方式 */
   quiz?: GrammarQuiz;
 };
