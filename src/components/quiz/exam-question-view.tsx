@@ -16,10 +16,18 @@ type ExamQuestionViewProps = {
   picked: string | null;
   getState: (option: string) => AnswerState;
   onPick: (option: string) => void;
+  /** 是否顯示對錯和解說；模擬考作答中為 false，可以改答案 */
+  reveal?: boolean;
 };
 
 /** 一題模擬試題：（讀解的文章或聽解的播放器）、題目、四個選項，作答後顯示解說 */
-export function ExamQuestionView({ item, picked, getState, onPick }: ExamQuestionViewProps) {
+export function ExamQuestionView({
+  item,
+  picked,
+  getState,
+  onPick,
+  reveal = true,
+}: ExamQuestionViewProps) {
   const theme = useTheme();
   const { question, options } = item;
 
@@ -34,7 +42,7 @@ export function ExamQuestionView({ item, picked, getState, onPick }: ExamQuestio
           questionId={question.id}
           script={question.script}
           question={question.sentence}
-          showTranscript={picked !== null}
+          showTranscript={reveal && picked !== null}
         />
       )}
       <ExamSentence sentence={question.sentence} />
@@ -44,13 +52,13 @@ export function ExamQuestionView({ item, picked, getState, onPick }: ExamQuestio
             key={option}
             label={option}
             state={getState(option)}
-            disabled={picked !== null}
+            disabled={reveal && picked !== null}
             onPress={() => onPick(option)}
             japanese={question.type !== 'kanji-reading' && question.type !== 'orthography'}
           />
         ))}
       </View>
-      {picked !== null && (
+      {reveal && picked !== null && (
         <View
           style={[
             styles.explanation,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ExamQuestionView } from './exam-question-view';
+import { MockExam } from './mock-exam';
 import { NextButton } from './next-button';
 import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
@@ -9,12 +10,7 @@ import { QuizResult } from './quiz-result';
 import { ThemedText } from '@/components/themed-text';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
-import {
-  EXAM_BY_LEVEL,
-  EXAM_SECTION_TYPES,
-  EXAM_TYPE_LABELS,
-  type ExamSection,
-} from '@/data/exam';
+import { EXAM_BY_LEVEL, EXAM_SECTION_TYPES, EXAM_TYPE_LABELS, type ExamSection } from '@/data/exam';
 import type { JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildExamRound } from '@/lib/quiz';
@@ -29,6 +25,13 @@ const SECTION_OPTIONS: { value: ExamSection; label: string }[] = [
   { value: 'listening', label: '聽解' },
 ];
 
+type ExamMode = 'practice' | 'mock';
+
+const EXAM_MODE_OPTIONS: { value: ExamMode; label: string }[] = [
+  { value: 'practice', label: '題型練習' },
+  { value: 'mock', label: '完整模擬考' },
+];
+
 type ExamQuizProps = {
   level: JlptLevel;
   /** 作答後呼叫，讓外層把畫面捲到解說和「下一題」 */
@@ -37,8 +40,32 @@ type ExamQuizProps = {
   onNext?: () => void;
 };
 
-/** 模擬試題：依 JLPT 題型自編的原創題；答錯的題目會加入錯題本 */
+/** 模擬試題：可以分題型練習，或照 JLPT 考科和時間做一次完整模擬考 */
 export function ExamQuiz({ level, onAnswered, onNext }: ExamQuizProps) {
+  const [mode, setMode] = useState<ExamMode>('practice');
+  const modePicker = (
+    <SegmentedControl options={EXAM_MODE_OPTIONS} value={mode} onChange={setMode} />
+  );
+
+  if (mode === 'mock') {
+    return (
+      <View style={styles.container}>
+        {modePicker}
+        <MockExam level={level} onScrollTop={onNext} />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {modePicker}
+      <ExamPractice level={level} onAnswered={onAnswered} onNext={onNext} />
+    </View>
+  );
+}
+
+/** 題型練習：依 JLPT 題型自編的原創題；每題作答後馬上看解說，答錯的題目會加入錯題本 */
+function ExamPractice({ level, onAnswered, onNext }: ExamQuizProps) {
   const { roundSize } = useSettings();
   // 像 JLPT 分科一樣，只練某一種題型
   const [section, setSection] = useState<ExamSection>('all');
