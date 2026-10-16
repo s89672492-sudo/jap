@@ -55,21 +55,24 @@ export const N5_EXAM: ExamQuestion[] = [
     type: 'grammar',
     sentence: 'わたしは 毎日 電車（　）学校へ 行きます。',
     options: ['で', 'に', 'を', 'が'],
-    explanation: '表示交通方式、手段用助詞「で」。',
+    explanation:
+      '「で」表示交通方式、手段：電車で行く＝搭電車去。「に」要用「電車に乗る」，不能直接接「行きます」。',
   },
   {
     id: 'n5-exam-09',
     type: 'grammar',
     sentence: 'つくえの 上（　）本が あります。',
     options: ['に', 'で', 'を', 'へ'],
-    explanation: '表示東西存在的場所，「〜に あります」。',
+    explanation:
+      '東西存在的場所用「に」：「〜に あります」。「で」用於動作發生的場所（例：公園で遊ぶ），不能接「あります」。',
   },
   {
     id: 'n5-exam-10',
     type: 'grammar',
     sentence: 'きのうは 雨（　）。',
     options: ['でした', 'です', 'でしょう', 'じゃありません'],
-    explanation: '「きのう」是過去，名詞的過去式用「でした」。',
+    explanation:
+      '「きのう」是過去，名詞過去式用「でした」。「です」「じゃありません」是現在式，「でしょう」是推測，時態都不對。',
   },
   {
     id: 'n5-exam-11',
@@ -146,21 +149,24 @@ export const N5_EXAM: ExamQuestion[] = [
     type: 'sentence-order',
     sentence: 'わたしは ＿＿ ＿＿ ★ ＿＿。',
     options: ['さんぽ', 'まいあさ', 'こうえんを', 'します'],
-    explanation: '正確句子：わたしは まいあさ こうえんを さんぽ します。',
+    explanation:
+      '正確句子：わたしは まいあさ こうえんを さんぽ します。「こうえんを さんぽする」＝在公園散步，★是「さんぽ」。',
   },
   {
     id: 'n5-exam-22',
     type: 'sentence-order',
     sentence: 'すみません、＿＿ ＿＿ ★ ＿＿。',
     options: ['かして', 'この', 'ペンを', 'ください'],
-    explanation: '正確句子：すみません、この ペンを かして ください。',
+    explanation:
+      '正確句子：すみません、この ペンを かして ください。「この」接名詞「ペン」，請求用「て形＋ください」，★是「かして」。',
   },
   {
     id: 'n5-exam-23',
     type: 'sentence-order',
     sentence: 'これは ＿＿ ＿＿ ★ ＿＿ です。',
     options: ['かった', 'わたしが', 'きのう', 'ほん'],
-    explanation: '正確句子：これは わたしが きのう かった ほん です。',
+    explanation:
+      '正確句子：これは わたしが きのう かった ほん です。「わたしが きのう かった」修飾「ほん」，★是「かった」。',
   },
   {
     id: 'n5-exam-24',
@@ -202,14 +208,15 @@ export const N5_EXAM: ExamQuestion[] = [
     type: 'grammar',
     sentence: 'にほんごは むずかしい（　）、おもしろいです。',
     options: ['ですが', 'ですから', 'ので', 'と'],
-    explanation: '前後意思相反（難但是有趣），用「〜ですが」。',
+    explanation:
+      '「難」與「有趣」意思相反，用逆接「〜ですが」。「ですから」「ので」表示原因，「難所以有趣」不合邏輯。',
   },
   {
     id: 'n5-exam-30',
     type: 'grammar',
     sentence: 'コーヒーと こうちゃと、（　）が いいですか。',
     options: ['どちら', 'どれ', 'どこ', 'だれ'],
-    explanation: '兩個之中選一個，用「どちら」。',
+    explanation: '兩個之中選一個用「どちら」。「どれ」用於三個以上，「どこ」問地點，「だれ」問人。',
   },
   {
     id: 'n5-exam-31',

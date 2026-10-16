@@ -37,9 +37,6 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf="questionmark.circle" md="quiz" />
       </NativeTabs.Trigger>
 
-      {/* AI 老師需要 WebGPU，只有網頁版可以使用，手機 App 不顯示 */}
-      <NativeTabs.Trigger name="teacher" hidden />
-
       <NativeTabs.Trigger name="settings">
         <NativeTabs.Trigger.Label>設定</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="gearshape" md="settings" />

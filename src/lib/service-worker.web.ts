@@ -1,5 +1,5 @@
 /**
- * 註冊 public/sw.js：把網站檔案存在瀏覽器裡，沒有網路時也能重新開啟（AI 老師離線使用需要）。
+ * 註冊 public/sw.js：把網站檔案存在瀏覽器裡，沒有網路時也能重新開啟。
  * 開發模式（npx expo start）不註冊，避免改了程式卻看到舊版本。
  */
 export function registerServiceWorker() {

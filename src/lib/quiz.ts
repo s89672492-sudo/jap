@@ -124,7 +124,7 @@ export type GrammarQuestion = {
 
 /**
  * 文法測驗：例句挖空，選出正確的文法部分。
- * 錯誤選項取自同等級其他文法的標示部分，優先選長度相近的。
+ * 有 quiz 資料的文法用校對過的題目；沒有的話，錯誤選項取自同等級其他文法的標示部分，優先選長度相近的。
  */
 export function buildGrammarRound(
   points: GrammarPoint[],
@@ -134,6 +134,11 @@ export function buildGrammarRound(
   const targets = shuffle(points).slice(0, Math.min(count, points.length));
 
   return targets.map((point) => {
+    // 有校對過的測驗題就用它：只挖空文法部分，錯誤選項是容易混淆的文法
+    if (point.quiz) {
+      const { blank, distractors } = point.quiz;
+      return { point, answer: blank, options: shuffle([blank, ...distractors]) };
+    }
     const answer = point.example.highlight;
     // 和答案互相包含的選項會讓題目有兩個答案，排除
     const others = shuffle(

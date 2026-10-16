@@ -1,12 +1,12 @@
 // 偵探日語的 service worker：把網站本身的檔案存起來，讓沒有網路時也能重新開啟。
-// 只處理同一個網站的檔案；AI 模型（Hugging Face 等）由 WebLLM 自己存在 Cache Storage，這裡不碰。
-const CACHE = 'jap-shell-v1';
-const PAGES = ['./', 'vocab', 'reading', 'quiz', 'settings', 'teacher'];
+// 只處理同一個網站的檔案。
+const CACHE = 'jap-shell-v2';
+const PAGES = ['./', 'vocab', 'reading', 'quiz', 'settings'];
 const SCRIPT_PATTERN = /_expo\/static\/(?:js|css)\/[^"'\s)]+\.(?:js|css)/g;
 
 const scopeUrl = (path) => new URL(path, self.registration.scope).href;
 
-/** 抓下頁面，順便把頁面和主程式裡提到的 JS/CSS（包含 AI 老師才載入的分割檔）一起存起來 */
+/** 抓下頁面，順便把頁面和主程式裡提到的 JS/CSS（包含分割出去的程式檔）一起存起來 */
 async function precache() {
   const cache = await caches.open(CACHE);
   const scripts = new Set();
@@ -53,7 +53,14 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('jap-shell-') && key !== CACHE).map((key) => caches.delete(key))))
+      .then((keys) =>
+        Promise.all(
+          keys
+            // 舊版網站檔案，以及已經拿掉的 AI 老師下載的模型（webllm/…，可能有 1～2 GB）
+            .filter((key) => (key.startsWith('jap-shell-') && key !== CACHE) || key.startsWith('webllm/'))
+            .map((key) => caches.delete(key)),
+        ),
+      )
       .then(() => self.clients.claim()),
   );
 });

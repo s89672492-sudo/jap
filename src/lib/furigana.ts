@@ -36,3 +36,15 @@ export function parseRuby(annotated: string): RubySegment[] {
 export function lookupFurigana(text: string): string | undefined {
   return FURIGANA_MAP[text];
 }
+
+/** 範圍 [start, end) 的邊界是否切在一組注音的中間（例如只挖空「何時」的「何」） */
+export function splitsRuby(annotated: string, [start, end]: [number, number]): boolean {
+  let offset = 0;
+  for (const segment of parseRuby(annotated)) {
+    const from = offset;
+    const to = offset + segment.text.length;
+    if (segment.ruby && ((start > from && start < to) || (end > from && end < to))) return true;
+    offset = to;
+  }
+  return false;
+}

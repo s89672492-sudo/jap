@@ -18,7 +18,7 @@ type GrammarCardProps = {
   showLevel?: boolean;
 };
 
-/** 文法卡：句型、中文意思、接續方式，下方是例句（句型以強調色標出） */
+/** 文法卡：句型、中文意思、接續方式、考試重點，下方是例句（句型以強調色標出） */
 export const GrammarCard = memo(function GrammarCard({
   item,
   showLevel = false,
@@ -52,6 +52,14 @@ export const GrammarCard = memo(function GrammarCard({
             接續：{item.connection}
           </ThemedText>
         </View>
+        {item.tip && (
+          <View style={[styles.tip, { borderLeftColor: theme.gold }]}>
+            <ThemedText type="smallBold" style={{ color: theme.gold }}>
+              考試重點
+            </ThemedText>
+            <ThemedText type="small">{item.tip}</ThemedText>
+          </View>
+        )}
         <View style={[styles.exampleRow, { borderTopColor: theme.border }]}>
           <View style={styles.exampleText}>
             {annotated ? (
@@ -121,6 +129,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
     alignSelf: 'flex-start',
     maxWidth: '100%',
+  },
+  tip: {
+    borderLeftWidth: 3,
+    paddingLeft: Spacing.two,
+    gap: Spacing.half,
   },
   exampleRow: {
     flexDirection: 'row',
