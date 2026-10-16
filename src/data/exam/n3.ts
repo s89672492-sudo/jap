@@ -54,22 +54,25 @@ export const N3_EXAM: ExamQuestion[] = [
     id: 'n3-exam-08',
     type: 'grammar',
     sentence: '証拠が ない（　）、彼を 犯人だと 決める ことは できない。',
-    options: ['以上', 'うちに', 'ところ', 'ばかりに'],
-    explanation: '「〜以上」表示「既然〜，就〜」。',
+    options: ['以上', 'うちに', 'ところ', 'たびに'],
+    explanation:
+      '「〜以上」表示「既然〜，就（當然）〜」。「うちに」表趁著，「たびに」表每次，都不合文意。',
   },
   {
     id: 'n3-exam-09',
     type: 'grammar',
     sentence: '警察が 来た（　）、犯人は 窓から 逃げた。',
-    options: ['とたんに', 'ばかりに', 'くせに', 'ために'],
-    explanation: '「た形＋とたんに」表示「一〜就馬上〜」。',
+    options: ['とたんに', 'くせに', 'ついでに', 'うちに'],
+    explanation:
+      '「た形＋とたんに」表示「一〜就馬上〜」。「くせに」帶責備，「ついでに」表順便，「うちに」不接た形。',
   },
   {
     id: 'n3-exam-10',
     type: 'grammar',
     sentence: 'この なぞは 子ども（　）解ける ほど 簡単だ。',
     options: ['でも', 'しか', 'だけ', 'こそ'],
-    explanation: '「〜でも」表示「連〜都」。',
+    explanation:
+      '「〜でも」表示「連〜都」（簡單到連小孩都解得開）。「しか」要接否定，「だけ」「こそ」與「ほど簡単」不搭。',
   },
   {
     id: 'n3-exam-11',
@@ -146,21 +149,24 @@ export const N3_EXAM: ExamQuestion[] = [
     type: 'sentence-order',
     sentence: '犯人は ＿＿ ＿＿ ★ ＿＿ 逃げた。',
     options: ['来る', '警察', 'が', '前に'],
-    explanation: '正確句子：犯人は 警察が 来る 前に 逃げた。',
+    explanation:
+      '正確句子：犯人は 警察 が 来る 前に 逃げた。「動詞辭書形＋前に」表示「在〜之前」，★是「来る」。',
   },
   {
     id: 'n3-exam-22',
     type: 'sentence-order',
     sentence: 'これは ＿＿ ＿＿ ★ ＿＿ 証拠だ。',
     options: ['犯人で', '彼', 'が', 'ある'],
-    explanation: '正確句子：これは 彼が 犯人で ある 証拠だ。',
+    explanation:
+      '正確句子：これは 彼 が 犯人で ある 証拠だ。「〜である」是「〜だ」的書面語，整句修飾「証拠」，★是「犯人で」。',
   },
   {
     id: 'n3-exam-23',
     type: 'sentence-order',
     sentence: 'その 夜 ＿＿ ＿＿ ★ ＿＿ だれも 知らない。',
     options: ['起きたのか', '何が', '本当に', 'は'],
-    explanation: '正確句子：その 夜 本当に 何が 起きたのかは だれも 知らない。',
+    explanation:
+      '正確句子：その 夜 本当に 何が 起きたのか は だれも 知らない。疑問句「〜のか」當名詞，接「は」，★是「起きたのか」。',
   },
   {
     id: 'n3-exam-24',
@@ -201,15 +207,17 @@ export const N3_EXAM: ExamQuestion[] = [
     id: 'n3-exam-29',
     type: 'grammar',
     sentence: '彼は 本当の ことを 知っている（　）、何も 言わなかった。',
-    options: ['くせに', 'ように', 'ために', 'ほど'],
-    explanation: '「〜くせに」表示「明明〜卻〜」，帶有責備的語氣。',
+    options: ['くせに', 'たびに', 'ついでに', 'ほど'],
+    explanation:
+      '「〜くせに」表示「明明〜卻〜」，帶責備語氣。「たびに」表每次，「ついでに」表順便，「ほど」表程度，都不合。',
   },
   {
     id: 'n3-exam-30',
     type: 'grammar',
     sentence: '雨が 降らない（　）、早く 帰ろう。',
     options: ['うちに', 'あいだ', 'ところに', 'ばかりに'],
-    explanation: '「〜ないうちに」表示「趁還沒〜的時候」。',
+    explanation:
+      '「〜ないうちに」表示「趁還沒〜的時候」（趁還沒下雨）。「あいだ」後面要接持續狀態，「ばかりに」表負面原因。',
   },
   {
     id: 'n3-exam-31',
