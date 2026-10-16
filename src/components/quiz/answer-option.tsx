@@ -5,7 +5,8 @@ import { JapaneseText } from '@/components/ui/japanese-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export type AnswerState = 'idle' | 'correct' | 'wrong' | 'dimmed';
+/** selected：模擬考作答中選了這個，但還不顯示對錯 */
+export type AnswerState = 'idle' | 'selected' | 'correct' | 'wrong' | 'dimmed';
 
 type AnswerOptionProps = {
   label: string;
@@ -26,21 +27,19 @@ export function AnswerOption({
 }: AnswerOptionProps) {
   const theme = useTheme();
 
-  const borderColor =
-    state === 'correct' ? theme.success : state === 'wrong' ? theme.accent : theme.border;
-  const backgroundColor =
-    state === 'correct'
-      ? theme.success
-      : state === 'wrong'
-        ? theme.accent
-        : theme.backgroundElement;
-  const textColor = state === 'correct' || state === 'wrong' ? theme.onPrimary : theme.text;
-  const mark = state === 'correct' ? '○ ' : state === 'wrong' ? '× ' : '';
+  const filled = { correct: theme.success, wrong: theme.accent, selected: theme.primary } as const;
+  const fill =
+    state === 'correct' || state === 'wrong' || state === 'selected' ? filled[state] : null;
+  const borderColor = fill ?? theme.border;
+  const backgroundColor = fill ?? theme.backgroundElement;
+  const textColor = fill ? theme.onPrimary : theme.text;
+  const mark =
+    state === 'correct' ? '○ ' : state === 'wrong' ? '× ' : state === 'selected' ? '● ' : '';
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
+      accessibilityState={{ disabled, selected: state === 'selected' }}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
@@ -54,14 +53,17 @@ export function AnswerOption({
           {mark ? (
             <ThemedText style={[styles.label, { color: textColor }]}>{mark}</ThemedText>
           ) : null}
-          <JapaneseText
-            text={label}
-            fontSize={18}
-            fontWeight={600}
-            center
-            color={textColor}
-            style={[styles.label, { color: textColor }]}
-          />
+          {/* 包一層可縮小的容器，長選項才會換行而不是超出畫面 */}
+          <View style={styles.japaneseText}>
+            <JapaneseText
+              text={label}
+              fontSize={18}
+              fontWeight={600}
+              center
+              color={textColor}
+              style={[styles.label, { color: textColor }]}
+            />
+          </View>
         </View>
       ) : (
         <ThemedText style={[styles.label, { color: textColor }]}>
@@ -92,6 +94,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center',
     flexWrap: 'wrap',
+  },
+  japaneseText: {
+    flexShrink: 1,
+    minWidth: 0,
   },
   dimmed: {
     opacity: 0.45,
