@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
@@ -68,18 +68,6 @@ export default function HomeScreen() {
                 label={daily.doneToday ? '再去閱讀' : '閱讀今日文章'}
                 onPress={() => router.navigate({ pathname: '/reading', params: { open: 'daily' } })}
               />
-            </>
-          )}
-
-          {/* 本地 AI 需要瀏覽器的 WebGPU，只在網頁版顯示 */}
-          {Platform.OS === 'web' && (
-            <>
-              <CaseCard label="CASE 003" title="AI 日文老師">
-                <ThemedText type="small" themeColor="textSecondary">
-                  在你的手機上執行的 AI，可以問文法、單字，或請它幫你改日文。下載一次後離線也能用。
-                </ThemedText>
-              </CaseCard>
-              <SecondaryButton label="請教 AI 老師" onPress={() => router.navigate('/teacher')} />
             </>
           )}
         </View>
