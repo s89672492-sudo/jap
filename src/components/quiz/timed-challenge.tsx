@@ -5,6 +5,7 @@ import { AnswerOption, type AnswerState } from './answer-option';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
+import { useModeActive } from '@/components/ui/keep-alive';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
@@ -48,9 +49,21 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
     setPhase('ready');
   }, [level]);
 
+  // 切到別的模式時暫停計時，切回來再接著倒數
+  const active = useModeActive();
+  const hiddenAt = useRef(0);
+  useEffect(() => {
+    if (!active) {
+      hiddenAt.current = Date.now();
+    } else if (hiddenAt.current) {
+      endAt.current += Date.now() - hiddenAt.current;
+      hiddenAt.current = 0;
+    }
+  }, [active]);
+
   // 倒數計時：以結束時間計算，畫面卡頓也不會算錯
   useEffect(() => {
-    if (phase !== 'running') return;
+    if (phase !== 'running' || !active) return;
     const timer = setInterval(() => {
       const left = Math.max(0, Math.ceil((endAt.current - Date.now()) / 1000));
       setRemaining(left);
@@ -60,7 +73,7 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
       }
     }, 200);
     return () => clearInterval(timer);
-  }, [phase, level]);
+  }, [phase, level, active]);
 
   // 作答後停一下顯示對錯，再自動換題
   useEffect(() => {

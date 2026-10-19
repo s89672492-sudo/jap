@@ -12,6 +12,7 @@ import { SpeakingPractice } from '@/components/quiz/speaking-practice';
 import { TimedChallenge } from '@/components/quiz/timed-challenge';
 import { VocabQuiz } from '@/components/quiz/vocab-quiz';
 import { ThemedText } from '@/components/themed-text';
+import { KeepAlive } from '@/components/ui/keep-alive';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { JLPT_LEVELS } from '@/data/vocab';
@@ -99,28 +100,31 @@ export default function QuizScreen() {
           },
         ]}>
         <View style={styles.inner}>
-          {mode === 'vocab' && (
+          {/* 打開過的模式切走時只是隱藏，切回來可以接著作答 */}
+          <KeepAlive active={mode === 'vocab'}>
             <VocabQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          )}
-          {mode === 'reading' && (
+          </KeepAlive>
+          <KeepAlive active={mode === 'reading'}>
             <ReadingQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          )}
-          {mode === 'grammar' && (
+          </KeepAlive>
+          <KeepAlive active={mode === 'grammar'}>
             <GrammarQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          )}
-          {mode === 'timed' && <TimedChallenge level={level} onStart={scrollToTop} />}
-          {mode === 'speaking' && (
+          </KeepAlive>
+          <KeepAlive active={mode === 'timed'}>
+            <TimedChallenge level={level} onStart={scrollToTop} />
+          </KeepAlive>
+          <KeepAlive active={mode === 'speaking'}>
             <SpeakingPractice level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          )}
-          {mode === 'exam' && (
+          </KeepAlive>
+          <KeepAlive active={mode === 'exam'}>
             <ExamQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          )}
-          {mode === 'listening' && (
+          </KeepAlive>
+          <KeepAlive active={mode === 'listening'}>
             <ListeningQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          )}
-          {mode === 'review' && (
+          </KeepAlive>
+          <KeepAlive active={mode === 'review'}>
             <ReviewQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
-          )}
+          </KeepAlive>
         </View>
       </ScrollView>
     </View>

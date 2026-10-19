@@ -8,6 +8,7 @@ import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
 
 import { ThemedText } from '@/components/themed-text';
+import { KeepAlive } from '@/components/ui/keep-alive';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
 import { EXAM_BY_LEVEL, EXAM_SECTION_TYPES, EXAM_TYPE_LABELS, type ExamSection } from '@/data/exam';
@@ -47,19 +48,16 @@ export function ExamQuiz({ level, onAnswered, onNext }: ExamQuizProps) {
     <SegmentedControl options={EXAM_MODE_OPTIONS} value={mode} onChange={setMode} />
   );
 
-  if (mode === 'mock') {
-    return (
-      <View style={styles.container}>
-        {modePicker}
-        <MockExam level={level} onScrollTop={onNext} />
-      </View>
-    );
-  }
-
+  // 模擬考考到一半切去練習，再切回來還在原本的地方（計時照樣進行）
   return (
     <View style={styles.container}>
       {modePicker}
-      <ExamPractice level={level} onAnswered={onAnswered} onNext={onNext} />
+      <KeepAlive active={mode === 'practice'}>
+        <ExamPractice level={level} onAnswered={onAnswered} onNext={onNext} />
+      </KeepAlive>
+      <KeepAlive active={mode === 'mock'}>
+        <MockExam level={level} onScrollTop={onNext} />
+      </KeepAlive>
     </View>
   );
 }

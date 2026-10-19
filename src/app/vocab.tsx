@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
 import { ThemedText } from '@/components/themed-text';
+import { KeepAlive } from '@/components/ui/keep-alive';
 import { PagedList } from '@/components/ui/paged-list';
 import { SearchBox } from '@/components/ui/search-box';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -64,7 +65,8 @@ export default function VocabScreen() {
   const [query, setQuery] = useState('');
   // 打字時先更新輸入框，搜尋結果稍後再算，打字不會卡
   const deferredQuery = useDeferredValue(query.trim());
-  const searching = deferredQuery.length > 0 && (mode === 'list' || mode === 'grammar');
+  const hasQuery = deferredQuery.length > 0;
+  const searching = hasQuery && (mode === 'list' || mode === 'grammar');
 
   const words = useMemo(() => {
     const all = VOCAB_BY_LEVEL[level];
@@ -72,12 +74,12 @@ export default function VocabScreen() {
   }, [level, pos]);
 
   const wordResults = useMemo(
-    () => (searching && mode === 'list' ? searchWords(deferredQuery) : []),
-    [searching, mode, deferredQuery],
+    () => (hasQuery ? searchWords(deferredQuery) : []),
+    [hasQuery, deferredQuery],
   );
   const grammarResults = useMemo(
-    () => (searching && mode === 'grammar' ? searchGrammar(deferredQuery) : []),
-    [searching, mode, deferredQuery],
+    () => (hasQuery ? searchGrammar(deferredQuery) : []),
+    [hasQuery, deferredQuery],
   );
 
   const saved = useMemo<SavedItem[]>(
@@ -152,8 +154,9 @@ export default function VocabScreen() {
         </View>
       </View>
 
-      {mode === 'list' &&
-        (searching ? (
+      {/* 打開過的模式切走時只是隱藏，切回來還在原本的頁數、單字卡進度 */}
+      <KeepAlive active={mode === 'list'} style={styles.fill}>
+        {hasQuery ? (
           <PagedList
             items={wordResults}
             pageSize={PAGE_SIZE}
@@ -174,19 +177,20 @@ export default function VocabScreen() {
             emptyText="這個分類沒有單字"
             contentContainerStyle={listStyle}
           />
-        ))}
-      {mode === 'grammar' && (
+        )}
+      </KeepAlive>
+      <KeepAlive active={mode === 'grammar'} style={styles.fill}>
         <PagedList
-          items={searching ? grammarResults : grammar}
+          items={hasQuery ? grammarResults : grammar}
           pageSize={GRAMMAR_PAGE_SIZE}
           keyExtractor={(item) => item.id}
-          renderItem={(item) => <GrammarCard item={item} showLevel={searching} />}
-          resetKey={searching ? `search-${deferredQuery}` : `grammar-${level}`}
+          renderItem={(item) => <GrammarCard item={item} showLevel={hasQuery} />}
+          resetKey={hasQuery ? `search-${deferredQuery}` : `grammar-${level}`}
           emptyText="找不到符合的文法"
           contentContainerStyle={listStyle}
         />
-      )}
-      {mode === 'saved' && (
+      </KeepAlive>
+      <KeepAlive active={mode === 'saved'} style={styles.fill}>
         <PagedList
           items={saved}
           pageSize={PAGE_SIZE}
@@ -202,25 +206,28 @@ export default function VocabScreen() {
           emptyText="還沒有收藏。在單字或文法卡片上點 ☆ 就能加入這裡。"
           contentContainerStyle={listStyle}
         />
-      )}
-      {mode === 'autoplay' && (
+      </KeepAlive>
+      <KeepAlive active={mode === 'autoplay'} style={styles.fill}>
         <ScrollView contentContainerStyle={listStyle}>
           <View style={styles.posFilter}>{posFilter}</View>
           <AutoPlayer words={words} />
         </ScrollView>
-      )}
-      {mode === 'flashcard' && (
+      </KeepAlive>
+      <KeepAlive active={mode === 'flashcard'} style={styles.fill}>
         <ScrollView contentContainerStyle={listStyle}>
           <View style={styles.posFilter}>{posFilter}</View>
           <FlashcardDeck level={level} words={words} sessionKey={`${level}-${pos}`} />
         </ScrollView>
-      )}
+      </KeepAlive>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+  },
+  fill: {
     flex: 1,
   },
   header: {
