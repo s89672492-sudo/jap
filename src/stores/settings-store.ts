@@ -12,6 +12,8 @@ export type Settings = {
   themeMode: ThemeMode;
   /** 例句上方顯示假名注音 */
   furigana: boolean;
+  /** 選的日文聲音 id；null 代表自動挑最自然的聲音 */
+  voice: string | null;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -19,6 +21,7 @@ export const DEFAULT_SETTINGS: Settings = {
   roundSize: 10,
   themeMode: 'system',
   furigana: true,
+  voice: null,
 };
 
 /** expo-speech 的 rate：1.0 是正常語速 */
@@ -48,6 +51,7 @@ const settingsStore = createPersistedStore<Settings>({
           ? (saved.themeMode as ThemeMode)
           : DEFAULT_SETTINGS.themeMode,
         furigana: typeof saved.furigana === 'boolean' ? saved.furigana : DEFAULT_SETTINGS.furigana,
+        voice: typeof saved.voice === 'string' ? saved.voice : DEFAULT_SETTINGS.voice,
       };
     } catch {
       return null;
