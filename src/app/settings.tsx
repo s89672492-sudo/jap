@@ -5,6 +5,7 @@ import { AppBackground } from '@/components/app-background';
 import { BackgroundPicker } from '@/components/settings/background-picker';
 import { ClearMistakes } from '@/components/settings/clear-mistakes';
 import { SettingsSection } from '@/components/settings/settings-section';
+import { VoicePicker } from '@/components/settings/voice-picker';
 import { ThemedText } from '@/components/themed-text';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { SpeakButton } from '@/components/ui/speak-button';
@@ -79,6 +80,12 @@ export default function SettingsScreen() {
               </ThemedText>
               <SpeakButton text={SAMPLE_SENTENCE} />
             </View>
+          </SettingsSection>
+
+          <SettingsSection
+            title="發音聲音"
+            description="選一個聽起來最自然的日文聲音，點一下就能試聽。聲音來自這支手機或瀏覽器，不同手機能選的不一樣。">
+            <VoicePicker />
           </SettingsSection>
 
           <SettingsSection title="例句假名注音" description="在單字例句的漢字上方顯示讀音（自動產生，少數讀音可能不準）。">

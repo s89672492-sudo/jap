@@ -1,18 +1,41 @@
 import * as Speech from 'expo-speech';
 
 import type { ScriptLine, ScriptSpeaker } from '@/data/exam';
+import { getCachedVoices, type JapaneseVoice } from '@/lib/voices';
 import { getSettings, SPEECH_RATES } from '@/stores/settings-store';
 
-/** 聽解對話用不同音高區分說話者（手機內建語音通常只有一種聲音） */
+/** 找不到男女兩種聲音時，聽解對話改用不同音高區分說話者 */
 const SPEAKER_PITCH: Record<ScriptSpeaker, number> = {
   narrator: 1.0,
   man: 0.8,
   woman: 1.3,
 };
 
-function speak(text: string, pitch = 1.0) {
+/** 設定裡選的聲音；選「自動」或那個聲音不在這支手機上時，用最自然的那一個 */
+function mainVoice(): JapaneseVoice | undefined {
+  const voices = getCachedVoices();
+  const chosen = getSettings().voice;
+  return voices.find((v) => v.id === chosen) ?? voices[0];
+}
+
+/** 這一句用哪個聲音、什麼音高 */
+function voiceFor(speaker: ScriptSpeaker = 'narrator'): { voice?: string; pitch: number } {
+  const main = mainVoice();
+  if (!main) return { pitch: SPEAKER_PITCH[speaker] };
+  if (speaker === 'narrator') return { voice: main.id, pitch: 1.0 };
+  const wanted = speaker === 'man' ? 'male' : 'female';
+  if (main.gender === wanted) return { voice: main.id, pitch: 1.0 };
+  // 有另一個性別的聲音就換人說，聽起來比調音高自然
+  const other = getCachedVoices().find((v) => v.gender === wanted);
+  if (other && main.gender) return { voice: other.id, pitch: 1.0 };
+  return { voice: main.id, pitch: SPEAKER_PITCH[speaker] };
+}
+
+function speak(text: string, speaker?: ScriptSpeaker) {
+  const { voice, pitch } = voiceFor(speaker);
   Speech.speak(text, {
     language: 'ja-JP',
+    voice,
     rate: SPEECH_RATES[getSettings().speechSpeed],
     pitch,
   });
@@ -31,9 +54,9 @@ export async function speakJapanese(text: string) {
 export async function speakScript(lines: ScriptLine[], question: string) {
   await Speech.stop();
   const [intro, ...dialogue] = lines;
-  speak(`${intro.text}${question}`, SPEAKER_PITCH.narrator);
-  dialogue.forEach((line) => speak(line.text, SPEAKER_PITCH[line.speaker]));
-  speak(question, SPEAKER_PITCH.narrator);
+  speak(`${intro.text}${question}`);
+  dialogue.forEach((line) => speak(line.text, line.speaker));
+  speak(question);
 }
 
 /** 停止目前的語音（例如離開聽解題時） */
@@ -53,6 +76,7 @@ export function speakAndWait(text: string, language: 'ja-JP' | 'zh-TW' = 'ja-JP'
       clearTimeout(timeout);
       resolve();
     };
-    Speech.speak(text, { language, rate, onDone: done, onStopped: done, onError: done });
+    const voice = language === 'ja-JP' ? mainVoice()?.id : undefined;
+    Speech.speak(text, { language, voice, rate, onDone: done, onStopped: done, onError: done });
   });
 }
