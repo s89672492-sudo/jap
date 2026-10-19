@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Flashcard } from './flashcard';
@@ -12,40 +12,108 @@ import { Spacing } from '@/constants/theme';
 import type { JlptLevel, VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { shuffle } from '@/lib/quiz';
+import {
+  resetKnownWords,
+  saveFlashcardSession,
+  setWordKnown,
+  useFlashcardSessions,
+  useFlashcardStoresLoaded,
+  useKnownWords,
+  type FlashcardSession,
+} from '@/stores/flashcard-store';
 import { addMistake } from '@/stores/mistakes-store';
 
 type FlashcardDeckProps = {
   level: JlptLevel;
   /** 這一疊要翻的單字（可能已依詞性篩選） */
   words: VocabWord[];
+  /** 用來記住這一疊翻到哪裡，例如「N5-verb」 */
+  sessionKey: string;
 };
 
-type Direction = 'ja-zh' | 'zh-ja';
+type Direction = FlashcardSession['direction'];
 
 const DIRECTION_OPTIONS: { value: Direction; label: string }[] = [
   { value: 'ja-zh', label: '日文 → 中文' },
   { value: 'zh-ja', label: '中文 → 日文' },
 ];
 
-/** 單字卡模式：一次一張，翻面後自評「記住了／還不熟」；還不熟的單字會加入錯題本 */
-export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
+/**
+ * 單字卡模式：一次一張，翻面後自評「記住了／還不熟」。
+ * 記住了的單字會存在手機裡，之後只出還不熟的；還不熟的會加入錯題本。
+ * 翻到第幾張也會記住，切到別的頁面再回來可以接著翻。
+ */
+export function FlashcardDeck({ level, words, sessionKey }: FlashcardDeckProps) {
   const theme = useTheme();
-  // 順序是隨機的，等畫面載入後才洗牌，避免網頁版預先產生的 HTML 和實際畫面不一致
-  const [deck, setDeck] = useState<VocabWord[]>([]);
-  const [index, setIndex] = useState(0);
+  const loaded = useFlashcardStoresLoaded();
+  const knownIds = useKnownWords();
+  const sessions = useFlashcardSessions();
   const [flipped, setFlipped] = useState(false);
-  const [known, setKnown] = useState(0);
-  const [round, setRound] = useState(0);
-  const [direction, setDirection] = useState<Direction>('ja-zh');
 
+  const byId = useMemo(() => new Map(words.map((w) => [w.id, w])), [words]);
+  const remaining = useMemo(() => words.filter((w) => !knownIds.has(w.id)), [words, knownIds]);
+  const knownCount = words.length - remaining.length;
+
+  // 存著的進度（單字都還在這一疊裡才沿用）
+  const saved = sessions[sessionKey];
+  const session = saved && saved.ids.every((id) => byId.has(id)) ? saved : undefined;
+
+  // 沒有進度時，用還沒記住的單字洗牌開新的一輪（等資料讀回、畫面載入後才洗牌）
   useEffect(() => {
-    setDeck(shuffle(words));
-    setIndex(0);
-    setFlipped(false);
-    setKnown(0);
-  }, [words, round]);
+    if (!loaded || session) return;
+    if (remaining.length > 0) {
+      saveFlashcardSession(sessionKey, {
+        ids: shuffle(remaining).map((w) => w.id),
+        index: 0,
+        known: 0,
+        direction: saved?.direction ?? 'ja-zh',
+      });
+    }
+    // 只在讀回資料、換一疊或沒有進度時開新的一輪
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, sessionKey, session === undefined]);
 
-  if (deck.length === 0) return null;
+  useEffect(() => setFlipped(false), [sessionKey]);
+
+  if (!loaded) return null;
+
+  const progress = (
+    <ThemedText type="small" themeColor="textSecondary" style={[styles.count, styles.center]}>
+      {level}・已記住 {knownCount} / {words.length} 個單字
+    </ThemedText>
+  );
+
+  const resetButton = knownCount > 0 && (
+    <SecondaryButton
+      label="重設已記住的單字"
+      onPress={() => {
+        resetKnownWords(words.map((w) => w.id));
+        saveFlashcardSession(sessionKey, null);
+      }}
+    />
+  );
+
+  // 這一疊全部記住了
+  if (remaining.length === 0 && (!session || session.index >= session.ids.length)) {
+    return (
+      <View style={styles.summary}>
+        <DetectiveEmblem />
+        <ThemedText type="smallBold" style={[styles.label, { color: theme.accent }]}>
+          {level} 單字全部記住了！
+        </ThemedText>
+        {progress}
+        <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
+          真是名偵探！想再複習的話，可以重設後重新翻一次。
+        </ThemedText>
+        {resetButton}
+      </View>
+    );
+  }
+
+  if (!session) return null;
+
+  const deck = session.ids.map((id) => byId.get(id)!);
+  const { index, known, direction } = session;
 
   if (index >= deck.length) {
     const unsure = deck.length - known;
@@ -53,17 +121,22 @@ export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
       <View style={styles.summary}>
         <DetectiveEmblem />
         <ThemedText type="smallBold" style={[styles.label, { color: theme.accent }]}>
-          {level} 單字卡完成
+          這一輪完成
         </ThemedText>
         <ThemedText style={styles.score}>
           {known} / {deck.length}
         </ThemedText>
+        {progress}
         <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
           {unsure > 0
-            ? `還不熟的 ${unsure} 個單字已加入錯題本，可以到「測驗 → 錯題」複習。`
-            : '全部都記住了，真是名偵探！'}
+            ? `還不熟的 ${unsure} 個單字已加入錯題本，下一輪會再出現。`
+            : '這一輪全部都記住了！'}
         </ThemedText>
-        <PrimaryButton label="再翻一輪" onPress={() => setRound((r) => r + 1)} />
+        <PrimaryButton
+          label={`繼續翻還不熟的 ${remaining.length} 個`}
+          onPress={() => saveFlashcardSession(sessionKey, null)}
+        />
+        {resetButton}
       </View>
     );
   }
@@ -71,14 +144,18 @@ export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
   const word = deck[index];
 
   const answer = (remembered: boolean) => {
-    if (remembered) setKnown((k) => k + 1);
-    else addMistake(word.id);
+    setWordKnown(word.id, remembered);
+    if (!remembered) addMistake(word.id);
     setFlipped(false);
-    setIndex((i) => i + 1);
+    saveFlashcardSession(sessionKey, {
+      ...session,
+      index: index + 1,
+      known: known + (remembered ? 1 : 0),
+    });
   };
 
   const changeDirection = (next: Direction) => {
-    setDirection(next);
+    saveFlashcardSession(sessionKey, { ...session, direction: next });
     setFlipped(false);
   };
 
@@ -90,7 +167,7 @@ export function FlashcardDeck({ level, words }: FlashcardDeckProps) {
           第 {index + 1} / {deck.length} 張
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary" style={styles.count}>
-          記住了 {known}
+          已記住 {knownCount} / {words.length}
         </ThemedText>
       </View>
       <View style={[styles.track, { backgroundColor: theme.backgroundSelected }]}>

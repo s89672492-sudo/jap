@@ -5,6 +5,7 @@ import { PronunciationDiff } from './pronunciation-diff';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
+import { useModeActive } from '@/components/ui/keep-alive';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -86,6 +87,11 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
 
   // 離開畫面時停止收音
   useEffect(() => () => stopRef.current(), []);
+  // 切到別的模式時停止錄音
+  const active = useModeActive();
+  useEffect(() => {
+    if (!active) stopRef.current();
+  }, [active]);
 
   if (supported === null || items.length === 0) return null;
 

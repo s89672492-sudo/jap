@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { useModeActive } from '@/components/ui/keep-alive';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
 import type { VocabWord } from '@/data/vocab';
@@ -59,8 +60,12 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
     setPlaying(false);
   }, []);
 
-  // 離開畫面時暫停
+  // 離開畫面或切到別的模式時暫停
   useFocusEffect(useCallback(() => stop, [stop]));
+  const active = useModeActive();
+  useEffect(() => {
+    if (!active) stop();
+  }, [active, stop]);
   useEffect(() => stop, [stop]);
 
   const play = async (from: number) => {
