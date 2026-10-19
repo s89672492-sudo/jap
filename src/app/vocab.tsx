@@ -212,7 +212,7 @@ export default function VocabScreen() {
       {mode === 'flashcard' && (
         <ScrollView contentContainerStyle={listStyle}>
           <View style={styles.posFilter}>{posFilter}</View>
-          <FlashcardDeck level={level} words={words} />
+          <FlashcardDeck level={level} words={words} sessionKey={`${level}-${pos}`} />
         </ScrollView>
       )}
     </View>
