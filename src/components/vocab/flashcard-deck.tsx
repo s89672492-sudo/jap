@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Flashcard } from './flashcard';
+import { KnownWordsList } from './known-words-list';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
@@ -43,7 +44,27 @@ const DIRECTION_OPTIONS: { value: Direction; label: string }[] = [
  * 記住了的單字會存在手機裡，之後只出還不熟的；還不熟的會加入錯題本。
  * 翻到第幾張也會記住，切到別的頁面再回來可以接著翻。
  */
-export function FlashcardDeck({ level, words, sessionKey }: FlashcardDeckProps) {
+type DeckView = 'study' | 'known';
+
+/** 單字卡：「翻卡」練習，或查看「已記住」的單字 */
+export function FlashcardDeck(props: FlashcardDeckProps) {
+  const knownIds = useKnownWords();
+  const knownCount = props.words.filter((w) => knownIds.has(w.id)).length;
+  const [view, setView] = useState<DeckView>('study');
+  const viewOptions: { value: DeckView; label: string }[] = [
+    { value: 'study', label: '翻卡' },
+    { value: 'known', label: `已記住 ${knownCount}` },
+  ];
+
+  return (
+    <View style={styles.container}>
+      <SegmentedControl options={viewOptions} value={view} onChange={setView} />
+      {view === 'study' ? <FlashcardStudy {...props} /> : <KnownWordsList words={props.words} />}
+    </View>
+  );
+}
+
+function FlashcardStudy({ level, words, sessionKey }: FlashcardDeckProps) {
   const theme = useTheme();
   const loaded = useFlashcardStoresLoaded();
   const knownIds = useKnownWords();
