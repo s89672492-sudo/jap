@@ -32,6 +32,8 @@ export type ExamQuestion = {
   explanation: string;
   /** 讀解：要閱讀的文章 */
   passage?: string;
+  /** 加了假名注音的題目句子（去掉［］），自動出的題目才有；沒有的話依句子查注音表 */
+  furigana?: string;
   /** 聽解：對話內容（第一句是情境說明），作答後才顯示 */
   script?: ScriptLine[];
 };

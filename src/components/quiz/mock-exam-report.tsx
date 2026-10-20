@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { ExamSentence } from './exam-sentence';
+import { ExamQuestionView } from './exam-question-view';
 
 import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { JapaneseText } from '@/components/ui/japanese-text';
 import { Spacing } from '@/constants/theme';
 import { EXAM_TYPE_LABELS, type ExamQuestionType } from '@/data/exam';
 import { useTheme } from '@/hooks/use-theme';
@@ -18,6 +17,8 @@ type MockExamReportProps = {
   result: MockExamResult;
   items: ExamRoundQuestion[];
   answers: Record<string, string>;
+  /** 重看以前的考試時，考試的時間（ISO 字串） */
+  date?: string;
   onRetry: () => void;
   onBack: () => void;
 };
@@ -30,7 +31,14 @@ const FILTER_OPTIONS: { value: ReviewFilter; label: string }[] = [
 ];
 
 /** 模擬考成績單：合格判定、各科分數、各題型正確率、逐題檢討 */
-export function MockExamReport({ result, items, answers, onRetry, onBack }: MockExamReportProps) {
+export function MockExamReport({
+  result,
+  items,
+  answers,
+  date,
+  onRetry,
+  onBack,
+}: MockExamReportProps) {
   const theme = useTheme();
   const [filter, setFilter] = useState<ReviewFilter>('wrong');
 
@@ -57,7 +65,7 @@ export function MockExamReport({ result, items, answers, onRetry, onBack }: Mock
           },
         ]}>
         <ThemedText type="small" themeColor="textSecondary">
-          模擬考結果（推估）
+          {date ? `${new Date(date).toLocaleString()} 的模擬考（推估）` : '模擬考結果（推估）'}
         </ThemedText>
         <ThemedText
           style={[styles.verdictText, { color: result.passed ? theme.success : theme.accent }]}>
@@ -159,6 +167,9 @@ export function MockExamReport({ result, items, answers, onRetry, onBack }: Mock
       </View>
 
       <ThemedText type="smallBold">逐題檢討</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        綠色是正確答案，紅色是你選的答案。這次的題目和你的答案已經存下來，之後可以在模擬考說明頁的「最近成績」再打開來複習。
+      </ThemedText>
       <SegmentedControl options={FILTER_OPTIONS} value={filter} onChange={setFilter} />
       {reviewItems.length === 0 && (
         <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
@@ -186,35 +197,21 @@ export function MockExamReport({ result, items, answers, onRetry, onBack }: Mock
                 {EXAM_TYPE_LABELS[item.question.type]}
               </ThemedText>
             </View>
-            <ExamSentence sentence={item.question.sentence} />
-            {!correct && (
-              <View style={styles.answerRow}>
-                <ThemedText type="small" style={{ color: theme.accent }}>
-                  你的答案：
-                </ThemedText>
-                {mine ? (
-                  <JapaneseText text={mine} fontSize={14} color={theme.accent} />
-                ) : (
-                  <ThemedText type="small" style={{ color: theme.accent }}>
-                    未作答
-                  </ThemedText>
-                )}
-              </View>
-            )}
-            <View style={styles.answerRow}>
-              <ThemedText type="small" style={{ color: theme.success }}>
-                正確答案：
+            {!mine && (
+              <ThemedText type="small" style={{ color: theme.accent }}>
+                這題沒有作答
               </ThemedText>
-              <JapaneseText
-                text={item.answer}
-                fontSize={14}
-                fontWeight={700}
-                color={theme.success}
-              />
-            </View>
-            <ThemedText type="small" themeColor="textSecondary">
-              {item.question.explanation}
-            </ThemedText>
+            )}
+            <ExamQuestionView
+              item={item}
+              picked={mine ?? ''}
+              getState={(option) => {
+                if (option === item.answer) return 'correct';
+                if (option === mine) return 'wrong';
+                return 'idle';
+              }}
+              onPick={() => {}}
+            />
           </View>
         );
       })}

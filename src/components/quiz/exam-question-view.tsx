@@ -45,7 +45,7 @@ export function ExamQuestionView({
           showTranscript={reveal && picked !== null}
         />
       )}
-      <ExamSentence sentence={question.sentence} />
+      <ExamSentence sentence={question.sentence} furigana={question.furigana} />
       <View style={styles.options}>
         {options.map((option) => (
           <AnswerOption

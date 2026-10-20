@@ -9,9 +9,10 @@ import { VocabQuestionView } from './vocab-question-view';
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { EXAM_BY_LEVEL, EXAM_TYPE_LABELS } from '@/data/exam';
+import { EXAM_BY_LEVEL, EXAM_TYPE_LABELS, type ExamQuestion } from '@/data/exam';
 import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
+import { getGeneratedQuestion, parseGeneratedId } from '@/lib/generated-exam';
 import {
   buildExamRound,
   buildRound,
@@ -40,7 +41,14 @@ export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
 
   const words = VOCAB_BY_LEVEL[level];
   const missedWords = words.filter((w) => mistakes.has(w.id));
-  const missedExam = EXAM_BY_LEVEL[level].filter((q) => mistakes.has(q.id));
+  // 模擬試題的錯題：自編的題目，加上模擬考裡自動出的題目
+  const missedExam = [
+    ...EXAM_BY_LEVEL[level].filter((q) => mistakes.has(q.id)),
+    ...[...mistakes]
+      .filter((id) => parseGeneratedId(id)?.level === level)
+      .map(getGeneratedQuestion)
+      .filter((q): q is ExamQuestion => q !== null),
+  ];
   const missedCount = missedWords.length + missedExam.length;
 
   const quiz = useQuizRound<ReviewItem>(

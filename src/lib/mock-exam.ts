@@ -1,5 +1,13 @@
-import type { ExamQuestion, ExamQuestionType } from '@/data/exam';
+import { EXAM_BY_LEVEL, type ExamQuestion, type ExamQuestionType } from '@/data/exam';
 import type { JlptLevel } from '@/data/vocab';
+import {
+  GENERATED_TYPES,
+  generatedCandidateIds,
+  getGeneratedQuestion,
+  isGeneratedId,
+  parseGeneratedId,
+  type GeneratedType,
+} from '@/lib/generated-exam';
 import { shuffle, type ExamRoundQuestion } from '@/lib/quiz';
 
 /**
@@ -142,12 +150,63 @@ export type MockSitting = Sitting & {
   seconds: number;
 };
 
-/** 出一份模擬考：每節依題型順序排列，選項打亂 */
-export function buildMockExam(level: JlptLevel, questions: ExamQuestion[]): MockSitting[] {
+/** 用題目 id 找回題目：自編的題目或自動出的題目 */
+export function findExamQuestion(level: JlptLevel, id: string): ExamQuestion | null {
+  if (isGeneratedId(id)) return getGeneratedQuestion(id);
+  return EXAM_BY_LEVEL[level].find((q) => q.id === id) ?? null;
+}
+
+export type PickHistory = {
+  /** 答錯、還沒複習掉的題目 id（錯題本） */
+  mistakes: ReadonlySet<string>;
+  /** 模擬考考過的題目 id */
+  seen: ReadonlySet<string>;
+};
+
+/**
+ * 挑一種題型的題目：題數和自編題目一樣，題目從「自編＋自動出題」的題庫裡挑。
+ * 順序：錯題本裡的題目（最多三分之一）→ 沒考過的 → 都考過了才出考過的。
+ */
+function pickQuestions(
+  level: JlptLevel,
+  type: GeneratedType,
+  count: number,
+  { mistakes, seen }: PickHistory,
+): ExamQuestion[] {
+  const authored = EXAM_BY_LEVEL[level].filter((q) => q.type === type);
+  const ids = [...authored.map((q) => q.id), ...generatedCandidateIds(level, type)];
+  const isThisType = (id: string) =>
+    isGeneratedId(id) ? parseGeneratedId(id)?.type === type : authored.some((q) => q.id === id);
+  const missed = shuffle([...mistakes].filter((id) => isThisType(id) && ids.includes(id)));
+  const others = shuffle(ids.filter((id) => !missed.includes(id)));
+  const order = [
+    ...missed.slice(0, Math.ceil(count / 3)),
+    ...others.filter((id) => !seen.has(id)),
+    ...others.filter((id) => seen.has(id)),
+  ];
+  const picked: ExamQuestion[] = [];
+  for (const id of order) {
+    const question = findExamQuestion(level, id);
+    if (question) picked.push(question);
+    if (picked.length === count) break;
+  }
+  return picked;
+}
+
+/**
+ * 出一份模擬考：每節依題型順序排列，選項打亂。
+ * 沒給 history 時只用自編題目（說明頁預覽題數和時間用）。
+ */
+export function buildMockExam(level: JlptLevel, history?: PickHistory): MockSitting[] {
+  const authored = EXAM_BY_LEVEL[level];
   return MOCK_EXAM_CONFIG[level].sittings.map((sitting) => {
-    const picked = questions
-      .filter((q) => sitting.types.includes(q.type))
-      .sort((a, b) => TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type))
+    const types = [...sitting.types].sort((a, b) => TYPE_ORDER.indexOf(a) - TYPE_ORDER.indexOf(b));
+    const picked = types
+      .flatMap((type) => {
+        const own = authored.filter((q) => q.type === type);
+        const generated = GENERATED_TYPES.find((t) => t === type);
+        return history && generated ? pickQuestions(level, generated, own.length, history) : own;
+      })
       .map((question) => ({
         question,
         options: shuffle([...question.options]),
@@ -157,6 +216,26 @@ export function buildMockExam(level: JlptLevel, questions: ExamQuestion[]): Mock
     // 以整分鐘計時，比較像正式考試
     return { ...sitting, questions: picked, seconds: Math.ceil(seconds / 60) * 60 };
   });
+}
+
+/** 從考試紀錄找回題目和自己的答案，重看題目和解說用（找不到的題目略過） */
+export function restoreMockExam(
+  level: JlptLevel,
+  items: { id: string; mine: string | null }[],
+): { items: ExamRoundQuestion[]; answers: Record<string, string> } {
+  const restored: ExamRoundQuestion[] = [];
+  const answers: Record<string, string> = {};
+  for (const { id, mine } of items) {
+    const question = findExamQuestion(level, id);
+    if (!question) continue;
+    restored.push({
+      question,
+      options: shuffle([...question.options]),
+      answer: question.options[0],
+    });
+    if (mine !== null) answers[id] = mine;
+  }
+  return { items: restored, answers };
 }
 
 export type SectionScore = {

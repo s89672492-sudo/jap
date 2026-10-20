@@ -10,16 +10,18 @@ import { useSettings } from '@/stores/settings-store';
 type ExamSentenceProps = {
   /** 用［］標出要畫底線的字；句子重組題用 ★ 標出要回答的位置 */
   sentence: string;
+  /** 注音版本（去掉［］）；沒給的話依句子查注音表 */
+  furigana?: string;
 };
 
 /** 試題的題目句子；模仿 JLPT 試卷，［］裡的字加上底線、★ 用強調色 */
-export function ExamSentence({ sentence }: ExamSentenceProps) {
+export function ExamSentence({ sentence, furigana: given }: ExamSentenceProps) {
   const theme = useTheme();
   // 以［…］或 ★ 切開：［］裡的字畫底線，★ 用強調色標出
   const parts = sentence.split(/(［.+?］|★)/);
   const { furigana } = useSettings();
   // 注音版本已去掉［］，畫底線的字本身不加注音（避免洩漏漢字讀法題的答案）
-  const annotated = furigana ? lookupFurigana(sentence) : undefined;
+  const annotated = furigana ? (given ?? lookupFurigana(sentence)) : undefined;
   const open = sentence.indexOf('［');
   const close = sentence.indexOf('］');
   const underline: [number, number] | undefined =
