@@ -1,6 +1,7 @@
 import type { ExamQuestion, ExamQuestionType } from '@/data/exam';
 import { GRAMMAR_BY_LEVEL, type GrammarPoint } from '@/data/grammar';
 import { JLPT_LEVELS, VOCAB_BY_LEVEL, type JlptLevel, type VocabWord } from '@/data/vocab';
+import { REAL_WORDS } from '@/data/exam/real-words';
 import { lookupFurigana, parseRuby, splitsRuby, type RubySegment } from '@/lib/furigana';
 
 /**
@@ -144,6 +145,29 @@ function replaceSpan(located: Span, replacement: string) {
   return { sentence, furigana: hasRuby ? annotated : undefined };
 }
 
+/**
+ * 也算正確的其他讀法（不能拿來當錯誤選項），
+ * 例如「世論」有よろん和せろん、「〜所」有じょ和しょ兩種唸法。
+ */
+const OTHER_READINGS: Record<string, string[]> = {
+  世論: ['せろん'],
+  世論調査: ['せろんちょうさ'],
+  無頓着: ['むとんじゃく'],
+  大分: ['だいぶん'],
+  疫病: ['やくびょう'],
+  憧憬: ['どうけい'],
+  修業: ['しゅうぎょう'],
+  分別: ['ふんべつ'],
+  格好いい: ['かっこういい'],
+  洗面所: ['せんめんしょ'],
+  撮影所: ['さつえいしょ'],
+  料金所: ['りょうきんしょ'],
+  案内所: ['あんないしょ'],
+  避難所: ['ひなんしょ'],
+  詩歌: ['しか'],
+  人徳: ['にんとく'],
+};
+
 // ── 索引：所有單字、漢字的讀音 ──
 
 type Indexes = {
@@ -198,6 +222,9 @@ function getIndexes(): Indexes {
         }
       }
     }
+  }
+  for (const [writing, readings] of Object.entries(OTHER_READINGS)) {
+    for (const reading of readings) addTo(built.readingsOf, writing, reading);
   }
   for (const [kanji, readings] of built.kanjiReadings) {
     for (const reading of readings) addTo(built.kanjiByReading, reading, kanji);
@@ -346,8 +373,10 @@ function orthographyDistractors(word: VocabWord, random: () => number): string[]
       candidates.push([...chars.slice(0, i), other, ...chars.slice(i + 1)].join(''));
     }
   });
-  // 錯誤選項不能剛好是真的單字（例如 機会／機械 兩個都對）
-  const unique = [...new Set(candidates)].filter((c) => c !== word.word && !writings.has(c));
+  // 錯誤選項不能剛好是真的單字（例如 機会／機械、川／皮，放進句子可能也說得通）
+  const unique = [...new Set(candidates)].filter(
+    (c) => c !== word.word && !writings.has(c) && !REAL_WORDS.has(c),
+  );
   if (unique.length < 3) return null;
   // 盡量換不同位置的漢字
   const byPosition = new Map<number, string[]>();
@@ -426,6 +455,9 @@ function buildVocabQuestion(
   const id = PREFIX[type] + word.id;
   const random = seededRandom(id);
   const hasKanji = [...word.word].some(isKanji);
+  // 數字後面的量詞（五［分］、三［階］）讀音會跟著數字變，不出讀音和寫法的題
+  const before = located.plain[located.start - 1] ?? '';
+  if (type !== 'context' && /[0-9０-９一二三四五六七八九十百千万何]/.test(before)) return null;
 
   if (type === 'kanji-reading') {
     if (!hasKanji) return null;
