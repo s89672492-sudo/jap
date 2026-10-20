@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+
+import { MockExamHistoryItem } from './mock-exam-history-item';
 
 import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -7,6 +10,7 @@ import type { JlptLevel } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { MOCK_EXAM_CONFIG, type MockSitting } from '@/lib/mock-exam';
 import {
+  clearMockExamSeen,
   useMockExamHistory,
   useMockExamSeenCount,
   type MockExamRecord,
@@ -21,18 +25,13 @@ type MockExamIntroProps = {
   onOpenRecord: (record: MockExamRecord) => void;
 };
 
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
 /** 模擬考開始前的說明：考科、時間、合格標準、最近成績 */
 export function MockExamIntro({ level, sittings, onStart, onOpenRecord }: MockExamIntroProps) {
   const theme = useTheme();
   const config = MOCK_EXAM_CONFIG[level];
   const history = useMockExamHistory()[level] ?? [];
   const seenCount = useMockExamSeenCount(level);
+  const [confirmClear, setConfirmClear] = useState(false);
   const totalQuestions = sittings.reduce((sum, s) => sum + s.questions.length, 0);
   const totalMinutes = sittings.reduce((sum, s) => sum + s.seconds / 60, 0);
 
@@ -54,6 +53,55 @@ export function MockExamIntro({ level, sittings, onStart, onOpenRecord }: MockEx
           每次換題：漢字讀法、表記、文脈語彙、文法從數千題的題庫裡挑，優先出沒考過的，錯題本裡的題目會再考一次。讀解、聽解、言い換え、句子重組目前是固定題目。
           {seenCount > 0 ? `已考過 ${seenCount} 題。` : ''}
         </ThemedText>
+        {seenCount > 0 &&
+          (confirmClear ? (
+            <View style={[styles.confirm, { backgroundColor: theme.backgroundSelected }]}>
+              <ThemedText type="small">
+                清除「已考過」的紀錄？之後考過的題目也可能再出現。成績紀錄和錯題本不會刪除。
+              </ThemedText>
+              <View style={styles.confirmButtons}>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setConfirmClear(false)}
+                  style={({ pressed }) => [
+                    styles.smallButton,
+                    { borderColor: theme.border },
+                    pressed && styles.pressed,
+                  ]}>
+                  <ThemedText type="small">取消</ThemedText>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    clearMockExamSeen(level);
+                    setConfirmClear(false);
+                  }}
+                  style={({ pressed }) => [
+                    styles.smallButton,
+                    { borderColor: theme.accent, backgroundColor: theme.accent },
+                    pressed && styles.pressed,
+                  ]}>
+                  <ThemedText type="smallBold" style={{ color: theme.onPrimary }}>
+                    確定清除
+                  </ThemedText>
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setConfirmClear(true)}
+              style={({ pressed }) => [
+                styles.smallButton,
+                styles.alignStart,
+                { borderColor: theme.border },
+                pressed && styles.pressed,
+              ]}>
+              <ThemedText type="small" themeColor="textSecondary">
+                清除已考過的題目紀錄
+              </ThemedText>
+            </Pressable>
+          ))}
         {sittings.map((sitting, i) => (
           <View key={sitting.label} style={[styles.row, { borderTopColor: theme.border }]}>
             <ThemedText type="smallBold" style={styles.rowLabel}>
@@ -98,52 +146,16 @@ export function MockExamIntro({ level, sittings, onStart, onOpenRecord }: MockEx
             最近成績
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            點一次考試，可以重看每一題、你的答案和解說（保留最近 10 次）。
+            點一次考試，可以重看每一題、你的答案和解說（保留最近 10 次）；不要的紀錄可以按「刪除」。
           </ThemedText>
-          {history.map((record) => {
-            const row = (
-              <>
-                <View style={styles.historyRow}>
-                  <ThemedText type="small" themeColor="textSecondary" style={styles.tabular}>
-                    {formatDate(record.date)}
-                  </ThemedText>
-                  <ThemedText type="smallBold" style={styles.tabular}>
-                    {record.total} / 180
-                  </ThemedText>
-                  <ThemedText
-                    type="smallBold"
-                    style={{ color: record.passed ? theme.success : theme.accent }}>
-                    {record.passed ? '合格' : '不合格'}
-                  </ThemedText>
-                </View>
-                {record.items && (
-                  <ThemedText type="small" style={{ color: theme.accent }}>
-                    查看題目和解說 ›
-                  </ThemedText>
-                )}
-              </>
-            );
-            return record.items ? (
-              <Pressable
-                key={record.date}
-                accessibilityRole="button"
-                accessibilityLabel={`查看 ${formatDate(record.date)} 的模擬考題目和解說`}
-                onPress={() => onOpenRecord(record)}
-                style={({ pressed }) => [
-                  styles.historyItem,
-                  { borderTopColor: theme.border },
-                  pressed && styles.pressed,
-                ]}>
-                {row}
-              </Pressable>
-            ) : (
-              <View
-                key={record.date}
-                style={[styles.historyItem, { borderTopColor: theme.border }]}>
-                {row}
-              </View>
-            );
-          })}
+          {history.map((record) => (
+            <MockExamHistoryItem
+              key={record.date}
+              level={level}
+              record={record}
+              onOpen={onOpenRecord}
+            />
+          ))}
         </View>
       )}
 
@@ -174,24 +186,29 @@ const styles = StyleSheet.create({
   rowLabel: {
     flexShrink: 1,
   },
-  historyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  confirm: {
+    borderRadius: Spacing.two,
+    padding: Spacing.two,
     gap: Spacing.two,
   },
-  historyItem: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingVertical: Spacing.two,
+  confirmButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: Spacing.two,
+  },
+  smallButton: {
     minHeight: 44,
+    paddingHorizontal: Spacing.three,
+    borderWidth: 1,
+    borderRadius: 22,
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.half,
+  },
+  alignStart: {
+    alignSelf: 'flex-start',
   },
   pressed: {
     opacity: 0.7,
-  },
-  tabular: {
-    fontVariant: ['tabular-nums'],
   },
   note: {
     fontSize: 12,

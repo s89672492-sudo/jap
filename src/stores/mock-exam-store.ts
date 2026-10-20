@@ -115,3 +115,16 @@ export function getMockExamSeen(level: JlptLevel): ReadonlySet<string> {
 export function useMockExamSeenCount(level: JlptLevel): number {
   return usePersistedStore(seenStore, EMPTY_SEEN)[level]?.length ?? 0;
 }
+
+/** 刪除一次考試紀錄（用考完的時間找） */
+export function deleteMockExamRecord(level: JlptLevel, date: string) {
+  mockExamStore.update((current) => ({
+    ...current,
+    [level]: (current[level] ?? []).filter((record) => record.date !== date),
+  }));
+}
+
+/** 忘掉這個等級考過哪些題目，之後每題都當作沒考過 */
+export function clearMockExamSeen(level: JlptLevel) {
+  seenStore.update((current) => ({ ...current, [level]: [] }));
+}
