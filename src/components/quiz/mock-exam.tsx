@@ -9,20 +9,26 @@ import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
-import { EXAM_BY_LEVEL, EXAM_TYPE_LABELS } from '@/data/exam';
+import { EXAM_TYPE_LABELS } from '@/data/exam';
 import type { JlptLevel } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import {
   buildMockExam,
+  restoreMockExam,
   scoreMockExam,
   type MockExamResult,
   type MockSitting,
 } from '@/lib/mock-exam';
 import { stopSpeaking } from '@/lib/speech';
-import { addMistake } from '@/stores/mistakes-store';
-import { recordMockExam } from '@/stores/mock-exam-store';
+import { addMistake, useMistakes } from '@/stores/mistakes-store';
+import {
+  getMockExamSeen,
+  markMockExamSeen,
+  recordMockExam,
+  type MockExamRecord,
+} from '@/stores/mock-exam-store';
 
-type Phase = 'intro' | 'sitting' | 'break' | 'report';
+type Phase = 'intro' | 'sitting' | 'break' | 'report' | 'record';
 
 type MockExamProps = {
   level: JlptLevel;
@@ -45,7 +51,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
   const theme = useTheme();
   const [phase, setPhase] = useState<Phase>('intro');
   // 說明頁先用一份預覽（題數、時間），按開始時再重新出題、打亂選項
-  const preview = useMemo(() => buildMockExam(level, EXAM_BY_LEVEL[level]), [level]);
+  const preview = useMemo(() => buildMockExam(level), [level]);
+  const mistakes = useMistakes();
+  // 從「最近成績」打開的舊考試紀錄
+  const [record, setRecord] = useState<MockExamRecord | null>(null);
   const [sittings, setSittings] = useState<MockSitting[]>(preview);
   const [sittingIndex, setSittingIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -77,7 +86,8 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
   };
 
   const start = () => {
-    const fresh = buildMockExam(level, EXAM_BY_LEVEL[level]);
+    // 錯題本的題目會再出，其餘優先出沒考過的
+    const fresh = buildMockExam(level, { mistakes, seen: getMockExamSeen(level) });
     setSittings(fresh);
     setAnswers({});
     setResult(null);
@@ -106,6 +116,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
     for (const item of items) {
       if (answers[item.question.id] !== item.answer) addMistake(item.question.id);
     }
+    markMockExamSeen(
+      level,
+      items.map((item) => item.question.id),
+    );
     recordMockExam(level, {
       date: new Date().toISOString(),
       total: scored.total,
@@ -114,6 +128,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
         label: s.section.label,
         score: s.score,
         max: s.section.max,
+      })),
+      items: items.map((item) => ({
+        id: item.question.id,
+        mine: answers[item.question.id] ?? null,
       })),
     });
     setResult(scored);
@@ -137,7 +155,32 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
   useEffect(() => () => stopSpeaking(), []);
 
   if (phase === 'intro') {
-    return <MockExamIntro level={level} sittings={preview} onStart={start} />;
+    return (
+      <MockExamIntro
+        level={level}
+        sittings={preview}
+        onStart={start}
+        onOpenRecord={(opened) => {
+          setRecord(opened);
+          setPhase('record');
+          onScrollTop?.();
+        }}
+      />
+    );
+  }
+
+  if (phase === 'record' && record?.items) {
+    return (
+      <SavedReport
+        level={level}
+        record={record}
+        onRetry={start}
+        onBack={() => {
+          setPhase('intro');
+          onScrollTop?.();
+        }}
+      />
+    );
   }
 
   if (phase === 'report' && result) {
@@ -293,6 +336,32 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
         />
       )}
     </View>
+  );
+}
+
+type SavedReportProps = {
+  level: JlptLevel;
+  record: MockExamRecord;
+  onRetry: () => void;
+  onBack: () => void;
+};
+
+/** 重看以前的模擬考：找回當時的題目和答案，重新算一次成績單 */
+function SavedReport({ level, record, onRetry, onBack }: SavedReportProps) {
+  const restored = useMemo(() => restoreMockExam(level, record.items ?? []), [level, record]);
+  const result = useMemo(
+    () => scoreMockExam(level, restored.items, restored.answers),
+    [level, restored],
+  );
+  return (
+    <MockExamReport
+      result={{ ...result, total: record.total, passed: record.passed }}
+      items={restored.items}
+      answers={restored.answers}
+      date={record.date}
+      onRetry={onRetry}
+      onBack={onBack}
+    />
   );
 }
 

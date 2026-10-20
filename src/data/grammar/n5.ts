@@ -1015,7 +1015,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'ベッドの下に',
     },
     tip: '位置詞（上、下、中、前、後ろ、隣、近く）前接「名詞＋の」，後接に表存在位置。',
-    quiz: { blank: '下', distractors: ['上', '中', '前'] },
+    quiz: { blank: '下に', distractors: ['下で', '下を', '下へ'] },
   },
   {
     id: 'n5-g87',
