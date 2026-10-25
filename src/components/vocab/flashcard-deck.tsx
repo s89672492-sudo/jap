@@ -6,9 +6,9 @@ import { KnownWordsList } from './known-words-list';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
+import { ChipButton } from '@/components/ui/chip-button';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
-import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
 import type { JlptLevel, VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
@@ -34,10 +34,10 @@ type FlashcardDeckProps = {
 
 type Direction = FlashcardSession['direction'];
 
-const DIRECTION_OPTIONS: { value: Direction; label: string }[] = [
-  { value: 'ja-zh', label: '日文 → 中文' },
-  { value: 'zh-ja', label: '中文 → 日文' },
-];
+const DIRECTION_LABELS: Record<Direction, string> = {
+  'ja-zh': '日文 → 中文',
+  'zh-ja': '中文 → 日文',
+};
 
 /**
  * 單字卡模式：一次一張，翻面後自評「記住了／還不熟」。
@@ -46,25 +46,28 @@ const DIRECTION_OPTIONS: { value: Direction; label: string }[] = [
  */
 type DeckView = 'study' | 'known';
 
-/** 單字卡：「翻卡」練習，或查看「已記住」的單字 */
+/** 單字卡：翻卡練習；卡片上方的「已記住 N ›」可以打開已記住的單字列表 */
 export function FlashcardDeck(props: FlashcardDeckProps) {
-  const knownIds = useKnownWords();
-  const knownCount = props.words.filter((w) => knownIds.has(w.id)).length;
   const [view, setView] = useState<DeckView>('study');
-  const viewOptions: { value: DeckView; label: string }[] = [
-    { value: 'study', label: '翻卡' },
-    { value: 'known', label: `已記住 ${knownCount}` },
-  ];
 
-  return (
-    <View style={styles.container}>
-      <SegmentedControl options={viewOptions} value={view} onChange={setView} />
-      {view === 'study' ? <FlashcardStudy {...props} /> : <KnownWordsList words={props.words} />}
-    </View>
-  );
+  if (view === 'known') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.toolbar}>
+          <ChipButton label="‹ 回到單字卡" onPress={() => setView('study')} />
+        </View>
+        <KnownWordsList words={props.words} />
+      </View>
+    );
+  }
+  return <FlashcardStudy {...props} onShowKnown={() => setView('known')} />;
 }
 
-function FlashcardStudy({ level, words, sessionKey }: FlashcardDeckProps) {
+type FlashcardStudyProps = FlashcardDeckProps & {
+  onShowKnown: () => void;
+};
+
+function FlashcardStudy({ level, words, sessionKey, onShowKnown }: FlashcardStudyProps) {
   const theme = useTheme();
   const loaded = useFlashcardStoresLoaded();
   const knownIds = useKnownWords();
@@ -104,6 +107,10 @@ function FlashcardStudy({ level, words, sessionKey }: FlashcardDeckProps) {
     </ThemedText>
   );
 
+  const knownLink = knownCount > 0 && (
+    <ChipButton label={`查看已記住的 ${knownCount} 個單字 ›`} onPress={onShowKnown} />
+  );
+
   const resetButton = knownCount > 0 && (
     <SecondaryButton
       label="重設已記住的單字"
@@ -126,6 +133,7 @@ function FlashcardStudy({ level, words, sessionKey }: FlashcardDeckProps) {
         <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
           真是名偵探！想再複習的話，可以重設後重新翻一次。
         </ThemedText>
+        {knownLink}
         {resetButton}
       </View>
     );
@@ -157,6 +165,7 @@ function FlashcardStudy({ level, words, sessionKey }: FlashcardDeckProps) {
           label={`繼續翻還不熟的 ${remaining.length} 個`}
           onPress={() => saveFlashcardSession(sessionKey, null)}
         />
+        {knownLink}
         {resetButton}
       </View>
     );
@@ -175,22 +184,32 @@ function FlashcardStudy({ level, words, sessionKey }: FlashcardDeckProps) {
     });
   };
 
-  const changeDirection = (next: Direction) => {
-    saveFlashcardSession(sessionKey, { ...session, direction: next });
+  const flipDirection = () => {
+    saveFlashcardSession(sessionKey, {
+      ...session,
+      direction: direction === 'ja-zh' ? 'zh-ja' : 'ja-zh',
+    });
     setFlipped(false);
   };
 
   return (
     <View style={styles.container}>
-      <SegmentedControl options={DIRECTION_OPTIONS} value={direction} onChange={changeDirection} />
-      <View style={styles.progressRow}>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.count}>
-          第 {index + 1} / {deck.length} 張
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.count}>
-          已記住 {knownCount} / {words.length}
-        </ThemedText>
+      {/* 小工具：切換方向、查看已記住的單字 */}
+      <View style={styles.toolbar}>
+        <ChipButton
+          label={`${DIRECTION_LABELS[direction]} ⇄`}
+          accessibilityLabel={`切換翻卡方向，目前是${DIRECTION_LABELS[direction]}`}
+          onPress={flipDirection}
+        />
+        <ChipButton
+          label={`已記住 ${knownCount} ›`}
+          accessibilityLabel={`查看已記住的 ${knownCount} 個單字`}
+          onPress={onShowKnown}
+        />
       </View>
+      <ThemedText type="small" themeColor="textSecondary" style={styles.count}>
+        第 {index + 1} / {deck.length} 張・共 {words.length} 個單字
+      </ThemedText>
       <View style={[styles.track, { backgroundColor: theme.backgroundSelected }]}>
         <View
           style={[
@@ -229,9 +248,12 @@ const styles = StyleSheet.create({
   container: {
     gap: Spacing.three,
   },
-  progressRow: {
+  toolbar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
   },
   count: {
     fontVariant: ['tabular-nums'],
