@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { FitText } from '@/components/ui/fit-text';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { Spacing } from '@/constants/theme';
 import type { VocabWord } from '@/data/vocab';
@@ -18,13 +19,14 @@ export function QuestionCard({ word, revealReading }: QuestionCardProps) {
 
   return (
     <View
-      style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      style={[
+        styles.card,
+        { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+      ]}>
       <ThemedText type="small" themeColor="textSecondary" style={styles.reading}>
         {revealReading && word.reading !== word.word ? word.reading : ' '}
       </ThemedText>
-      <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
-        {word.word}
-      </ThemedText>
+      <FitText style={styles.word}>{word.word}</FitText>
       <SpeakButton text={word.reading} size="large" />
     </View>
   );

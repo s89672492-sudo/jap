@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { AnswerOption, type AnswerState } from './answer-option';
 
 import { ThemedText } from '@/components/themed-text';
+import { FitText } from '@/components/ui/fit-text';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
@@ -17,7 +18,12 @@ type ReadingQuestionViewProps = {
 };
 
 /** 一題讀音題：看漢字選讀音。發音按鈕會洩漏答案，所以作答後才出現 */
-export function ReadingQuestionView({ question, picked, getState, onPick }: ReadingQuestionViewProps) {
+export function ReadingQuestionView({
+  question,
+  picked,
+  getState,
+  onPick,
+}: ReadingQuestionViewProps) {
   const theme = useTheme();
   const { word } = question;
 
@@ -27,10 +33,11 @@ export function ReadingQuestionView({ question, picked, getState, onPick }: Read
         這個單字怎麼唸？
       </ThemedText>
       <View
-        style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-        <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
-          {word.word}
-        </ThemedText>
+        style={[
+          styles.card,
+          { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        ]}>
+        <FitText style={styles.word}>{word.word}</FitText>
         {picked !== null && (
           <View style={styles.reveal}>
             <ThemedText type="smallBold" style={{ color: theme.accent }}>

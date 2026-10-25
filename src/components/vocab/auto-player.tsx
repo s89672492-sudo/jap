@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { FitText } from '@/components/ui/fit-text';
 import { useModeActive } from '@/components/ui/keep-alive';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
@@ -156,9 +157,7 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
         <ThemedText type="small" themeColor="textSecondary" style={styles.reading}>
           {revealed && word.reading !== word.word ? word.reading : ' '}
         </ThemedText>
-        <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
-          {word.word}
-        </ThemedText>
+        <FitText style={styles.word}>{word.word}</FitText>
         <ThemedText style={[styles.meaning, { color: revealed ? theme.accent : 'transparent' }]}>
           {word.meaning}
         </ThemedText>
