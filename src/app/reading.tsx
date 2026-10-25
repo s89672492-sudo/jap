@@ -9,16 +9,13 @@ import { ArticleView } from '@/components/reading/article-view';
 import { DailyCard } from '@/components/reading/daily-card';
 import { ExternalLinks } from '@/components/reading/external-links';
 import { ThemedText } from '@/components/themed-text';
-import { SegmentedControl } from '@/components/ui/segmented-control';
+import { LevelPicker } from '@/components/ui/level-picker';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { READING_BY_LEVEL, type ReadingArticle } from '@/data/reading';
-import { JLPT_LEVELS } from '@/data/vocab';
 import { useDailyArticle } from '@/hooks/use-daily-article';
 import { useTheme } from '@/hooks/use-theme';
-import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
+import { useJlptLevel } from '@/stores/jlpt-level-store';
 import { useReadArticles } from '@/stores/reading-store';
-
-const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
 
 export default function ReadingScreen() {
   const theme = useTheme();
@@ -74,13 +71,14 @@ export default function ReadingScreen() {
             <ThemedText type="subtitle" style={styles.title}>
               閱讀
             </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {level}・已讀 {readCount} / {articles.length} 篇
-            </ThemedText>
+            <View style={styles.titleSide}>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
+                已讀 {readCount} / {articles.length} 篇
+              </ThemedText>
+              {/* 讀文章時不換等級，回到列表才顯示 */}
+              {!article && <LevelPicker />}
+            </View>
           </View>
-          {!article && (
-            <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setJlptLevel} />
-          )}
         </View>
       </View>
 
@@ -135,9 +133,20 @@ const styles = StyleSheet.create({
   },
   titleRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.two,
+    minHeight: 44,
+  },
+  titleSide: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    flexShrink: 1,
+  },
+  subtitle: {
+    flexShrink: 1,
+    textAlign: 'right',
   },
   title: {
     letterSpacing: 4,

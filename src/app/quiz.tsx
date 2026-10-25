@@ -6,52 +6,28 @@ import { AppBackground } from '@/components/app-background';
 import { ExamQuiz } from '@/components/quiz/exam-quiz';
 import { GrammarQuiz } from '@/components/quiz/grammar-quiz';
 import { ListeningQuiz } from '@/components/quiz/listening-quiz';
+import { QUIZ_MODES, QuizModeMenu, type QuizMode } from '@/components/quiz/quiz-mode-menu';
 import { ReadingQuiz } from '@/components/quiz/reading-quiz';
 import { ReviewQuiz } from '@/components/quiz/review-quiz';
 import { SpeakingPractice } from '@/components/quiz/speaking-practice';
 import { TimedChallenge } from '@/components/quiz/timed-challenge';
 import { VocabQuiz } from '@/components/quiz/vocab-quiz';
 import { ThemedText } from '@/components/themed-text';
+import { ChipButton } from '@/components/ui/chip-button';
 import { KeepAlive } from '@/components/ui/keep-alive';
-import { SegmentedControl } from '@/components/ui/segmented-control';
+import { LevelPicker } from '@/components/ui/level-picker';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { JLPT_LEVELS } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
-import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
-
-type QuizMode =
-  | 'vocab'
-  | 'reading'
-  | 'grammar'
-  | 'listening'
-  | 'exam'
-  | 'timed'
-  | 'speaking'
-  | 'review';
-
-// 模式太多，小螢幕一排放不下，所以分兩排；兩排合起來只會有一個被選取
-const MODE_ROWS: { value: QuizMode; label: string }[][] = [
-  [
-    { value: 'vocab', label: '單字' },
-    { value: 'reading', label: '讀音' },
-    { value: 'grammar', label: '文法' },
-    { value: 'listening', label: '聽力' },
-  ],
-  [
-    { value: 'exam', label: '試題' },
-    { value: 'timed', label: '限時' },
-    { value: 'speaking', label: '口說' },
-    { value: 'review', label: '錯題' },
-  ],
-];
-
-const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
+import { useJlptLevel } from '@/stores/jlpt-level-store';
 
 export default function QuizScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const level = useJlptLevel();
-  const [mode, setMode] = useState<QuizMode>('vocab');
+  // null：顯示模式選單；選了模式才開始答題
+  const [mode, setMode] = useState<QuizMode | null>(null);
+  const [visited, setVisited] = useState<ReadonlySet<QuizMode>>(new Set());
+  const current = QUIZ_MODES.find((m) => m.value === mode);
   const scrollRef = useRef<ScrollView>(null);
 
   // 等新內容排版完成後再捲動
@@ -59,8 +35,9 @@ export default function QuizScreen() {
     requestAnimationFrame(() => scrollRef.current?.scrollToEnd({ animated: true }));
   const scrollToTop = () => scrollRef.current?.scrollTo({ y: 0, animated: false });
 
-  const changeMode = (next: QuizMode) => {
+  const changeMode = (next: QuizMode | null) => {
     setMode(next);
+    if (next) setVisited((prev) => (prev.has(next) ? prev : new Set([...prev, next])));
     scrollToTop();
   };
 
@@ -78,14 +55,26 @@ export default function QuizScreen() {
           },
         ]}>
         <View style={styles.inner}>
-          <ThemedText type="subtitle" style={styles.title}>
-            推理測驗
-          </ThemedText>
-          {/* 切換模式或等級都會重新開始一輪 */}
-          {MODE_ROWS.map((options, row) => (
-            <SegmentedControl key={row} options={options} value={mode} onChange={changeMode} />
-          ))}
-          <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setJlptLevel} />
+          <View style={styles.titleRow}>
+            {current ? (
+              <View style={styles.titleStart}>
+                <ChipButton
+                  label="‹ 模式"
+                  accessibilityLabel="回到測驗模式選單"
+                  onPress={() => changeMode(null)}
+                />
+                <ThemedText type="subtitle" style={styles.modeTitle} numberOfLines={1}>
+                  {current.title}測驗
+                </ThemedText>
+              </View>
+            ) : (
+              <ThemedText type="subtitle" style={styles.title}>
+                推理測驗
+              </ThemedText>
+            )}
+            {/* 換等級會重新開始一輪 */}
+            <LevelPicker />
+          </View>
         </View>
       </View>
 
@@ -100,6 +89,14 @@ export default function QuizScreen() {
           },
         ]}>
         <View style={styles.inner}>
+          {!mode && (
+            <>
+              <ThemedText type="small" themeColor="textSecondary">
+                選一種練習開始。做到一半回到這裡，進度會保留。
+              </ThemedText>
+              <QuizModeMenu onPick={changeMode} inProgress={visited} />
+            </>
+          )}
           {/* 打開過的模式切走時只是隱藏，切回來可以接著作答 */}
           <KeepAlive active={mode === 'vocab'}>
             <VocabQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
@@ -147,6 +144,25 @@ const styles = StyleSheet.create({
   },
   title: {
     letterSpacing: 4,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+    minHeight: 44,
+  },
+  titleStart: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    flexShrink: 1,
+  },
+  modeTitle: {
+    fontSize: 24,
+    lineHeight: 32,
+    letterSpacing: 2,
+    flexShrink: 1,
   },
   content: {
     alignItems: 'center',

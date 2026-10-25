@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppBackground } from '@/components/app-background';
 import { ThemedText } from '@/components/themed-text';
 import { KeepAlive } from '@/components/ui/keep-alive';
+import { LevelPicker } from '@/components/ui/level-picker';
 import { PagedList } from '@/components/ui/paged-list';
 import { SearchBox } from '@/components/ui/search-box';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -15,7 +16,6 @@ import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { GRAMMAR_BY_LEVEL, type GrammarPoint } from '@/data/grammar';
 import {
-  JLPT_LEVELS,
   PART_OF_SPEECH_LABELS,
   VOCAB_BY_LEVEL,
   type PartOfSpeech,
@@ -24,9 +24,7 @@ import {
 import { useTheme } from '@/hooks/use-theme';
 import { ALL_GRAMMAR, ALL_WORDS, searchGrammar, searchWords } from '@/lib/search';
 import { useBookmarks } from '@/stores/bookmarks-store';
-import { setJlptLevel, useJlptLevel } from '@/stores/jlpt-level-store';
-
-const LEVEL_OPTIONS = JLPT_LEVELS.map((level) => ({ value: level, label: level }));
+import { useJlptLevel } from '@/stores/jlpt-level-store';
 
 type VocabMode = 'list' | 'flashcard' | 'autoplay' | 'grammar' | 'saved';
 
@@ -102,8 +100,8 @@ export default function VocabScreen() {
       return `全部等級・找到 ${count} 個`;
     }
     if (mode === 'saved') return `${saved.length} 個收藏`;
-    if (mode === 'grammar') return `${level}・${grammar.length} 個文法`;
-    return `${level}・${words.length} 個`;
+    if (mode === 'grammar') return `${grammar.length} 個文法`;
+    return `${words.length} 個`;
   })();
 
   const title = { list: '單字', flashcard: '單字', autoplay: '單字', grammar: '文法', saved: '收藏' }[mode];
@@ -120,7 +118,7 @@ export default function VocabScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <AppBackground />
-      {/* 標題、模式、等級和搜尋固定在上方 */}
+      {/* 標題（含等級）、模式和搜尋固定在上方 */}
       <View
         style={[
           styles.header,
@@ -136,14 +134,14 @@ export default function VocabScreen() {
             <ThemedText type="subtitle" style={styles.title}>
               {title}
             </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {subtitle}
-            </ThemedText>
+            <View style={styles.titleSide}>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
+                {subtitle}
+              </ThemedText>
+              <LevelPicker />
+            </View>
           </View>
           <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
-          {mode !== 'saved' && !searching && (
-            <SegmentedControl options={LEVEL_OPTIONS} value={level} onChange={setJlptLevel} />
-          )}
           {(mode === 'list' || mode === 'grammar') && (
             <SearchBox
               value={query}
@@ -242,9 +240,20 @@ const styles = StyleSheet.create({
   },
   titleRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.two,
+    minHeight: 44,
+  },
+  titleSide: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    flexShrink: 1,
+  },
+  subtitle: {
+    flexShrink: 1,
+    textAlign: 'right',
   },
   title: {
     letterSpacing: 4,
