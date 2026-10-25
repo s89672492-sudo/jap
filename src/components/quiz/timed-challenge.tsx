@@ -5,6 +5,7 @@ import { AnswerOption, type AnswerState } from './answer-option';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
+import { FitText } from '@/components/ui/fit-text';
 import { useModeActive } from '@/components/ui/keep-alive';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Spacing } from '@/constants/theme';
@@ -183,9 +184,7 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
       </View>
       <View
         style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-        <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
-          {question.word.word}
-        </ThemedText>
+        <FitText style={styles.word}>{question.word.word}</FitText>
         <ThemedText type="small" themeColor="textSecondary">
           {picked !== null && question.word.reading !== question.word.word
             ? question.word.reading

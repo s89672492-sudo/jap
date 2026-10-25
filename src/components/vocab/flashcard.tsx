@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
+import { FitText } from '@/components/ui/fit-text';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
@@ -75,9 +76,7 @@ export function Flashcard({ word, flipped, onFlip, reverse = false }: FlashcardP
               {word.meaning}
             </ThemedText>
           ) : (
-            <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
-              {word.word}
-            </ThemedText>
+            <FitText style={styles.word}>{word.word}</FitText>
           )}
           <ThemedText type="small" themeColor="textSecondary">
             {reverse ? '想想日文怎麼說，再點一下翻面' : '點一下翻面'}
@@ -97,9 +96,7 @@ export function Flashcard({ word, flipped, onFlip, reverse = false }: FlashcardP
               {word.reading}
             </ThemedText>
           )}
-          <ThemedText style={styles.backWord} adjustsFontSizeToFit numberOfLines={1}>
-            {word.word}
-          </ThemedText>
+          <FitText style={styles.backWord}>{word.word}</FitText>
           <ThemedText style={[styles.meaning, { color: theme.accent }]}>{word.meaning}</ThemedText>
           <SpeakButton text={word.reading} size="large" />
           <ExampleSentence word={word} />

@@ -5,6 +5,7 @@ import { PronunciationDiff } from './pronunciation-diff';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { ThemedText } from '@/components/themed-text';
+import { FitText } from '@/components/ui/fit-text';
 import { useModeActive } from '@/components/ui/keep-alive';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
@@ -207,9 +208,7 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
                 {word.reading}
               </ThemedText>
             )}
-            <ThemedText style={styles.word} adjustsFontSizeToFit numberOfLines={1}>
-              {word.word}
-            </ThemedText>
+            <FitText style={styles.word}>{word.word}</FitText>
             <ThemedText type="smallBold" style={{ color: theme.accent }}>
               {word.meaning}
             </ThemedText>
