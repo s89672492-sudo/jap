@@ -7,7 +7,7 @@ import { FuriganaText } from '@/components/vocab/furigana-text';
 import { GrammarCard } from '@/components/vocab/grammar-card';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { lookupFurigana, splitsRuby } from '@/lib/furigana';
+import { lookupFurigana, splitsRuby, useFuriganaLoaded } from '@/lib/furigana';
 import type { GrammarQuestion } from '@/lib/quiz';
 import { useSettings } from '@/stores/settings-store';
 
@@ -33,6 +33,8 @@ export function GrammarQuestionView({
   const before = point.example.ja.slice(0, index);
   const after = point.example.ja.slice(index + answer.length);
   const { furigana } = useSettings();
+  // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
+  useFuriganaLoaded();
   const range: [number, number] = [index, index + answer.length];
   const lookedUp = furigana ? lookupFurigana(point.example.ja) : undefined;
   // 空格切在一組注音中間時（例如「何時」只挖空「何」），作答前先不顯示注音，免得多遮住字

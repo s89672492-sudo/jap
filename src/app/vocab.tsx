@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppBackground } from '@/components/app-background';
 import { ThemedText } from '@/components/themed-text';
 import { KeepAlive } from '@/components/ui/keep-alive';
+import { LoadingNote } from '@/components/ui/loading-note';
 import { LevelPicker } from '@/components/ui/level-picker';
 import { PagedList } from '@/components/ui/paged-list';
 import { SearchBox } from '@/components/ui/search-box';
@@ -14,15 +15,11 @@ import { FlashcardDeck } from '@/components/vocab/flashcard-deck';
 import { GrammarCard } from '@/components/vocab/grammar-card';
 import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { GRAMMAR_BY_LEVEL, type GrammarPoint } from '@/data/grammar';
-import {
-  PART_OF_SPEECH_LABELS,
-  VOCAB_BY_LEVEL,
-  type PartOfSpeech,
-  type VocabWord,
-} from '@/data/vocab';
+import type { GrammarPoint } from '@/data/grammar';
+import { useAllLevelData, useLevelData } from '@/data/level-data';
+import { PART_OF_SPEECH_LABELS, type PartOfSpeech, type VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
-import { ALL_GRAMMAR, ALL_WORDS, searchGrammar, searchWords } from '@/lib/search';
+import { searchGrammar, searchWords } from '@/lib/search';
 import { useBookmarks } from '@/stores/bookmarks-store';
 import { useJlptLevel } from '@/stores/jlpt-level-store';
 
@@ -37,6 +34,9 @@ const POS_OPTIONS: { value: PosFilter; label: string }[] = [
     label: PART_OF_SPEECH_LABELS[pos],
   })),
 ];
+
+const NO_WORDS: VocabWord[] = [];
+const NO_GRAMMAR: GrammarPoint[] = [];
 
 /** 每頁幾個，避免一頁太長要一直滑（文法卡比較高，所以少一點） */
 const PAGE_SIZE = 20;
@@ -66,35 +66,47 @@ export default function VocabScreen() {
   const hasQuery = deferredQuery.length > 0;
   const searching = hasQuery && (mode === 'list' || mode === 'grammar');
 
+  // 這個等級的資料用到時才載入；跨等級搜尋和收藏才需要全部等級
+  const levelData = useLevelData(level);
+  const allData = useAllLevelData(hasQuery || mode === 'saved');
+  const loading = levelData === null;
+
   const words = useMemo(() => {
-    const all = VOCAB_BY_LEVEL[level];
+    const all = levelData?.words ?? NO_WORDS;
     return pos === 'all' ? all : all.filter((word) => word.pos === pos);
-  }, [level, pos]);
+  }, [levelData, pos]);
 
   const wordResults = useMemo(
-    () => (hasQuery ? searchWords(deferredQuery) : []),
-    [hasQuery, deferredQuery],
+    () => (hasQuery && allData ? searchWords(allData.words, deferredQuery) : NO_WORDS),
+    [hasQuery, allData, deferredQuery],
   );
   const grammarResults = useMemo(
-    () => (hasQuery ? searchGrammar(deferredQuery) : []),
-    [hasQuery, deferredQuery],
+    () => (hasQuery && allData ? searchGrammar(allData.grammar, deferredQuery) : NO_GRAMMAR),
+    [hasQuery, allData, deferredQuery],
   );
 
   const saved = useMemo<SavedItem[]>(
-    () => [
-      ...ALL_WORDS.filter((word) => bookmarks.has(word.id)).map(
-        (item) => ({ kind: 'word', item }) as const,
-      ),
-      ...ALL_GRAMMAR.filter((point) => bookmarks.has(point.id)).map(
-        (item) => ({ kind: 'grammar', item }) as const,
-      ),
-    ],
-    [bookmarks],
+    () =>
+      allData
+        ? [
+            ...allData.words
+              .filter((word) => bookmarks.has(word.id))
+              .map((item) => ({ kind: 'word', item }) as const),
+            ...allData.grammar
+              .filter((point) => bookmarks.has(point.id))
+              .map((item) => ({ kind: 'grammar', item }) as const),
+          ]
+        : [],
+    [bookmarks, allData],
   );
 
-  const grammar = GRAMMAR_BY_LEVEL[level];
+  const grammar = levelData?.grammar ?? NO_GRAMMAR;
+  const allLoading = allData === null;
 
   const subtitle = (() => {
+    if (searching && allLoading) return '載入全部等級…';
+    if (mode === 'saved' && allLoading) return '載入中…';
+    if (loading && mode !== 'saved' && !searching) return '載入中…';
     if (searching) {
       const count = mode === 'list' ? wordResults.length : grammarResults.length;
       return `全部等級・找到 ${count} 個`;
@@ -104,7 +116,13 @@ export default function VocabScreen() {
     return `${words.length} 個`;
   })();
 
-  const title = { list: '單字', flashcard: '單字', autoplay: '單字', grammar: '文法', saved: '收藏' }[mode];
+  const title = {
+    list: '單字',
+    flashcard: '單字',
+    autoplay: '單字',
+    grammar: '文法',
+    saved: '收藏',
+  }[mode];
 
   const posFilter = <SegmentedControl options={POS_OPTIONS} value={pos} onChange={setPos} />;
 
@@ -161,7 +179,7 @@ export default function VocabScreen() {
             keyExtractor={(item) => item.id}
             renderItem={(item) => <VocabCard item={item} showLevel />}
             resetKey={`search-${deferredQuery}`}
-            emptyText="找不到符合的單字"
+            emptyText={allLoading ? '載入全部等級的單字…' : '找不到符合的單字'}
             contentContainerStyle={listStyle}
           />
         ) : (
@@ -172,7 +190,7 @@ export default function VocabScreen() {
             renderItem={(item) => <VocabCard item={item} />}
             resetKey={`${level}-${pos}`}
             header={posFilter}
-            emptyText="這個分類沒有單字"
+            emptyText={loading ? '載入中…' : '這個分類沒有單字'}
             contentContainerStyle={listStyle}
           />
         )}
@@ -184,7 +202,7 @@ export default function VocabScreen() {
           keyExtractor={(item) => item.id}
           renderItem={(item) => <GrammarCard item={item} showLevel={hasQuery} />}
           resetKey={hasQuery ? `search-${deferredQuery}` : `grammar-${level}`}
-          emptyText="找不到符合的文法"
+          emptyText={(hasQuery ? allLoading : loading) ? '載入中…' : '找不到符合的文法'}
           contentContainerStyle={listStyle}
         />
       </KeepAlive>
@@ -201,20 +219,24 @@ export default function VocabScreen() {
             )
           }
           resetKey="saved"
-          emptyText="還沒有收藏。在單字或文法卡片上點 ☆ 就能加入這裡。"
+          emptyText={allLoading ? '載入中…' : '還沒有收藏。在單字或文法卡片上點 ☆ 就能加入這裡。'}
           contentContainerStyle={listStyle}
         />
       </KeepAlive>
       <KeepAlive active={mode === 'autoplay'} style={styles.fill}>
         <ScrollView contentContainerStyle={listStyle}>
           <View style={styles.posFilter}>{posFilter}</View>
-          <AutoPlayer words={words} />
+          {loading ? <LoadingNote /> : <AutoPlayer words={words} />}
         </ScrollView>
       </KeepAlive>
       <KeepAlive active={mode === 'flashcard'} style={styles.fill}>
         <ScrollView contentContainerStyle={listStyle}>
           <View style={styles.posFilter}>{posFilter}</View>
-          <FlashcardDeck level={level} words={words} sessionKey={`${level}-${pos}`} />
+          {loading ? (
+            <LoadingNote />
+          ) : (
+            <FlashcardDeck level={level} words={words} sessionKey={`${level}-${pos}`} />
+          )}
         </ScrollView>
       </KeepAlive>
     </View>

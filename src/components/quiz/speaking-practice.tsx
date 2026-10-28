@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { PronunciationDiff } from './pronunciation-diff';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
+import { LoadingNote } from '@/components/ui/loading-note';
 import { ThemedText } from '@/components/themed-text';
 import { FitText } from '@/components/ui/fit-text';
 import { useModeActive } from '@/components/ui/keep-alive';
@@ -13,7 +14,8 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { FuriganaText } from '@/components/vocab/furigana-text';
 import { Spacing } from '@/constants/theme';
-import { VOCAB_BY_LEVEL, type JlptLevel, type VocabWord } from '@/data/vocab';
+import { useLevelData, type LevelData } from '@/data/level-data';
+import { type JlptLevel, type VocabWord } from '@/data/vocab';
 import { useDepsChanged, useHydrated } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { checkPronunciation, verdict, type PronunciationResult } from '@/lib/pronunciation';
@@ -52,7 +54,19 @@ const ERROR_MESSAGES: Record<RecognitionError, string> = {
 };
 
 /** 口說練習：聽標準發音 → 按麥克風說日文 → 比對辨識結果，標出唸錯的字 */
-export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPracticeProps) {
+/** 這個等級的資料載入後才開始 */
+export function SpeakingPractice(props: SpeakingPracticeProps) {
+  const data = useLevelData(props.level);
+  if (!data) return <LoadingNote />;
+  return <SpeakingPracticeContent {...props} data={data} />;
+}
+
+function SpeakingPracticeContent({
+  level,
+  onAnswered,
+  onNext,
+  data,
+}: SpeakingPracticeProps & { data: LevelData }) {
   const theme = useTheme();
   const { roundSize, furigana } = useSettings();
   const [target, setTarget] = useState<Target>('word');
@@ -61,7 +75,7 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
   const supported = hydrated ? isRecognitionSupported() : null;
   const makeItems = () => {
     if (!hydrated) return [];
-    const words = VOCAB_BY_LEVEL[level].filter((w) => target === 'word' || w.example);
+    const words = data.words.filter((w) => target === 'word' || w.example);
     return shuffle(words).slice(0, roundSize);
   };
   const [items, setItems] = useState<VocabWord[]>(makeItems);

@@ -5,8 +5,10 @@ import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
 import { VocabQuestionView } from './vocab-question-view';
 
+import { LoadingNote } from '@/components/ui/loading-note';
 import { Spacing } from '@/constants/theme';
-import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { useLevelData, type LevelData } from '@/data/level-data';
+import { type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildRound } from '@/lib/quiz';
 import { pickForStudy } from '@/lib/study-order';
@@ -23,11 +25,23 @@ type VocabQuizProps = {
 };
 
 /** 單字測驗：看日文單字，選中文意思；答錯的單字會加入錯題本 */
-export function VocabQuiz({ level, onAnswered, onNext }: VocabQuizProps) {
+/** 這個等級的資料載入後才開始 */
+export function VocabQuiz(props: VocabQuizProps) {
+  const data = useLevelData(props.level);
+  if (!data) return <LoadingNote />;
+  return <VocabQuizContent {...props} data={data} />;
+}
+
+function VocabQuizContent({
+  level,
+  onAnswered,
+  onNext,
+  data,
+}: VocabQuizProps & { data: LevelData }) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
     () => {
-      const words = VOCAB_BY_LEVEL[level];
+      const words = data.words;
       // 優先出該複習、常答錯的單字，再補新單字
       return buildRound(
         words,

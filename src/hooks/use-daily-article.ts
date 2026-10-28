@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
-import { READING_BY_LEVEL, type ReadingArticle } from '@/data/reading';
+import { useLevelData } from '@/data/level-data';
+import type { ReadingArticle } from '@/data/reading';
 import type { JlptLevel } from '@/data/vocab';
 import { useHydrated } from '@/hooks/use-hydrated';
 import { dateKey, pickDaily, readingStreak } from '@/lib/daily';
@@ -11,6 +12,8 @@ import {
   useReadingDays,
   useReadingLoaded,
 } from '@/stores/reading-store';
+
+const NO_ARTICLES: ReadingArticle[] = [];
 
 export type DailyArticle = {
   article: ReadingArticle;
@@ -32,7 +35,8 @@ export function useDailyArticle(level: JlptLevel): DailyArticle | null {
   const days = useReadingDays();
   const daily = useDailyPicks();
 
-  const articles = READING_BY_LEVEL[level];
+  const levelData = useLevelData(level);
+  const articles = levelData?.reading ?? NO_ARTICLES;
   const savedId = today && daily.date === today ? daily.picks[level] : undefined;
   const saved = articles.find((a) => a.id === savedId);
   const article = saved ?? (today ? pickDaily(articles, read, today) : undefined);

@@ -7,11 +7,14 @@ import { QuizResult } from './quiz-result';
 import { VocabQuestionView } from './vocab-question-view';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
+import { LoadingNote } from '@/components/ui/loading-note';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useAllLevelData, type LevelData } from '@/data/level-data';
 import { EXAM_BY_LEVEL, EXAM_TYPE_LABELS, type ExamQuestion } from '@/data/exam';
-import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
+import { useFuriganaLoaded } from '@/lib/furigana';
 import { getGeneratedQuestion, parseGeneratedId } from '@/lib/generated-exam';
 import {
   buildExamRound,
@@ -38,12 +41,25 @@ type ReviewQuizProps = {
  * 錯題本：從這個等級答錯過的單字和試題出題，先出到期該複習的。
  * 答對一次不會馬上移除：要在不同天答對、複習間隔拉長到 7 天以上，才會自動移出錯題本。
  */
-export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
+export function ReviewQuiz(props: ReviewQuizProps) {
+  // 錯題可能包含模擬考自動出的題目，出題要用到全部等級的單字和注音
+  const all = useAllLevelData();
+  const furiganaReady = useFuriganaLoaded();
+  if (!all || !furiganaReady) return <LoadingNote />;
+  return <ReviewQuizContent {...props} data={all.byLevel[props.level]} />;
+}
+
+function ReviewQuizContent({
+  level,
+  onAnswered,
+  onNext,
+  data,
+}: ReviewQuizProps & { data: LevelData }) {
   const mistakes = useMistakes();
   const { roundSize } = useSettings();
   const loaded = useMistakesLoaded();
 
-  const words = VOCAB_BY_LEVEL[level];
+  const words = data.words;
   const missedWords = words.filter((w) => mistakes.has(w.id));
   // 模擬試題的錯題：自編的題目，加上模擬考裡自動出的題目
   const missedExam = [

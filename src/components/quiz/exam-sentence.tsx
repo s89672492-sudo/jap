@@ -4,7 +4,7 @@ import { ThemedText } from '@/components/themed-text';
 import { FuriganaText } from '@/components/vocab/furigana-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { lookupFurigana } from '@/lib/furigana';
+import { lookupFurigana, useFuriganaLoaded } from '@/lib/furigana';
 import { useSettings } from '@/stores/settings-store';
 
 type ExamSentenceProps = {
@@ -20,6 +20,8 @@ export function ExamSentence({ sentence, furigana: given }: ExamSentenceProps) {
   // 以［…］或 ★ 切開：［］裡的字畫底線，★ 用強調色標出
   const parts = sentence.split(/(［.+?］|★)/);
   const { furigana } = useSettings();
+  // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
+  useFuriganaLoaded();
   // 注音版本已去掉［］，畫底線的字本身不加注音（避免洩漏漢字讀法題的答案）
   const annotated = furigana ? (given ?? lookupFurigana(sentence)) : undefined;
   const open = sentence.indexOf('［');

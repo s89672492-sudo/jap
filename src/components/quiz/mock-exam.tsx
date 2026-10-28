@@ -8,8 +8,10 @@ import { MockExamReport } from './mock-exam-report';
 import { ThemedText } from '@/components/themed-text';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
+import { LoadingNote } from '@/components/ui/loading-note';
 import { Spacing } from '@/constants/theme';
 import { EXAM_TYPE_LABELS } from '@/data/exam';
+import { useAllLevelData } from '@/data/level-data';
 import type { JlptLevel } from '@/data/vocab';
 import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
@@ -20,6 +22,7 @@ import {
   type MockExamResult,
   type MockSitting,
 } from '@/lib/mock-exam';
+import { useFuriganaLoaded } from '@/lib/furigana';
 import { stopSpeaking } from '@/lib/speech';
 import { addMistake, useMistakes } from '@/stores/mistakes-store';
 import {
@@ -49,7 +52,15 @@ function formatTime(ms: number) {
  * 完整模擬考：說明 → 第 1 節 → 休息 → 第 2 節 → … → 成績單。
  * 每節計時（用截止時間計算，切到背景再回來也準確），時間到自動交卷。
  */
-export function MockExam({ level, onScrollTop }: MockExamProps) {
+export function MockExam(props: MockExamProps) {
+  // 自動出題要用到全部等級的單字、文法和注音，載入後才開始
+  const all = useAllLevelData();
+  const furiganaReady = useFuriganaLoaded();
+  if (!all || !furiganaReady) return <LoadingNote text="準備模擬考題庫…" />;
+  return <MockExamContent {...props} />;
+}
+
+function MockExamContent({ level, onScrollTop }: MockExamProps) {
   const theme = useTheme();
   const [phase, setPhase] = useState<Phase>('intro');
   // 說明頁先用一份預覽（題數、時間），按開始時再重新出題、打亂選項
@@ -89,7 +100,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
 
   const start = () => {
     // 錯題本的題目會再出，其餘優先出沒考過的
-    const fresh = buildMockExam(level, { mistakes, seen: getMockExamSeen(level) });
+    const fresh = buildMockExam(level, {
+      mistakes,
+      seen: getMockExamSeen(level),
+    });
     setSittings(fresh);
     setAnswers({});
     setResult(null);
@@ -209,7 +223,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
         <View
           style={[
             styles.card,
-            { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+            {
+              backgroundColor: theme.backgroundElement,
+              borderColor: theme.border,
+            },
           ]}>
           <ThemedText type="smallBold" style={{ color: theme.accent }}>
             第 {sittingIndex + 1} 節結束
@@ -245,7 +262,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
       <View
         style={[
           styles.header,
-          { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+          {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.border,
+          },
         ]}>
         <View style={styles.headerText}>
           <ThemedText type="smallBold" numberOfLines={2}>
@@ -322,7 +342,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
         <View
           style={[
             styles.card,
-            { backgroundColor: theme.backgroundElement, borderColor: theme.accent },
+            {
+              backgroundColor: theme.backgroundElement,
+              borderColor: theme.accent,
+            },
           ]}>
           <ThemedText type="smallBold">
             {unanswered > 0 ? `還有 ${unanswered} 題沒作答，確定要交卷嗎？` : '確定要交卷嗎？'}

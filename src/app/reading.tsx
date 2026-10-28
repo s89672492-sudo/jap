@@ -10,13 +10,17 @@ import { DailyCard } from '@/components/reading/daily-card';
 import { ExternalLinks } from '@/components/reading/external-links';
 import { ThemedText } from '@/components/themed-text';
 import { LevelPicker } from '@/components/ui/level-picker';
+import { LoadingNote } from '@/components/ui/loading-note';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { READING_BY_LEVEL, type ReadingArticle } from '@/data/reading';
+import { useLevelData } from '@/data/level-data';
+import type { ReadingArticle } from '@/data/reading';
 import { useDailyArticle } from '@/hooks/use-daily-article';
 import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { useJlptLevel } from '@/stores/jlpt-level-store';
 import { useReadArticles } from '@/stores/reading-store';
+
+const NO_ARTICLES: ReadingArticle[] = [];
 
 export default function ReadingScreen() {
   const theme = useTheme();
@@ -30,7 +34,8 @@ export default function ReadingScreen() {
   const [article, setArticle] = useState<ReadingArticle | null>(dailyRequest);
   const scrollRef = useRef<ScrollView>(null);
 
-  const articles = READING_BY_LEVEL[level];
+  const levelData = useLevelData(level);
+  const articles = levelData?.reading ?? NO_ARTICLES;
   const readCount = articles.filter((a) => read.has(a.id)).length;
 
   const open = (next: ReadingArticle | null) => {
@@ -76,7 +81,7 @@ export default function ReadingScreen() {
             </ThemedText>
             <View style={styles.titleSide}>
               <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
-                已讀 {readCount} / {articles.length} 篇
+                {levelData ? `已讀 ${readCount} / ${articles.length} 篇` : '載入中…'}
               </ThemedText>
               {/* 讀文章時不換等級，回到列表才顯示 */}
               {!article && <LevelPicker />}
@@ -104,7 +109,7 @@ export default function ReadingScreen() {
               <ThemedText type="small" themeColor="textSecondary">
                 原創的分級文章，依等級的單字和文法撰寫。讀完做閱讀理解題就會打勾。
               </ThemedText>
-              <ArticleList articles={articles} onOpen={open} />
+              {levelData ? <ArticleList articles={articles} onOpen={open} /> : <LoadingNote />}
               <ThemedText type="smallBold" style={[styles.section, { color: theme.accent }]}>
                 更多線上閱讀
               </ThemedText>

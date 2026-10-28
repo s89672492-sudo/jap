@@ -36,6 +36,8 @@ jobs:
         run: printf '/// <reference types="expo/types" />\n' > expo-env.d.ts
 
       - run: npx tsc --noEmit
+      # 學習資料格式檢查（單字、注音、題目、文章圖片），有錯就不打包
+      - run: npm run check:data
 
       # GitHub Pages 的網址是 https://<user>.github.io/<repo>/，所以只在打包時加上 baseUrl，
       # 不寫進 app.json，避免影響 Expo Go。
@@ -53,6 +55,8 @@ jobs:
       - run: npx expo export --platform web --output-dir dist --clear
         env:
           WEB_KEEP_UNICODE: '1'
+          # 讓 service worker 每次上架都重新快取新版本（見 src/lib/service-worker.web.ts）
+          EXPO_PUBLIC_BUILD_ID: ${{ github.sha }}
 
       - name: Prepare Pages files
         run: |
