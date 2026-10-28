@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,6 +18,7 @@ import { ChipButton } from '@/components/ui/chip-button';
 import { KeepAlive } from '@/components/ui/keep-alive';
 import { LevelPicker } from '@/components/ui/level-picker';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { useJlptLevel } from '@/stores/jlpt-level-store';
 
@@ -24,9 +26,14 @@ export default function QuizScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const level = useJlptLevel();
+  // 從首頁「今日任務」進來時（例如 /quiz?mode=review），直接打開那個模式
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
+  const requested = QUIZ_MODES.find((m) => m.value === modeParam)?.value ?? null;
   // null：顯示模式選單；選了模式才開始答題
-  const [mode, setMode] = useState<QuizMode | null>(null);
-  const [visited, setVisited] = useState<ReadonlySet<QuizMode>>(new Set());
+  const [mode, setMode] = useState<QuizMode | null>(requested);
+  const [visited, setVisited] = useState<ReadonlySet<QuizMode>>(
+    () => new Set(requested ? [requested] : []),
+  );
   const current = QUIZ_MODES.find((m) => m.value === mode);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -40,6 +47,17 @@ export default function QuizScreen() {
     if (next) setVisited((prev) => (prev.has(next) ? prev : new Set([...prev, next])));
     scrollToTop();
   };
+
+  if (useDepsChanged([requested]) && requested) {
+    setMode(requested);
+    if (!visited.has(requested)) setVisited(new Set([...visited, requested]));
+  }
+  // 打開後捲到最上面，並清掉網址參數（之後回到這頁不會又自動切換）
+  useEffect(() => {
+    if (!requested) return;
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    router.setParams({ mode: undefined });
+  }, [requested]);
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>

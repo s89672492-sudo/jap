@@ -60,8 +60,11 @@ function checkOptions(where, options, count = 4) {
 const POS = new Set(['noun', 'verb', 'adjective', 'adverb']);
 const wordIds = new Map();
 let wordCount = 0;
+/** 各等級實際的數量（和 level-counts.ts 比對） */
+const counts = Object.fromEntries(LEVELS.map((lv) => [lv, { words: 0, grammar: 0, reading: 0 }]));
 for (const lv of LEVELS) {
   const words = load(`vocab/${lv}.ts`);
+  counts[lv].words = words.length;
   for (const w of words) {
     const where = `單字 ${w.id ?? '(沒有 id)'}`;
     wordCount++;
@@ -96,6 +99,7 @@ for (const lv of LEVELS) {
   for (const g of load(`grammar/${lv}.ts`)) {
     const where = `文法 ${g.id ?? '(沒有 id)'}`;
     grammarCount++;
+    counts[lv].grammar++;
     if (!isText(g.id) || !g.id.startsWith(`${lv}-`)) error(where, 'id 缺少或和等級不一致');
     if (grammarIds.has(g.id)) error(where, 'id 重複');
     grammarIds.add(g.id);
@@ -154,6 +158,7 @@ const articleIds = new Map();
 for (const lv of LEVELS) {
   for (const a of load(`reading/${lv}.ts`)) {
     const where = `文章 ${a.id ?? '(沒有 id)'}`;
+    counts[lv].reading++;
     if (articleIds.has(a.id)) error(where, 'id 重複');
     articleIds.set(a.id, a);
     if (!isText(a.title) || !isText(a.titleZh)) error(where, '缺少標題');
@@ -218,6 +223,20 @@ for (const [plain, annotated] of Object.entries(map)) {
   const stripped = checkRuby(where, annotated);
   // 試題句子的注音版本刻意去掉了畫底線用的［］
   if (stripped !== plain.replace(/[［］]/g, '')) error(where, '去掉注音後和原句不一致');
+}
+
+// ── 各等級數量（首頁、進度總覽用） ──
+const levelCounts = load('level-counts.ts');
+for (const lv of LEVELS) {
+  const listed = levelCounts[lv.toUpperCase()] ?? {};
+  for (const kind of ['words', 'grammar', 'reading']) {
+    if (listed[kind] !== counts[lv][kind]) {
+      error(
+        `level-counts.ts ${lv.toUpperCase()}`,
+        `${kind} 寫 ${listed[kind]}，實際是 ${counts[lv][kind]}`,
+      );
+    }
+  }
 }
 
 // ── 結果 ──
