@@ -32,6 +32,11 @@ export function removeMistake(id: string) {
   });
 }
 
+/** 不在畫面裡時讀取錯題本（例如答題後判斷要不要移出錯題本） */
+export function getMistakes(): MistakeIds {
+  return mistakesStore.get();
+}
+
 export function useMistakes(): MistakeIds {
   return usePersistedStore(mistakesStore, EMPTY);
 }

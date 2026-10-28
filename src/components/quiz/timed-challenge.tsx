@@ -15,6 +15,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { buildRound, type QuizQuestion } from '@/lib/quiz';
 import { recordChallengeScore, useBestScores } from '@/stores/challenge-store';
 import { addMistake } from '@/stores/mistakes-store';
+import { recordStudy } from '@/stores/study-store';
 
 type TimedChallengeProps = {
   level: JlptLevel;
@@ -146,6 +147,7 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
   const pick = (option: string) => {
     if (picked !== null) return;
     setPicked(option);
+    recordStudy(question.word.id, option === question.word.meaning);
     if (option === question.word.meaning) {
       scoreRef.current += 1;
       setCorrect((c) => c + 1);

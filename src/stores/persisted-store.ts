@@ -8,6 +8,8 @@ export type PersistedStore<T> = {
   update: (fn: (current: T) => T) => Promise<void>;
   /** 是否已經從手機儲存空間讀回資料 */
   isLoaded: () => boolean;
+  /** 等資料從手機讀回（不在畫面裡時使用，例如備份、轉換舊紀錄） */
+  whenLoaded: () => Promise<void>;
   subscribe: (listener: () => void) => () => void;
 };
 
@@ -55,6 +57,7 @@ export function createPersistedStore<T>(options: {
   return {
     get: () => value,
     isLoaded: () => loaded,
+    whenLoaded: () => load(),
     set,
     update: (fn) => load().then(() => set(fn(value))),
     subscribe: (listener) => {

@@ -9,8 +9,10 @@ import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildListeningRound } from '@/lib/quiz';
-import { addMistake } from '@/stores/mistakes-store';
+import { pickForStudy } from '@/lib/study-order';
+import { addMistake, getMistakes } from '@/stores/mistakes-store';
 import { useSettings } from '@/stores/settings-store';
+import { getStudyCards, recordStudy } from '@/stores/study-store';
 
 type ListeningQuizProps = {
   level: JlptLevel;
@@ -24,10 +26,18 @@ type ListeningQuizProps = {
 export function ListeningQuiz({ level, onAnswered, onNext }: ListeningQuizProps) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
-    () => buildListeningRound(VOCAB_BY_LEVEL[level], roundSize),
+    () => {
+      const words = VOCAB_BY_LEVEL[level];
+      return buildListeningRound(
+        words,
+        roundSize,
+        pickForStudy(words, roundSize, getStudyCards(), getMistakes()),
+      );
+    },
     (q) => q.word.word,
     [level, roundSize],
     (q, correct) => {
+      recordStudy(q.word.id, correct);
       if (!correct) addMistake(q.word.id);
     },
   );

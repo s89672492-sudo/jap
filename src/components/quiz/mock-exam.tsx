@@ -28,6 +28,7 @@ import {
   recordMockExam,
   type MockExamRecord,
 } from '@/stores/mock-exam-store';
+import { recordStudy } from '@/stores/study-store';
 
 type Phase = 'intro' | 'sitting' | 'break' | 'report' | 'record';
 
@@ -115,7 +116,9 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
     const items = sittings.flatMap((s) => s.questions);
     const scored = scoreMockExam(level, items, answers);
     for (const item of items) {
-      if (answers[item.question.id] !== item.answer) addMistake(item.question.id);
+      const correct = answers[item.question.id] === item.answer;
+      recordStudy(item.question.id, correct);
+      if (!correct) addMistake(item.question.id);
     }
     markMockExamSeen(
       level,

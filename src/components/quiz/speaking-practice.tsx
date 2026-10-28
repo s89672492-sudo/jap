@@ -26,6 +26,7 @@ import {
 } from '@/lib/speech-recognition';
 import { addMistake } from '@/stores/mistakes-store';
 import { useSettings } from '@/stores/settings-store';
+import { recordStudy } from '@/stores/study-store';
 
 type SpeakingPracticeProps = {
   level: JlptLevel;
@@ -154,6 +155,8 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
 
   const goNext = () => {
     stopRef.current();
+    // 說得夠好（六成以上）算答對
+    recordStudy(word.id, (best[index] ?? 0) >= 0.6);
     if ((best[index] ?? 0) < 0.6) addMistake(word.id);
     setBest((prev) => {
       const next = [...prev];

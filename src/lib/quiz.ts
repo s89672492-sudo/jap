@@ -72,8 +72,10 @@ export type ListeningQuestion = {
 export function buildListeningRound(
   words: VocabWord[],
   count = QUESTIONS_PER_ROUND,
+  /** 只從這些單字出題（例如該複習的）；錯誤選項仍取自整個 words */
+  candidates: VocabWord[] = words,
 ): ListeningQuestion[] {
-  const targets = shuffle(words).slice(0, Math.min(count, words.length));
+  const targets = shuffle(candidates).slice(0, Math.min(count, candidates.length));
 
   return targets.map((word) => {
     const distractors = shuffle(
@@ -91,7 +93,7 @@ export type ReadingQuestion = {
 };
 
 /** 含漢字的單字才適合考讀音 */
-const HAS_KANJI = /[一-鿿々]/;
+export const HAS_KANJI = /[一-鿿々]/;
 
 /**
  * 漢字讀音測驗：看漢字選假名讀音。
@@ -100,10 +102,13 @@ const HAS_KANJI = /[一-鿿々]/;
 export function buildReadingRound(
   words: VocabWord[],
   count = QUESTIONS_PER_ROUND,
+  /** 只從這些單字出題（例如該複習的）；錯誤選項仍取自整個 words */
+  candidates: VocabWord[] = words,
 ): ReadingQuestion[] {
   const kanjiWords = words.filter((word) => HAS_KANJI.test(word.word));
   const readings = [...new Set(kanjiWords.map((word) => word.reading))];
-  const targets = shuffle(kanjiWords).slice(0, Math.min(count, kanjiWords.length));
+  const pool = candidates.filter((word) => HAS_KANJI.test(word.word));
+  const targets = shuffle(pool).slice(0, Math.min(count, pool.length));
 
   return targets.map((word) => {
     const others = shuffle(readings.filter((reading) => reading !== word.reading));
