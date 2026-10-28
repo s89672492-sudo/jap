@@ -10,7 +10,9 @@ import { GRAMMAR_BY_LEVEL } from '@/data/grammar';
 import type { JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildGrammarRound } from '@/lib/quiz';
+import { pickForStudy } from '@/lib/study-order';
 import { useSettings } from '@/stores/settings-store';
+import { getStudyCards, recordStudy } from '@/stores/study-store';
 
 type GrammarQuizProps = {
   level: JlptLevel;
@@ -24,9 +26,14 @@ type GrammarQuizProps = {
 export function GrammarQuiz({ level, onAnswered, onNext }: GrammarQuizProps) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
-    () => buildGrammarRound(GRAMMAR_BY_LEVEL[level], roundSize),
+    () =>
+      buildGrammarRound(
+        pickForStudy(GRAMMAR_BY_LEVEL[level], roundSize, getStudyCards(), new Set()),
+        roundSize,
+      ),
     (q) => q.answer,
     [level, roundSize],
+    (q, correct) => recordStudy(q.point.id, correct),
   );
 
   if (!quiz.ready) return null;

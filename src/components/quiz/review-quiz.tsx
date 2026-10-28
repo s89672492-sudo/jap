@@ -20,8 +20,9 @@ import {
   type ExamRoundQuestion,
   type QuizQuestion,
 } from '@/lib/quiz';
-import { removeMistake, useMistakes, useMistakesLoaded } from '@/stores/mistakes-store';
+import { useMistakes, useMistakesLoaded } from '@/stores/mistakes-store';
 import { useSettings } from '@/stores/settings-store';
+import { getStudyCards, recordStudy } from '@/stores/study-store';
 
 type ReviewItem =
   | { kind: 'vocab'; id: string; question: QuizQuestion }
@@ -33,7 +34,10 @@ type ReviewQuizProps = {
   onNext?: () => void;
 };
 
-/** 錯題本：從這個等級答錯過的單字和試題出題，答對就從錯題本移除 */
+/**
+ * 錯題本：從這個等級答錯過的單字和試題出題，先出到期該複習的。
+ * 答對一次不會馬上移除：要在不同天答對、複習間隔拉長到 7 天以上，才會自動移出錯題本。
+ */
 export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
   const mistakes = useMistakes();
   const { roundSize } = useSettings();
@@ -56,17 +60,22 @@ export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
       const vocabItems: ReviewItem[] = buildRound(words, missedWords.length, missedWords).map(
         (question) => ({ kind: 'vocab', id: question.word.id, question }),
       );
-      const examItems: ReviewItem[] = buildExamRound(missedExam, missedExam.length).map(
-        (item) => ({ kind: 'exam', id: item.question.id, item }),
-      );
-      return shuffle([...vocabItems, ...examItems]).slice(0, roundSize);
+      const examItems: ReviewItem[] = buildExamRound(missedExam, missedExam.length).map((item) => ({
+        kind: 'exam',
+        id: item.question.id,
+        item,
+      }));
+      // 先出到期的（還沒有複習紀錄的錯題也算到期），同樣到期的隨機
+      const cards = getStudyCards();
+      const dueAt = (r: ReviewItem) => cards[r.id]?.d ?? 0;
+      const ordered = shuffle([...vocabItems, ...examItems]).sort((a, b) => dueAt(a) - dueAt(b));
+      return shuffle(ordered.slice(0, roundSize));
     },
     (r) => (r.kind === 'vocab' ? r.question.word.meaning : r.item.answer),
     // 錯題要等從手機讀回後才能出題；作答中錯題本變動不會重新出題
     [level, loaded, roundSize],
-    (r, correct) => {
-      if (correct) removeMistake(r.id);
-    },
+    // 答對、答錯都記錄；間隔拉長到 7 天以上時會自動移出錯題本
+    (r, correct) => recordStudy(r.id, correct),
   );
 
   // 還沒開始、而且這個等級沒有錯題：顯示空狀態
@@ -76,7 +85,8 @@ export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
         <DetectiveEmblem />
         <ThemedText style={styles.emptyTitle}>{level} 錯題本是空的</ThemedText>
         <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-          在「單字」「試題」「聽力」答錯的題目，以及單字卡選「還不熟」的單字，都會自動記在這裡。答對之後就會從錯題本移除。
+          在「單字」「試題」「聽力」答錯的題目，以及單字卡選「還不熟」的單字，都會自動記在這裡。要在不同天答對、複習間隔拉長到
+          7 天以上，才會從錯題本移除。
         </ThemedText>
       </View>
     );
@@ -104,7 +114,11 @@ export function ReviewQuiz({ level, onAnswered, onNext }: ReviewQuizProps) {
   return (
     <View style={styles.container}>
       <QuizProgress
-        label={current.kind === 'vocab' ? '錯題・單字' : `錯題・${EXAM_TYPE_LABELS[current.item.question.type]}`}
+        label={
+          current.kind === 'vocab'
+            ? '錯題・單字'
+            : `錯題・${EXAM_TYPE_LABELS[current.item.question.type]}`
+        }
         index={quiz.index}
         total={quiz.total}
         score={quiz.score}

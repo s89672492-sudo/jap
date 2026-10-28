@@ -8,9 +8,11 @@ import { ReadingQuestionView } from './reading-question-view';
 import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
-import { buildReadingRound } from '@/lib/quiz';
-import { addMistake } from '@/stores/mistakes-store';
+import { buildReadingRound, HAS_KANJI } from '@/lib/quiz';
+import { pickForStudy } from '@/lib/study-order';
+import { addMistake, getMistakes } from '@/stores/mistakes-store';
 import { useSettings } from '@/stores/settings-store';
+import { getStudyCards, recordStudy } from '@/stores/study-store';
 
 type ReadingQuizProps = {
   level: JlptLevel;
@@ -24,10 +26,19 @@ type ReadingQuizProps = {
 export function ReadingQuiz({ level, onAnswered, onNext }: ReadingQuizProps) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
-    () => buildReadingRound(VOCAB_BY_LEVEL[level], roundSize),
+    () => {
+      const words = VOCAB_BY_LEVEL[level];
+      const kanjiWords = words.filter((word) => HAS_KANJI.test(word.word));
+      return buildReadingRound(
+        words,
+        roundSize,
+        pickForStudy(kanjiWords, roundSize, getStudyCards(), getMistakes()),
+      );
+    },
     (q) => q.word.reading,
     [level, roundSize],
     (q, correct) => {
+      recordStudy(q.word.id, correct);
       if (!correct) addMistake(q.word.id);
     },
   );

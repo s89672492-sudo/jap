@@ -42,6 +42,12 @@ export function resetKnownWords(ids: string[]) {
   });
 }
 
+/** 不在畫面裡時讀取已記住的單字（等資料讀回後） */
+export async function loadKnownWords(): Promise<KnownIds> {
+  await knownStore.whenLoaded();
+  return knownStore.get();
+}
+
 export function useKnownWords(): KnownIds {
   return usePersistedStore(knownStore, EMPTY_KNOWN);
 }

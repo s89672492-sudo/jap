@@ -9,8 +9,10 @@ import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildRound } from '@/lib/quiz';
-import { addMistake } from '@/stores/mistakes-store';
+import { pickForStudy } from '@/lib/study-order';
+import { addMistake, getMistakes } from '@/stores/mistakes-store';
 import { useSettings } from '@/stores/settings-store';
+import { getStudyCards, recordStudy } from '@/stores/study-store';
 
 type VocabQuizProps = {
   level: JlptLevel;
@@ -24,10 +26,19 @@ type VocabQuizProps = {
 export function VocabQuiz({ level, onAnswered, onNext }: VocabQuizProps) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
-    () => buildRound(VOCAB_BY_LEVEL[level], roundSize),
+    () => {
+      const words = VOCAB_BY_LEVEL[level];
+      // 優先出該複習、常答錯的單字，再補新單字
+      return buildRound(
+        words,
+        roundSize,
+        pickForStudy(words, roundSize, getStudyCards(), getMistakes()),
+      );
+    },
     (q) => q.word.meaning,
     [level, roundSize],
     (q, correct) => {
+      recordStudy(q.word.id, correct);
       if (!correct) addMistake(q.word.id);
     },
   );

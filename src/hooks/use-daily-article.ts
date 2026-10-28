@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { READING_BY_LEVEL, type ReadingArticle } from '@/data/reading';
 import type { JlptLevel } from '@/data/vocab';
+import { useHydrated } from '@/hooks/use-hydrated';
 import { dateKey, pickDaily, readingStreak } from '@/lib/daily';
 import {
   saveDailyPick,
@@ -24,15 +25,12 @@ export type DailyArticle = {
  * 跟日期有關，所以等畫面載入後才計算（網頁版預先產生的 HTML 不知道今天是幾號）。
  */
 export function useDailyArticle(level: JlptLevel): DailyArticle | null {
-  const [today, setToday] = useState<string | null>(null);
+  // 網頁版預先產生的畫面不知道今天幾號，載入後才用裝置的日期
+  const today = useHydrated() ? dateKey() : null;
   const loaded = useReadingLoaded();
   const read = useReadArticles();
   const days = useReadingDays();
   const daily = useDailyPicks();
-
-  useEffect(() => {
-    setToday(dateKey());
-  }, []);
 
   const articles = READING_BY_LEVEL[level];
   const savedId = today && daily.date === today ? daily.picks[level] : undefined;

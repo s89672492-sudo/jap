@@ -1,9 +1,10 @@
-import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import { FlatList, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Pager } from '@/components/ui/pager';
 import { Spacing } from '@/constants/theme';
+import { useDepsChanged } from '@/hooks/use-hydrated';
 
 type PagedListProps<T> = {
   items: T[];
@@ -31,9 +32,8 @@ export function PagedList<T>({
   contentContainerStyle,
 }: PagedListProps<T>) {
   const [page, setPage] = useState(0);
-  useEffect(() => {
-    setPage(0);
-  }, [resetKey]);
+  // 換分類、搜尋時回到第一頁
+  if (useDepsChanged([resetKey])) setPage(0);
 
   const pageCount = Math.ceil(items.length / pageSize);
   // 收藏被取消而少了一頁時，停在最後一頁

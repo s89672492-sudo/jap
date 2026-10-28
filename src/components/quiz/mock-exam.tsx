@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ExamQuestionView } from './exam-question-view';
@@ -11,6 +11,7 @@ import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
 import { EXAM_TYPE_LABELS } from '@/data/exam';
 import type { JlptLevel } from '@/data/vocab';
+import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import {
   buildMockExam,
@@ -27,6 +28,7 @@ import {
   recordMockExam,
   type MockExamRecord,
 } from '@/stores/mock-exam-store';
+import { recordStudy } from '@/stores/study-store';
 
 type Phase = 'intro' | 'sitting' | 'break' | 'report' | 'record';
 
@@ -66,10 +68,10 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
   const finishing = useRef(false);
 
   // 換等級時回到說明頁
-  useEffect(() => {
+  if (useDepsChanged([preview])) {
     setPhase('intro');
     setSittings(preview);
-  }, [preview]);
+  }
 
   const sitting = sittings[sittingIndex];
   const remaining = Math.max(0, deadline - now);
@@ -114,7 +116,9 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
     const items = sittings.flatMap((s) => s.questions);
     const scored = scoreMockExam(level, items, answers);
     for (const item of items) {
-      if (answers[item.question.id] !== item.answer) addMistake(item.question.id);
+      const correct = answers[item.question.id] === item.answer;
+      recordStudy(item.question.id, correct);
+      if (!correct) addMistake(item.question.id);
     }
     markMockExamSeen(
       level,
@@ -139,17 +143,17 @@ export function MockExam({ level, onScrollTop }: MockExamProps) {
     onScrollTop?.();
   };
 
-  // 計時：每秒更新一次，時間到自動交卷
+  // 計時：每秒更新一次，時間到自動交卷（用截止時間算，切到背景再回來也準確）
+  const tick = useEffectEvent(() => {
+    const time = Date.now();
+    setNow(time);
+    if (deadline > 0 && time >= deadline) finishSitting();
+  });
   useEffect(() => {
     if (phase !== 'sitting') return;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, [phase]);
-  useEffect(() => {
-    if (phase === 'sitting' && deadline > 0 && now >= deadline) finishSitting();
-    // finishSitting 每次 render 都是新的函式，只看時間
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, now, deadline]);
 
   // 離開模擬考（切換模式、等級或分頁）時停止聽解播放
   useEffect(() => () => stopSpeaking(), []);

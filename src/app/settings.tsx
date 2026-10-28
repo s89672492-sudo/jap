@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
 import { BackgroundPicker } from '@/components/settings/background-picker';
+import { BackupSection } from '@/components/settings/backup-section';
 import { ClearMistakes } from '@/components/settings/clear-mistakes';
 import { SettingsSection } from '@/components/settings/settings-section';
 import { VoicePicker } from '@/components/settings/voice-picker';
@@ -88,7 +89,9 @@ export default function SettingsScreen() {
             <VoicePicker />
           </SettingsSection>
 
-          <SettingsSection title="例句假名注音" description="在單字例句的漢字上方顯示讀音（自動產生，少數讀音可能不準）。">
+          <SettingsSection
+            title="例句假名注音"
+            description="在單字例句的漢字上方顯示讀音（自動產生，少數讀音可能不準）。">
             <SegmentedControl
               options={FURIGANA_OPTIONS}
               value={settings.furigana ? 'on' : 'off'}
@@ -118,12 +121,18 @@ export default function SettingsScreen() {
             <BackgroundPicker />
           </SettingsSection>
 
+          <SettingsSection
+            title="學習紀錄備份"
+            description="把錯題本、已記住、單字卡進度、收藏、閱讀紀錄、模擬考、限時挑戰和間隔複習紀錄存成一個檔案，換手機或資料不見時可以還原。背景圖片不包含在內。">
+            <BackupSection />
+          </SettingsSection>
+
           <SettingsSection title="錯題本">
             <ClearMistakes />
           </SettingsSection>
 
           <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
-            設定、背景圖片、選過的等級和錯題本都存在這支手機裡；換手機或清除瀏覽器資料後會重新開始。
+            設定、背景圖片、選過的等級和學習紀錄都存在這支手機裡；換手機或清除瀏覽器資料前，請先用「學習紀錄備份」匯出。
           </ThemedText>
         </View>
       </ScrollView>

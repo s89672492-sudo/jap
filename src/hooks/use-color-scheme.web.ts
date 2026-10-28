@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 
+import { useHydrated } from '@/hooks/use-hydrated';
 import { useSettings } from '@/stores/settings-store';
 
 /**
@@ -8,11 +8,7 @@ import { useSettings } from '@/stores/settings-store';
  * 設定頁選了淺色或深色就用它，否則跟隨系統。
  */
 export function useColorScheme() {
-  const [hasHydrated, setHasHydrated] = useState(false);
-
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
+  const hasHydrated = useHydrated();
 
   const system = useSystemColorScheme();
   const { themeMode } = useSettings();

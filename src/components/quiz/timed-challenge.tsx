@@ -10,10 +10,12 @@ import { useModeActive } from '@/components/ui/keep-alive';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { buildRound, type QuizQuestion } from '@/lib/quiz';
 import { recordChallengeScore, useBestScores } from '@/stores/challenge-store';
 import { addMistake } from '@/stores/mistakes-store';
+import { recordStudy } from '@/stores/study-store';
 
 type TimedChallengeProps = {
   level: JlptLevel;
@@ -46,9 +48,7 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
   const scoreRef = useRef(0);
 
   // 換等級時回到開始畫面
-  useEffect(() => {
-    setPhase('ready');
-  }, [level]);
+  if (useDepsChanged([level])) setPhase('ready');
 
   // 切到別的模式時暫停計時，切回來再接著倒數
   const active = useModeActive();
@@ -147,6 +147,7 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
   const pick = (option: string) => {
     if (picked !== null) return;
     setPicked(option);
+    recordStudy(question.word.id, option === question.word.meaning);
     if (option === question.word.meaning) {
       scoreRef.current += 1;
       setCorrect((c) => c + 1);

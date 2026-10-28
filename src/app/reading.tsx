@@ -13,6 +13,7 @@ import { LevelPicker } from '@/components/ui/level-picker';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { READING_BY_LEVEL, type ReadingArticle } from '@/data/reading';
 import { useDailyArticle } from '@/hooks/use-daily-article';
+import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { useJlptLevel } from '@/stores/jlpt-level-store';
 import { useReadArticles } from '@/stores/reading-store';
@@ -22,10 +23,11 @@ export default function ReadingScreen() {
   const insets = useSafeAreaInsets();
   const level = useJlptLevel();
   const read = useReadArticles();
-  const [article, setArticle] = useState<ReadingArticle | null>(null);
   const daily = useDailyArticle(level);
   // 從首頁「閱讀今日文章」進來時，直接打開今日文章
   const { open: openParam } = useLocalSearchParams<{ open?: string }>();
+  const dailyRequest = openParam === 'daily' && daily ? daily.article : null;
+  const [article, setArticle] = useState<ReadingArticle | null>(dailyRequest);
   const scrollRef = useRef<ScrollView>(null);
 
   const articles = READING_BY_LEVEL[level];
@@ -36,12 +38,13 @@ export default function ReadingScreen() {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
 
+  if (useDepsChanged([dailyRequest]) && dailyRequest) setArticle(dailyRequest);
+  // 打開後捲到最上面，並清掉網址參數（之後回到這頁不會又自動打開）
   useEffect(() => {
-    if (openParam !== 'daily' || !daily) return;
-    open(daily.article);
+    if (!dailyRequest) return;
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
     router.setParams({ open: undefined });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openParam, daily?.article.id]);
+  }, [dailyRequest]);
 
   // Android 的返回鍵：在文章裡時先回到列表
   useEffect(() => {

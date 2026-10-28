@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import type { AnswerState } from '@/components/quiz/answer-option';
+import { useDepsChanged, useHydrated } from '@/hooks/use-hydrated';
 
 /**
  * 一輪測驗的共用流程：出題 → 作答 → 下一題 → 計分。
@@ -14,21 +15,21 @@ export function useQuizRound<Q>(
   /** 每次作答後呼叫，用來記錄錯題 */
   onAnswer?: (question: Q, correct: boolean) => void,
 ) {
-  const [questions, setQuestions] = useState<Q[]>([]);
+  const hydrated = useHydrated();
+  const [questions, setQuestions] = useState<Q[]>(() => (hydrated ? build() : []));
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   // 按「再調查一輪」時加一，觸發重新出題
   const [round, setRound] = useState(0);
 
-  useEffect(() => {
-    setQuestions(build());
+  // deps、round 改變（或網頁版剛載入完成）時重新出題
+  if (useDepsChanged([...deps, round, hydrated])) {
+    setQuestions(hydrated ? build() : []);
     setIndex(0);
     setPicked(null);
     setScore(0);
-    // build 每次 render 都是新的函式，只在 deps 或 round 改變時重新出題
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...deps, round]);
+  }
 
   const ready = questions.length > 0;
   const finished = ready && index >= questions.length;

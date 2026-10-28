@@ -17,6 +17,7 @@ import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildExamRound } from '@/lib/quiz';
 import { addMistake } from '@/stores/mistakes-store';
 import { useSettings } from '@/stores/settings-store';
+import { recordStudy } from '@/stores/study-store';
 
 const SECTION_OPTIONS: { value: ExamSection; label: string }[] = [
   { value: 'all', label: '全部' },
@@ -79,6 +80,7 @@ function ExamPractice({ level, onAnswered, onNext }: ExamQuizProps) {
     (q) => q.answer,
     [level, roundSize, section],
     (q, correct) => {
+      recordStudy(q.question.id, correct);
       if (!correct) addMistake(q.question.id);
     },
   );

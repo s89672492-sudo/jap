@@ -8,8 +8,29 @@ export type PersistedStore<T> = {
   update: (fn: (current: T) => T) => Promise<void>;
   /** 是否已經從手機儲存空間讀回資料 */
   isLoaded: () => boolean;
+  /** 等資料從手機讀回（不在畫面裡時使用，例如備份、轉換舊紀錄） */
+  whenLoaded: () => Promise<void>;
   subscribe: (listener: () => void) => () => void;
 };
+
+/** 所有存在手機裡的資料，依 key 登記，給備份還原用 */
+type RegisteredStore = {
+  /** 這段文字（存檔格式）能不能被讀回 */
+  validate: (raw: string) => boolean;
+  /** 重新從手機讀回（還原備份後讓畫面換成新的紀錄） */
+  reload: () => Promise<void>;
+};
+
+const registry = new Map<string, RegisteredStore>();
+
+export function getRegisteredStore(key: string): RegisteredStore | undefined {
+  return registry.get(key);
+}
+
+/** 重新讀回這些 key 的資料，畫面會跟著更新 */
+export async function reloadStores(keys: string[]) {
+  await Promise.all(keys.map((key) => registry.get(key)?.reload()));
+}
 
 /**
  * 存在手機裡、所有畫面共用的小型狀態。
@@ -52,9 +73,27 @@ export function createPersistedStore<T>(options: {
     AsyncStorage.setItem(options.key, options.serialize(next)).catch(() => {});
   };
 
+  registry.set(options.key, {
+    validate: (raw) => options.deserialize(raw) !== null,
+    reload: async () => {
+      let next = options.initial;
+      try {
+        const raw = await AsyncStorage.getItem(options.key);
+        if (raw !== null) next = options.deserialize(raw) ?? options.initial;
+      } catch {
+        // 讀不到就用預設值
+      }
+      value = next;
+      loaded = true;
+      loadPromise = Promise.resolve();
+      emit();
+    },
+  });
+
   return {
     get: () => value,
     isLoaded: () => loaded,
+    whenLoaded: () => load(),
     set,
     update: (fn) => load().then(() => set(fn(value))),
     subscribe: (listener) => {
