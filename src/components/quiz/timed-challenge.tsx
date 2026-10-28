@@ -4,12 +4,14 @@ import { StyleSheet, View } from 'react-native';
 import { AnswerOption, type AnswerState } from './answer-option';
 
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
+import { LoadingNote } from '@/components/ui/loading-note';
 import { ThemedText } from '@/components/themed-text';
 import { FitText } from '@/components/ui/fit-text';
 import { useModeActive } from '@/components/ui/keep-alive';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Spacing } from '@/constants/theme';
-import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { useLevelData, type LevelData } from '@/data/level-data';
+import { type JlptLevel } from '@/data/vocab';
 import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { buildRound, type QuizQuestion } from '@/lib/quiz';
@@ -33,7 +35,18 @@ const QUESTION_POOL = 150;
 type Phase = 'ready' | 'running' | 'done';
 
 /** 限時挑戰：60 秒內看日文選中文，答對越多越好；每個等級記錄最高分 */
-export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
+/** 這個等級的資料載入後才開始 */
+export function TimedChallenge(props: TimedChallengeProps) {
+  const data = useLevelData(props.level);
+  if (!data) return <LoadingNote />;
+  return <TimedChallengeContent {...props} data={data} />;
+}
+
+function TimedChallengeContent({
+  level,
+  onStart,
+  data,
+}: TimedChallengeProps & { data: LevelData }) {
   const theme = useTheme();
   const best = useBestScores()[level] ?? 0;
   const [phase, setPhase] = useState<Phase>('ready');
@@ -87,7 +100,7 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
   }, [picked, phase, questions.length]);
 
   const start = () => {
-    setQuestions(buildRound(VOCAB_BY_LEVEL[level], QUESTION_POOL));
+    setQuestions(buildRound(data.words, QUESTION_POOL));
     setIndex(0);
     setPicked(null);
     setCorrect(0);
@@ -184,7 +197,13 @@ export function TimedChallenge({ level, onStart }: TimedChallengeProps) {
         />
       </View>
       <View
-        style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.border,
+          },
+        ]}>
         <FitText style={styles.word}>{question.word.word}</FitText>
         <ThemedText type="small" themeColor="textSecondary">
           {picked !== null && question.word.reading !== question.word.word

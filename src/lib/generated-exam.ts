@@ -1,6 +1,7 @@
 import type { ExamQuestion, ExamQuestionType } from '@/data/exam';
-import { GRAMMAR_BY_LEVEL, type GrammarPoint } from '@/data/grammar';
-import { JLPT_LEVELS, VOCAB_BY_LEVEL, type JlptLevel, type VocabWord } from '@/data/vocab';
+import type { GrammarPoint } from '@/data/grammar';
+import { getAllLevels, type AllLevelData } from '@/data/level-data';
+import { JLPT_LEVELS, type JlptLevel, type VocabWord } from '@/data/vocab';
 import { REAL_WORDS } from '@/data/exam/real-words';
 import { lookupFurigana, parseRuby, splitsRuby, type RubySegment } from '@/lib/furigana';
 
@@ -13,6 +14,13 @@ import { lookupFurigana, parseRuby, splitsRuby, type RubySegment } from '@/lib/f
  * 題目 id 由單字或文法 id 組成，出題用 id 當亂數種子，同一個 id 每次都出一模一樣的題目，
  * 所以錯題本、考試紀錄只要記 id 就能找回題目。
  */
+
+/** 自動出題要用到全部等級的單字和文法；用之前畫面要先等 loadAllLevels() 完成 */
+function data(): AllLevelData {
+  const all = getAllLevels();
+  if (!all) throw new Error('自動出題前要先載入全部等級的資料');
+  return all;
+}
 
 export type GeneratedType = Extract<
   ExamQuestionType,
@@ -200,7 +208,7 @@ function getIndexes(): Indexes {
     kanjiByReading: new Map(),
   };
   for (const level of JLPT_LEVELS) {
-    for (const word of VOCAB_BY_LEVEL[level]) {
+    for (const word of data().byLevel[level].words) {
       built.byId.set(word.id, word);
       built.writings.add(word.word);
       addTo(built.readingsOf, word.word, word.reading);
@@ -422,7 +430,7 @@ function contextDistractors(
     if (word.pos === 'verb' || word.pos === 'adjective') return other.word.slice(-1) === ending;
     return true;
   };
-  const pool = VOCAB_BY_LEVEL[level].filter(sameShape);
+  const pool = data().byLevel[level].words.filter(sameShape);
   if (pool.length < 3) return null;
   const picked: VocabWord[] = [];
   for (const other of seededShuffle(pool, random)) {
@@ -542,7 +550,7 @@ export function getGeneratedQuestion(id: string): ExamQuestion | null {
     const { type, level } = parsed;
     const sourceId = id.slice(PREFIX[type].length);
     if (type === 'grammar') {
-      const point = GRAMMAR_BY_LEVEL[level].find((p) => p.id === sourceId);
+      const point = data().byLevel[level].grammar.find((p) => p.id === sourceId);
       question = point ? buildGrammarQuestion(point) : null;
     } else {
       const word = getIndexes().byId.get(sourceId);
@@ -571,8 +579,12 @@ export function getGeneratedBank(level: JlptLevel, type: GeneratedType): ExamQue
 export function generatedCandidateIds(level: JlptLevel, type: GeneratedType): string[] {
   const sourceIds =
     type === 'grammar'
-      ? GRAMMAR_BY_LEVEL[level].filter((p) => p.quiz).map((p) => p.id)
-      : VOCAB_BY_LEVEL[level].filter((w) => w.example).map((w) => w.id);
+      ? data()
+          .byLevel[level].grammar.filter((p) => p.quiz)
+          .map((p) => p.id)
+      : data()
+          .byLevel[level].words.filter((w) => w.example)
+          .map((w) => w.id);
   return sourceIds.map((sourceId) => PREFIX[type] + sourceId);
 }
 

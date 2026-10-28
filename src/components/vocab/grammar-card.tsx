@@ -9,7 +9,7 @@ import { FuriganaText } from '@/components/vocab/furigana-text';
 import { Spacing } from '@/constants/theme';
 import type { GrammarPoint } from '@/data/grammar';
 import { useTheme } from '@/hooks/use-theme';
-import { lookupFurigana } from '@/lib/furigana';
+import { lookupFurigana, useFuriganaLoaded } from '@/lib/furigana';
 import { useSettings } from '@/stores/settings-store';
 
 type GrammarCardProps = {
@@ -27,6 +27,8 @@ export const GrammarCard = memo(function GrammarCard({
   const { ja, zh, highlight } = item.example;
   const index = ja.indexOf(highlight);
   const { furigana } = useSettings();
+  // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
+  useFuriganaLoaded();
   const annotated = furigana ? lookupFurigana(ja) : undefined;
 
   return (

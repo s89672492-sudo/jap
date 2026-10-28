@@ -5,8 +5,10 @@ import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
 import { ReadingQuestionView } from './reading-question-view';
 
+import { LoadingNote } from '@/components/ui/loading-note';
 import { Spacing } from '@/constants/theme';
-import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { useLevelData, type LevelData } from '@/data/level-data';
+import { type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildReadingRound, HAS_KANJI } from '@/lib/quiz';
 import { pickForStudy } from '@/lib/study-order';
@@ -23,11 +25,23 @@ type ReadingQuizProps = {
 };
 
 /** 漢字讀音測驗：看漢字選讀音；答錯的單字會加入錯題本 */
-export function ReadingQuiz({ level, onAnswered, onNext }: ReadingQuizProps) {
+/** 這個等級的資料載入後才開始 */
+export function ReadingQuiz(props: ReadingQuizProps) {
+  const data = useLevelData(props.level);
+  if (!data) return <LoadingNote />;
+  return <ReadingQuizContent {...props} data={data} />;
+}
+
+function ReadingQuizContent({
+  level,
+  onAnswered,
+  onNext,
+  data,
+}: ReadingQuizProps & { data: LevelData }) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
     () => {
-      const words = VOCAB_BY_LEVEL[level];
+      const words = data.words;
       const kanjiWords = words.filter((word) => HAS_KANJI.test(word.word));
       return buildReadingRound(
         words,

@@ -6,5 +6,10 @@ export function registerServiceWorker() {
   if (__DEV__ || !('serviceWorker' in navigator)) return;
   // 部署在 GitHub Pages 的 /jap/ 底下時，baseUrl 會在打包時填入
   const base = process.env.EXPO_BASE_URL ?? '';
-  navigator.serviceWorker.register(`${base}/sw.js`, { scope: `${base}/` }).catch(() => {});
+  // 每次上架的版本號（GitHub 打包時填入）：網址不同，瀏覽器就會重新安裝 service worker，
+  // 在背景把新版本的程式和各等級資料存起來，離線時也不會缺檔或新舊混用
+  const version = process.env.EXPO_PUBLIC_BUILD_ID ?? 'local';
+  navigator.serviceWorker
+    .register(`${base}/sw.js?v=${version}`, { scope: `${base}/` })
+    .catch(() => {});
 }

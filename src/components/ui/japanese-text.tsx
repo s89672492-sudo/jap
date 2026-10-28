@@ -2,7 +2,7 @@ import type { StyleProp, TextStyle } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { FuriganaText } from '@/components/vocab/furigana-text';
-import { lookupFurigana } from '@/lib/furigana';
+import { lookupFurigana, useFuriganaLoaded } from '@/lib/furigana';
 import { useSettings } from '@/stores/settings-store';
 
 type JapaneseTextProps = {
@@ -31,6 +31,8 @@ export function JapaneseText({
   style,
 }: JapaneseTextProps) {
   const { furigana } = useSettings();
+  // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
+  useFuriganaLoaded();
   const annotated = furigana ? lookupFurigana(text) : undefined;
   const at = highlight ? text.indexOf(highlight) : -1;
 

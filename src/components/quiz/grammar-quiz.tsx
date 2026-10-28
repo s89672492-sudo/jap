@@ -5,8 +5,9 @@ import { NextButton } from './next-button';
 import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
 
+import { LoadingNote } from '@/components/ui/loading-note';
 import { Spacing } from '@/constants/theme';
-import { GRAMMAR_BY_LEVEL } from '@/data/grammar';
+import { useLevelData, type LevelData } from '@/data/level-data';
 import type { JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildGrammarRound } from '@/lib/quiz';
@@ -23,12 +24,24 @@ type GrammarQuizProps = {
 };
 
 /** 文法測驗：例句挖空，選出正確的文法部分 */
-export function GrammarQuiz({ level, onAnswered, onNext }: GrammarQuizProps) {
+/** 這個等級的資料載入後才開始 */
+export function GrammarQuiz(props: GrammarQuizProps) {
+  const data = useLevelData(props.level);
+  if (!data) return <LoadingNote />;
+  return <GrammarQuizContent {...props} data={data} />;
+}
+
+function GrammarQuizContent({
+  level,
+  onAnswered,
+  onNext,
+  data,
+}: GrammarQuizProps & { data: LevelData }) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
     () =>
       buildGrammarRound(
-        pickForStudy(GRAMMAR_BY_LEVEL[level], roundSize, getStudyCards(), new Set()),
+        pickForStudy(data.grammar, roundSize, getStudyCards(), new Set()),
         roundSize,
       ),
     (q) => q.answer,

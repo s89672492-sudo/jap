@@ -5,8 +5,10 @@ import { NextButton } from './next-button';
 import { QuizProgress } from './quiz-progress';
 import { QuizResult } from './quiz-result';
 
+import { LoadingNote } from '@/components/ui/loading-note';
 import { Spacing } from '@/constants/theme';
-import { VOCAB_BY_LEVEL, type JlptLevel } from '@/data/vocab';
+import { useLevelData, type LevelData } from '@/data/level-data';
+import { type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildListeningRound } from '@/lib/quiz';
 import { pickForStudy } from '@/lib/study-order';
@@ -23,11 +25,23 @@ type ListeningQuizProps = {
 };
 
 /** 聽力測驗：聽發音選單字；答錯的單字會加入錯題本 */
-export function ListeningQuiz({ level, onAnswered, onNext }: ListeningQuizProps) {
+/** 這個等級的資料載入後才開始 */
+export function ListeningQuiz(props: ListeningQuizProps) {
+  const data = useLevelData(props.level);
+  if (!data) return <LoadingNote />;
+  return <ListeningQuizContent {...props} data={data} />;
+}
+
+function ListeningQuizContent({
+  level,
+  onAnswered,
+  onNext,
+  data,
+}: ListeningQuizProps & { data: LevelData }) {
   const { roundSize } = useSettings();
   const quiz = useQuizRound(
     () => {
-      const words = VOCAB_BY_LEVEL[level];
+      const words = data.words;
       return buildListeningRound(
         words,
         roundSize,
