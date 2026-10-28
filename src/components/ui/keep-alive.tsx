@@ -24,10 +24,10 @@ type KeepAliveProps = {
 export function KeepAlive({ active, children, style }: KeepAliveProps) {
   const [visited, setVisited] = useState(active);
   const wasActive = useRef(active);
+  if (active && !visited) setVisited(true);
 
   useEffect(() => {
-    if (active) setVisited(true);
-    else if (wasActive.current) stopSpeaking();
+    if (!active && wasActive.current) stopSpeaking();
     wasActive.current = active;
   }, [active]);
 

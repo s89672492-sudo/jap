@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AnswerOption, type AnswerState } from '@/components/quiz/answer-option';
@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { JapaneseText } from '@/components/ui/japanese-text';
 import { Spacing } from '@/constants/theme';
 import type { ReadingQuestion } from '@/data/reading/types';
+import { useDepsChanged, useHydrated } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { shuffle } from '@/lib/quiz';
 
@@ -19,13 +20,16 @@ type ArticleQuestionsProps = {
 export function ArticleQuestions({ questions, onFinish }: ArticleQuestionsProps) {
   const theme = useTheme();
   // 選項順序是隨機的，等畫面載入後才打亂，避免網頁版預先產生的 HTML 不一致
-  const [options, setOptions] = useState<string[][]>(() => questions.map((q) => q.options));
+  const hydrated = useHydrated();
+  const makeOptions = () => questions.map((q) => (hydrated ? shuffle(q.options) : q.options));
+  const [options, setOptions] = useState<string[][]>(makeOptions);
   const [picked, setPicked] = useState<(string | null)[]>(() => questions.map(() => null));
 
-  useEffect(() => {
-    setOptions(questions.map((q) => shuffle(q.options)));
+  // 換文章時重新出題
+  if (useDepsChanged([questions, hydrated])) {
+    setOptions(makeOptions());
     setPicked(questions.map(() => null));
-  }, [questions]);
+  }
 
   const answered = picked.filter((p) => p !== null).length;
   const correct = picked.filter((p, i) => p === questions[i]?.options[0]).length;

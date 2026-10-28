@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -23,11 +23,8 @@ export function KnownWordsList({ words }: KnownWordsListProps) {
   const known = useMemo(() => words.filter((w) => knownIds.has(w.id)), [words, knownIds]);
   const [page, setPage] = useState(0);
   const pageCount = Math.ceil(known.length / PAGE_SIZE);
-
-  // 移回不熟後如果這一頁空了，退回上一頁
-  useEffect(() => {
-    if (page > 0 && page >= pageCount) setPage(Math.max(0, pageCount - 1));
-  }, [page, pageCount]);
+  // 移回不熟後如果這一頁空了，停在最後一頁
+  const current = Math.min(page, Math.max(pageCount - 1, 0));
 
   if (known.length === 0) {
     return (
@@ -42,7 +39,7 @@ export function KnownWordsList({ words }: KnownWordsListProps) {
       <ThemedText type="small" themeColor="textSecondary">
         已記住 {known.length} 個。按「移回還不熟」，這個單字下一輪會再出現在單字卡裡。
       </ThemedText>
-      {known.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((word) => (
+      {known.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE).map((word) => (
         <View key={word.id} style={styles.item}>
           <VocabCard item={word} />
           <Pressable
@@ -60,7 +57,7 @@ export function KnownWordsList({ words }: KnownWordsListProps) {
           </Pressable>
         </View>
       ))}
-      <Pager page={page} pageCount={pageCount} onChange={setPage} />
+      <Pager page={current} pageCount={pageCount} onChange={setPage} />
     </View>
   );
 }

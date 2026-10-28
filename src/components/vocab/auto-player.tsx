@@ -8,6 +8,7 @@ import { useModeActive } from '@/components/ui/keep-alive';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
 import type { VocabWord } from '@/data/vocab';
+import { useDepsChanged, useHydrated } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { shuffle } from '@/lib/quiz';
 import { speakAndWait, stopSpeaking } from '@/lib/speech';
@@ -38,21 +39,26 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
     random: false,
     slow: false,
   });
-  const [order, setOrder] = useState<VocabWord[]>(words);
+  // 隨機順序等畫面載入後才洗牌（網頁版預先產生的畫面用原本的順序）
+  const hydrated = useHydrated();
+  const makeOrder = () => (options.random && hydrated ? shuffle(words) : words);
+  const [order, setOrder] = useState<VocabWord[]>(makeOrder);
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [playing, setPlaying] = useState(false);
   /** 每次開始播放都換一個編號；舊的播放迴圈看到編號變了就停下來 */
   const runId = useRef(0);
 
-  // 換等級、詞性或切換隨機時重新排順序，回到第一個（隨機順序等畫面載入後才洗牌）
+  // 換等級、詞性或切換隨機時重新排順序，回到第一個
+  if (useDepsChanged([words, options.random, hydrated])) {
+    setPlaying(false);
+    setOrder(makeOrder());
+    setIndex(0);
+    setRevealed(false);
+  }
   useEffect(() => {
     runId.current += 1;
     stopSpeaking();
-    setPlaying(false);
-    setOrder(options.random ? shuffle(words) : words);
-    setIndex(0);
-    setRevealed(false);
   }, [words, options.random]);
 
   const stop = useCallback(() => {
@@ -64,9 +70,12 @@ export function AutoPlayer({ words }: AutoPlayerProps) {
   // 離開畫面或切到別的模式時暫停
   useFocusEffect(useCallback(() => stop, [stop]));
   const active = useModeActive();
+  if (!active && playing) setPlaying(false);
   useEffect(() => {
-    if (!active) stop();
-  }, [active, stop]);
+    if (active) return;
+    runId.current += 1;
+    stopSpeaking();
+  }, [active]);
   useEffect(() => stop, [stop]);
 
   const play = async (from: number) => {

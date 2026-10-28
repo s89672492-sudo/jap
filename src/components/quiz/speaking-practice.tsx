@@ -14,6 +14,7 @@ import { SpeakButton } from '@/components/ui/speak-button';
 import { FuriganaText } from '@/components/vocab/furigana-text';
 import { Spacing } from '@/constants/theme';
 import { VOCAB_BY_LEVEL, type JlptLevel, type VocabWord } from '@/data/vocab';
+import { useDepsChanged, useHydrated } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { checkPronunciation, verdict, type PronunciationResult } from '@/lib/pronunciation';
 import { shuffle } from '@/lib/quiz';
@@ -54,8 +55,15 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
   const theme = useTheme();
   const { roundSize, furigana } = useSettings();
   const [target, setTarget] = useState<Target>('word');
-  const [supported, setSupported] = useState<boolean | null>(null);
-  const [items, setItems] = useState<VocabWord[]>([]);
+  // 瀏覽器支不支援、題目順序都和裝置有關，等畫面載入後才決定
+  const hydrated = useHydrated();
+  const supported = hydrated ? isRecognitionSupported() : null;
+  const makeItems = () => {
+    if (!hydrated) return [];
+    const words = VOCAB_BY_LEVEL[level].filter((w) => target === 'word' || w.example);
+    return shuffle(words).slice(0, roundSize);
+  };
+  const [items, setItems] = useState<VocabWord[]>(makeItems);
   const [index, setIndex] = useState(0);
   const [listening, setListening] = useState(false);
   const [partial, setPartial] = useState('');
@@ -66,19 +74,14 @@ export function SpeakingPractice({ level, onAnswered, onNext }: SpeakingPractice
   const [round, setRound] = useState(0);
   const stopRef = useRef<() => void>(() => {});
 
-  // 瀏覽器支不支援、題目順序都和裝置有關，等畫面載入後才決定
-  useEffect(() => {
-    setSupported(isRecognitionSupported());
-  }, []);
-
-  useEffect(() => {
-    const words = VOCAB_BY_LEVEL[level].filter((w) => target === 'word' || w.example);
-    setItems(shuffle(words).slice(0, roundSize));
+  // 換等級、說單字／例句、題數或再練一輪時重新出題
+  if (useDepsChanged([level, target, roundSize, round, hydrated])) {
+    setItems(makeItems());
     setIndex(0);
     setResult(null);
     setError(null);
     setBest([]);
-  }, [level, target, roundSize, round]);
+  }
 
   // 結果或錯誤訊息畫出來之後，再讓外層捲到下面
   useEffect(() => {

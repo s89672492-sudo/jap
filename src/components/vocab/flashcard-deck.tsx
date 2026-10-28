@@ -11,6 +11,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
 import type { JlptLevel, VocabWord } from '@/data/vocab';
+import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { shuffle } from '@/lib/quiz';
 import {
@@ -97,7 +98,7 @@ function FlashcardStudy({ level, words, sessionKey, onShowKnown }: FlashcardStud
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded, sessionKey, session === undefined]);
 
-  useEffect(() => setFlipped(false), [sessionKey]);
+  if (useDepsChanged([sessionKey])) setFlipped(false);
 
   if (!loaded) return null;
 
