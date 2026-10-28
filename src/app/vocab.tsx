@@ -13,27 +13,22 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { AutoPlayer } from '@/components/vocab/auto-player';
 import { FlashcardDeck } from '@/components/vocab/flashcard-deck';
 import { GrammarCard } from '@/components/vocab/grammar-card';
+import {
+  PosFilterButton,
+  posFilterLabel,
+  type PosFilter,
+} from '@/components/vocab/pos-filter-button';
 import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import type { GrammarPoint } from '@/data/grammar';
 import { useAllLevelData, useLevelData } from '@/data/level-data';
-import { PART_OF_SPEECH_LABELS, type PartOfSpeech, type VocabWord } from '@/data/vocab';
+import type { VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { searchGrammar, searchWords } from '@/lib/search';
 import { useBookmarks } from '@/stores/bookmarks-store';
 import { useJlptLevel } from '@/stores/jlpt-level-store';
 
 type VocabMode = 'list' | 'flashcard' | 'autoplay' | 'grammar' | 'saved';
-
-type PosFilter = 'all' | PartOfSpeech;
-
-const POS_OPTIONS: { value: PosFilter; label: string }[] = [
-  { value: 'all', label: '全部' },
-  ...(Object.keys(PART_OF_SPEECH_LABELS) as PartOfSpeech[]).map((pos) => ({
-    value: pos,
-    label: PART_OF_SPEECH_LABELS[pos],
-  })),
-];
 
 const NO_WORDS: VocabWord[] = [];
 const NO_GRAMMAR: GrammarPoint[] = [];
@@ -76,10 +71,20 @@ export default function VocabScreen() {
     return pos === 'all' ? all : all.filter((word) => word.pos === pos);
   }, [levelData, pos]);
 
-  const wordResults = useMemo(
-    () => (hasQuery && allData ? searchWords(allData.words, deferredQuery) : NO_WORDS),
-    [hasQuery, allData, deferredQuery],
-  );
+  // 篩選選單上每個詞性的數量
+  const posCounts = useMemo(() => {
+    const all = levelData?.words ?? NO_WORDS;
+    const counts: Partial<Record<PosFilter, number>> = { all: all.length };
+    for (const word of all) counts[word.pos] = (counts[word.pos] ?? 0) + 1;
+    return counts;
+  }, [levelData]);
+
+  // 搜尋結果也套用詞性篩選
+  const wordResults = useMemo(() => {
+    if (!hasQuery || !allData) return NO_WORDS;
+    const results = searchWords(allData.words, deferredQuery);
+    return pos === 'all' ? results : results.filter((word) => word.pos === pos);
+  }, [hasQuery, allData, deferredQuery, pos]);
   const grammarResults = useMemo(
     () => (hasQuery && allData ? searchGrammar(allData.grammar, deferredQuery) : NO_GRAMMAR),
     [hasQuery, allData, deferredQuery],
@@ -124,7 +129,10 @@ export default function VocabScreen() {
     saved: '收藏',
   }[mode];
 
-  const posFilter = <SegmentedControl options={POS_OPTIONS} value={pos} onChange={setPos} />;
+  const filterButton = (
+    <PosFilterButton value={pos} onChange={setPos} counts={hasQuery ? undefined : posCounts} />
+  );
+  const filtered = pos !== 'all';
 
   const contentPadding = {
     paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
@@ -160,12 +168,25 @@ export default function VocabScreen() {
             </View>
           </View>
           <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
-          {(mode === 'list' || mode === 'grammar') && (
-            <SearchBox
-              value={query}
-              onChange={setQuery}
-              placeholder={mode === 'list' ? '搜尋單字：日文、假名或中文' : '搜尋文法：句型或中文'}
-            />
+          {mode === 'list' && (
+            // 搜尋框旁邊是詞性篩選
+            <View style={styles.toolRow}>
+              <View style={styles.searchBox}>
+                <SearchBox value={query} onChange={setQuery} placeholder="搜尋日文、假名或中文" />
+              </View>
+              {filterButton}
+            </View>
+          )}
+          {mode === 'grammar' && (
+            <SearchBox value={query} onChange={setQuery} placeholder="搜尋文法：句型或中文" />
+          )}
+          {(mode === 'flashcard' || mode === 'autoplay') && (
+            <View style={styles.toolRow}>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.toolNote}>
+                {filtered ? `只看${posFilterLabel(pos)}` : '全部詞性的單字'}
+              </ThemedText>
+              {filterButton}
+            </View>
           )}
         </View>
       </View>
@@ -178,8 +199,14 @@ export default function VocabScreen() {
             pageSize={PAGE_SIZE}
             keyExtractor={(item) => item.id}
             renderItem={(item) => <VocabCard item={item} showLevel />}
-            resetKey={`search-${deferredQuery}`}
-            emptyText={allLoading ? '載入全部等級的單字…' : '找不到符合的單字'}
+            resetKey={`search-${deferredQuery}-${pos}`}
+            emptyText={
+              allLoading
+                ? '載入全部等級的單字…'
+                : filtered
+                  ? `找不到符合的${posFilterLabel(pos)}（可以按「${posFilterLabel(pos)} ▾」改成全部詞性）`
+                  : '找不到符合的單字'
+            }
             contentContainerStyle={listStyle}
           />
         ) : (
@@ -189,7 +216,6 @@ export default function VocabScreen() {
             keyExtractor={(item) => item.id}
             renderItem={(item) => <VocabCard item={item} />}
             resetKey={`${level}-${pos}`}
-            header={posFilter}
             emptyText={loading ? '載入中…' : '這個分類沒有單字'}
             contentContainerStyle={listStyle}
           />
@@ -225,13 +251,11 @@ export default function VocabScreen() {
       </KeepAlive>
       <KeepAlive active={mode === 'autoplay'} style={styles.fill}>
         <ScrollView contentContainerStyle={listStyle}>
-          <View style={styles.posFilter}>{posFilter}</View>
           {loading ? <LoadingNote /> : <AutoPlayer words={words} />}
         </ScrollView>
       </KeepAlive>
       <KeepAlive active={mode === 'flashcard'} style={styles.fill}>
         <ScrollView contentContainerStyle={listStyle}>
-          <View style={styles.posFilter}>{posFilter}</View>
           {loading ? (
             <LoadingNote />
           ) : (
@@ -286,7 +310,16 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
   },
-  posFilter: {
-    marginBottom: Spacing.three,
+  toolRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  searchBox: {
+    flex: 1,
+    minWidth: 0,
+  },
+  toolNote: {
+    flex: 1,
   },
 });
