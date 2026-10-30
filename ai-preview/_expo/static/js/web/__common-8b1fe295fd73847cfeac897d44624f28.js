@@ -1,0 +1,1 @@
+__d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.withExamples=function(n,u){return n.map(n=>{const s=u[n.id];return s?{...n,example:{ja:(0,t.stripRuby)(s.ja),zh:s.zh,furigana:s.ja}}:n})};var t=r(d[0])},1235,[1236]);
