@@ -6,10 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppBackground } from '@/components/app-background';
 import { CaseCard } from '@/components/detective/case-card';
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
+import { DueWordsReview } from '@/components/home/due-words-review';
 import { LevelProgressList } from '@/components/home/level-progress-list';
 import { ProgressOverview } from '@/components/home/progress-overview';
 import { TodayTasks } from '@/components/home/today-tasks';
-import { ExamInProgressBanner } from '@/components/quiz/mock-exam/exam-lock';
+import { ExamInProgressBanner, ExamLock } from '@/components/quiz/mock-exam/exam-lock';
 import { ThemedText } from '@/components/themed-text';
 import { ChipButton } from '@/components/ui/chip-button';
 import { LoadingNote } from '@/components/ui/loading-note';
@@ -27,24 +28,24 @@ export default function HomeScreen() {
   const level = useJlptLevel();
   const daily = useDailyArticle(level);
   const progress = useLearningProgress();
-  // 首頁或「學習進度總覽」
-  const [showOverview, setShowOverview] = useState(false);
+  // 首頁、「學習進度總覽」或「今日複習單字」
+  const [view, setView] = useState<'home' | 'overview' | 'review'>('home');
   const scrollRef = useRef<ScrollView>(null);
 
-  const toggleOverview = (next: boolean) => {
-    setShowOverview(next);
+  const open = (next: 'home' | 'overview' | 'review') => {
+    setView(next);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
 
-  // Android 的返回鍵：在進度總覽時先回到首頁
+  // Android 的返回鍵：在進度總覽、複習單字時先回到首頁
   useEffect(() => {
-    if (!showOverview) return;
+    if (view === 'home') return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      setShowOverview(false);
+      setView('home');
       return true;
     });
     return () => sub.remove();
-  }, [showOverview]);
+  }, [view]);
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
@@ -61,19 +62,24 @@ export default function HomeScreen() {
             paddingRight: insets.right + Spacing.three,
           },
         ]}>
-        {showOverview ? (
+        {view !== 'home' ? (
           <View style={styles.inner}>
             <View style={styles.overviewHeader}>
               <ChipButton
                 label="‹ 事務所"
                 accessibilityLabel="回到事務所首頁"
-                onPress={() => toggleOverview(false)}
+                onPress={() => open('home')}
               />
               <ThemedText type="subtitle" style={styles.overviewTitle} numberOfLines={1}>
-                學習進度總覽
+                {view === 'review' ? `複習單字・${level}` : '學習進度總覽'}
               </ThemedText>
             </View>
-            {progress ? (
+            {view === 'review' ? (
+              // 考試中不能看單字（避免查到答案）
+              <ExamLock what="單字複習">
+                <DueWordsReview level={level} />
+              </ExamLock>
+            ) : progress ? (
               <ProgressOverview progress={progress} />
             ) : (
               <LoadingNote text="讀取學習紀錄…" />
@@ -96,7 +102,12 @@ export default function HomeScreen() {
             <ExamInProgressBanner />
 
             {progress ? (
-              <TodayTasks level={level} progress={progress} daily={daily} />
+              <TodayTasks
+                level={level}
+                progress={progress}
+                daily={daily}
+                onReviewWords={() => open('review')}
+              />
             ) : (
               <LoadingNote text="讀取今日任務…" />
             )}
@@ -114,7 +125,7 @@ export default function HomeScreen() {
                 <CaseCard label="CASE 002" title="各等級學習進度">
                   <LevelProgressList levels={progress.levels} />
                 </CaseCard>
-                <SecondaryButton label="查看學習進度總覽" onPress={() => toggleOverview(true)} />
+                <SecondaryButton label="查看學習進度總覽" onPress={() => open('overview')} />
               </>
             )}
           </View>
