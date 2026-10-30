@@ -67,7 +67,7 @@ export type ExamGroup = {
   id: string;
   kind: 'passage' | 'audio';
   subcategory: ExamSubcategory;
-  /** 讀解文章（日文） */
+  /** 讀解文章（日文）；可以直接寫注音 [漢字|かな]，讀進來時會分成文章和注音版本 */
   passage?: string;
   /** 文章或對話的中文翻譯（考後才顯示） */
   translation?: string;
@@ -115,6 +115,11 @@ export type ExamQuestion = {
   optionNotes?: [string, string, string, string];
   /** 題目句子的中文翻譯（考後顯示） */
   translation?: string;
+  // ── 讀進來時由題組補上（資料檔裡不用寫） ──
+  /** 文章的注音版本（[漢字|かな]） */
+  passageFurigana?: string;
+  /** 文章或對話的中文翻譯 */
+  passageTranslation?: string;
   sentence: string;
   /** 第一個是正確答案；出題時會打亂順序 */
   options: [string, string, string, string];

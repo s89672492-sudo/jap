@@ -36,7 +36,9 @@ export function ExamQuestionView({
       <ThemedText type="smallBold" themeColor="textSecondary">
         {EXAM_TYPE_PROMPTS[question.type]}
       </ThemedText>
-      {question.passage && <PassageCard passage={question.passage} />}
+      {question.passage && (
+        <PassageCard passage={question.passage} furigana={question.passageFurigana} />
+      )}
       {question.script && (
         <ListeningPlayer
           questionId={question.id}
@@ -68,6 +70,36 @@ export function ExamQuestionView({
             推理解說
           </ThemedText>
           <ThemedText type="small">{question.explanation}</ThemedText>
+          {question.translation && (
+            <ThemedText type="small" themeColor="textSecondary">
+              題目翻譯：{question.translation}
+            </ThemedText>
+          )}
+          {question.optionNotes && (
+            <View style={styles.notes}>
+              {question.options.map((option, i) => (
+                <ThemedText key={option} type="small">
+                  <ThemedText
+                    type="smallBold"
+                    style={{ color: i === 0 ? theme.success : theme.textSecondary }}>
+                    {i === 0 ? '✓ ' : '✗ '}
+                    {option}：
+                  </ThemedText>
+                  {question.optionNotes?.[i]}
+                </ThemedText>
+              ))}
+            </View>
+          )}
+          {question.passageTranslation && (
+            <View style={[styles.translation, { borderTopColor: theme.border }]}>
+              <ThemedText type="smallBold" themeColor="textSecondary">
+                文章翻譯
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {question.passageTranslation}
+              </ThemedText>
+            </View>
+          )}
         </View>
       )}
     </>
@@ -77,6 +109,14 @@ export function ExamQuestionView({
 const styles = StyleSheet.create({
   options: {
     gap: Spacing.two,
+  },
+  notes: {
+    gap: Spacing.one,
+  },
+  translation: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: Spacing.two,
+    gap: Spacing.half,
   },
   explanation: {
     borderWidth: 1,

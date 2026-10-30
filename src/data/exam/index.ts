@@ -1,5 +1,8 @@
 import type { JlptLevel } from '@/data/vocab/types';
+import { stripRuby } from '@/lib/furigana';
 
+import { N4_EXAM_BANK } from './bank/n4';
+import { N5_EXAM_BANK } from './bank/n5';
 import { N1_EXAM_GROUPS } from './groups/n1';
 import { N2_EXAM_GROUPS } from './groups/n2';
 import { N3_EXAM_GROUPS } from './groups/n3';
@@ -34,8 +37,9 @@ export type {
 } from './types';
 
 const RAW_EXAM: Record<JlptLevel, ExamQuestion[]> = {
-  N5: N5_EXAM,
-  N4: N4_EXAM,
+  // 原有的 50 題＋擴充題庫（新題型、讀解題組）
+  N5: [...N5_EXAM, ...N5_EXAM_BANK],
+  N4: [...N4_EXAM, ...N4_EXAM_BANK],
   N3: N3_EXAM,
   N2: N2_EXAM,
   N1: N1_EXAM,
@@ -63,11 +67,20 @@ export function getExamGroup(id: string): ExamGroup | undefined {
  * 讀進來的題目：補上題組的文章或對話（畫面直接用 passage、script），
  * 舊題目沒有寫的分類、難度、來源、版本，依題型補預設值。
  */
+const RUBY = /\[[^|\]]+\|[^\]]+\]/;
+
 export function normalizeQuestion(level: JlptLevel, question: ExamQuestion): ExamQuestion {
   const group = question.groupId ? GROUP_BY_ID.get(question.groupId) : undefined;
   const defaults = TYPE_DEFAULTS[question.type];
+  // 新題目可以直接在句子、文章裡寫注音 [漢字|かな]：分成畫面用的文字和注音版本
+  const sentenceHasRuby = RUBY.test(question.sentence);
+  const rawPassage = question.passage ?? group?.passage;
+  const passageHasRuby = rawPassage !== undefined && RUBY.test(rawPassage);
   return {
     ...question,
+    sentence: sentenceHasRuby ? stripRuby(question.sentence) : question.sentence,
+    furigana:
+      question.furigana ?? (sentenceHasRuby ? question.sentence.replace(/[［］]/g, '') : undefined),
     level: question.level ?? level,
     category: question.category ?? defaults.category,
     subcategory: question.subcategory ?? group?.subcategory ?? defaults.subcategory,
@@ -75,7 +88,9 @@ export function normalizeQuestion(level: JlptLevel, question: ExamQuestion): Exa
     source: question.source ?? group?.source ?? ORIGINAL_SOURCE.source,
     license: question.license ?? group?.license ?? ORIGINAL_SOURCE.license,
     version: question.version ?? 1,
-    passage: question.passage ?? group?.passage,
+    passage: rawPassage !== undefined && passageHasRuby ? stripRuby(rawPassage) : rawPassage,
+    passageFurigana: passageHasRuby ? rawPassage : undefined,
+    passageTranslation: group?.translation,
     script: question.script ?? group?.script,
   };
 }

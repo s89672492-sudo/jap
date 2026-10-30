@@ -222,14 +222,26 @@ for (const lv of LEVELS) {
     }
     if (!['passage', 'audio'].includes(g.kind)) error(where, `題組種類不正確：${g.kind}`);
     if (!SUBCATEGORIES.has(g.subcategory)) error(where, `細分題型不正確：${g.subcategory}`);
-    if (g.passage && !JAPANESE.test(g.passage)) error(where, '文章沒有日文');
+    if (g.passage) {
+      const plain = RUBY.test(g.passage) ? checkRuby(where, g.passage) : g.passage;
+      RUBY.lastIndex = 0;
+      if (!JAPANESE.test(plain)) error(where, '文章沒有日文');
+      // 新格式的題組（有注音或標了難度）一定要有完整中文翻譯
+      if ((g.difficulty !== undefined || plain !== g.passage) && !isText(g.translation)) {
+        error(where, '新題組缺少文章的中文翻譯');
+      }
+    }
     checkMeta(where, g);
   }
 }
 
 const seenContent = new Map();
 for (const lv of LEVELS) {
-  for (const q of load(`exam/${lv}.ts`)) {
+  const bankFile = `exam/bank/${lv}.ts`;
+  const bank = fs.existsSync(path.join(DATA, bankFile))
+    ? loadTs(bankFile)[`${lv.toUpperCase()}_EXAM_BANK`]
+    : [];
+  for (const q of [...load(`exam/${lv}.ts`), ...bank]) {
     const where = `試題 ${q.id ?? '(沒有 id)'}`;
     examCount++;
     if (examIds.has(q.id)) error(where, 'id 重複');
@@ -237,8 +249,15 @@ for (const lv of LEVELS) {
     examById.set(q.id, q);
     if (!isText(q.id) || !q.id.startsWith(`${lv}-`)) error(where, 'id 和檔案等級不一致');
     if (!EXAM_TYPES.has(q.type)) error(where, `題型不正確：${q.type}`);
+    // 新題目可以直接寫注音 [漢字|かな]
+    let sentence = q.sentence;
+    if (isText(q.sentence) && /\[[^|\]]+\|/.test(q.sentence)) {
+      sentence = checkRuby(where, q.sentence.replace(/[［］]/g, ''));
+      sentence = q.sentence.replace(/\[([^|\]]+)\|[^\]]+\]/g, '$1');
+    }
     if (!isText(q.sentence)) error(where, '缺少題目');
-    else if (!JAPANESE.test(q.sentence)) error(where, '題目沒有日文');
+    else if (!JAPANESE.test(sentence)) error(where, '題目沒有日文');
+    if (q.options?.some((o) => /\[[^|\]]+\|/.test(o))) error(where, '選項不能有注音標記');
     if (!isText(q.explanation)) error(where, '缺少解說（正確答案的說明）');
     checkOptions(where, q.options);
     if (q.options?.some((o) => !isText(o))) error(where, '有空白的選項');
@@ -253,6 +272,14 @@ for (const lv of LEVELS) {
       }
     }
     if (q.difficulty === undefined) noDifficulty++;
+    // 新格式題目（標了難度）：每個選項都要有解說，題目要有翻譯（讀解看文章翻譯）、授權
+    else {
+      if (!q.optionNotes) error(where, '新題目缺少每個選項的解說（optionNotes）');
+      if (!q.license) error(where, '新題目缺少授權標示（license）');
+      if (!['reading', 'listening'].includes(q.type) && !isText(q.translation)) {
+        error(where, '新題目缺少題目的中文翻譯（translation）');
+      }
+    }
     if (q.translation === undefined) noTranslation++;
     const group = q.groupId ? groupById.get(q.groupId) : undefined;
     if (q.groupId) {
@@ -260,7 +287,8 @@ for (const lv of LEVELS) {
       else usedGroups.add(q.groupId);
       if (q.passage) error(where, '題目同時有 groupId 和 passage，文章只要放在題組裡');
     }
-    const passage = q.passage ?? group?.passage;
+    const rawPassage = q.passage ?? group?.passage;
+    const passage = rawPassage?.replace(/\[([^|\]]+)\|[^\]]+\]/g, '$1');
     const script = q.script ?? group?.script;
     if (q.type === 'reading' && !isText(passage)) error(where, '讀解題缺少文章（passage 或題組）');
     if (q.type === 'listening' && !(Array.isArray(script) && script.length > 1)) {
@@ -273,7 +301,7 @@ for (const lv of LEVELS) {
       error(where, '題目沒有用［］標出畫底線的字');
     }
     // 重複的題目：同一篇文章、同一句題目、同一組選項
-    const key = JSON.stringify([passage ?? '', q.sentence, [...(q.options ?? [])].sort()]);
+    const key = JSON.stringify([passage ?? '', sentence, [...(q.options ?? [])].sort()]);
     if (seenContent.has(key)) error(where, `和 ${seenContent.get(key)} 是重複的題目`);
     else seenContent.set(key, q.id);
   }

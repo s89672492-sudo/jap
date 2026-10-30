@@ -114,7 +114,9 @@ export function MockExamIntro({ level, onStart, onOpenRecord }: MockExamIntroPro
           後可以接著考；時間照截止時間計算，不會因為重新整理而增加。考試期間會暫停單字、閱讀和其他練習，離開考試畫面的次數會記在成績單。
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          題庫現況：漢字讀法、表記、文脈語彙、文法形式有數千題可以挑；讀解、聽解、言い換え、句子重組的題數還少（正在擴充），所以隨機考卷的這些題型目前常會重複，題數也比正式考試少。
+          {level === 'N5' || level === 'N4'
+            ? '題庫現況：文字語彙、文法、讀解（短篇、中篇、資訊檢索、文章文法）已照正式題型比例出題；聽解目前只有 10 題（正在擴充），所以聽解科的題數比正式考試少。'
+            : '題庫現況：漢字讀法、表記、文脈語彙、文法形式有數千題可以挑；讀解、聽解、言い換え、句子重組的題數還少（正在擴充），所以這些題型常會重複，題數也比正式考試少。'}
           {seenCount > 0 ? `已考過 ${seenCount} 題。` : ''}
         </ThemedText>
         {seenCount > 0 &&
