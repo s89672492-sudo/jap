@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import type { JlptLevel } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
+import { paperLabel } from '@/lib/exam-paper';
 import { MOCK_EXAM_MODE_LABELS } from '@/lib/mock-exam-session';
 import { deleteMockExamRecord, type MockExamRecord } from '@/stores/mock-exam-store';
 
@@ -44,6 +45,7 @@ export function MockExamHistoryItem({ level, record, onOpen }: MockExamHistoryIt
       </View>
       {record.mode && (
         <ThemedText type="small" themeColor="textSecondary">
+          {paperLabel(level, record.paperId, record.paperVersion)}・
           {MOCK_EXAM_MODE_LABELS[record.mode]}
           {record.leaveCount ? `・離開考試畫面 ${record.leaveCount} 次` : ''}
         </ThemedText>

@@ -1,6 +1,6 @@
 import type { ExamQuestion, ExamQuestionType } from '@/data/exam';
 import { JLPT_LEVELS, type JlptLevel } from '@/data/vocab';
-import type { MockSitting } from '@/lib/mock-exam';
+import type { MockSitting } from '@/lib/exam-paper';
 import type { ExamRoundQuestion } from '@/lib/quiz';
 
 /**
@@ -46,9 +46,12 @@ export type MockExamDraft = {
   sessionId: string;
   level: JlptLevel;
   mode: MockExamMode;
-  /** 考卷：目前都是每次重新組的「random」，固定考卷之後加入 */
+  /** 考卷：random（隨機組卷）或固定考卷的 id（例如 n5-mock-01） */
   paperId: string;
+  /** 固定考卷的版本；隨機考卷是組卷規則的版本 */
   paperVersion: number;
+  /** 隨機考卷的種子（固定考卷沒有） */
+  seed?: string;
   /** sitting：正在作答；break：這一節已交卷，等開始下一節 */
   status: 'sitting' | 'break';
   sittings: DraftSitting[];
@@ -85,11 +88,14 @@ export function sittingSeconds(sitting: MockSitting, mode: MockExamMode): number
   return mode === 'official' ? sitting.officialMinutes * 60 : sitting.seconds;
 }
 
+export type PaperInfo = { paperId: string; paperVersion: number; seed?: string };
+
 export function createDraft(
   level: JlptLevel,
   mode: MockExamMode,
   sittings: MockSitting[],
   now: number,
+  paper: PaperInfo = { paperId: 'random', paperVersion: 1 },
 ): MockExamDraft {
   const draftSittings = sittings.map((s) => ({
     label: s.label,
@@ -103,8 +109,9 @@ export function createDraft(
     sessionId: newSessionId(now),
     level,
     mode,
-    paperId: 'random',
-    paperVersion: 1,
+    paperId: paper.paperId,
+    paperVersion: paper.paperVersion,
+    ...(paper.seed ? { seed: paper.seed } : {}),
     status: 'sitting',
     sittings: draftSittings,
     sittingIndex: 0,
@@ -318,6 +325,7 @@ export function parseDraft(value: unknown): MockExamDraft | null {
     (d.mode === 'official' || d.mode === 'practice') &&
     isString(d.paperId) &&
     isNumber(d.paperVersion) &&
+    (d.seed === undefined || isString(d.seed)) &&
     (d.status === 'sitting' || d.status === 'break') &&
     Array.isArray(d.sittings) &&
     d.sittings.length > 0 &&

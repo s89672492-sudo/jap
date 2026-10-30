@@ -54,6 +54,7 @@ export async function finishMockExam(draft: MockExamDraft): Promise<FinishedExam
       mode: draft.mode,
       paperId: draft.paperId,
       paperVersion: draft.paperVersion,
+      ...(draft.seed ? { seed: draft.seed } : {}),
       startedAt: new Date(draft.startedAt).toISOString(),
       leaveCount: draft.leaveCount,
       events: draft.events.slice(-50),

@@ -21,6 +21,8 @@ export type MockExamRecord = {
   mode?: MockExamMode;
   paperId?: string;
   paperVersion?: number;
+  /** 隨機考卷的種子 */
+  seed?: string;
   startedAt?: string;
   /** 考試中離開考試畫面的次數 */
   leaveCount?: number;

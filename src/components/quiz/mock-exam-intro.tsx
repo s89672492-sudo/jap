@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { MockExamHistoryItem } from './mock-exam-history-item';
@@ -9,7 +9,15 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
 import type { JlptLevel } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
-import { MOCK_EXAM_CONFIG, type MockSitting } from '@/lib/mock-exam';
+import { PLANNED_PAPERS } from '@/data/exam/papers';
+import {
+  RANDOM_PAPER_ID,
+  buildFixedPaper,
+  findPaper,
+  fixedPapers,
+  latestPaperVersion,
+} from '@/lib/exam-paper';
+import { MOCK_EXAM_CONFIG, buildMockExam } from '@/lib/mock-exam';
 import { MOCK_EXAM_MODE_LABELS, sittingSeconds, type MockExamMode } from '@/lib/mock-exam-session';
 import {
   clearMockExamSeen,
@@ -20,12 +28,46 @@ import {
 
 type MockExamIntroProps = {
   level: JlptLevel;
-  /** 預覽用的考科（題數、時間） */
-  sittings: MockSitting[];
-  onStart: (mode: MockExamMode) => void;
+  /** paperId：random（隨機組卷）或固定考卷的 id */
+  onStart: (mode: MockExamMode, paperId: string) => void;
   /** 打開以前的考試紀錄，重看題目和解說 */
   onOpenRecord: (record: MockExamRecord) => void;
 };
+
+function PaperChip({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress?: () => void;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ selected, disabled: !onPress }}
+      aria-checked={selected}
+      disabled={!onPress}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.paperChip,
+        {
+          borderColor: selected ? theme.primary : theme.border,
+          backgroundColor: selected ? theme.primary : theme.background,
+          opacity: onPress ? 1 : 0.55,
+        },
+        pressed && styles.pressed,
+      ]}>
+      <ThemedText
+        type="smallBold"
+        style={{ color: selected ? theme.onPrimary : onPress ? theme.text : theme.textSecondary }}>
+        {label}
+      </ThemedText>
+    </Pressable>
+  );
+}
 
 const MODE_OPTIONS: { value: MockExamMode; label: string }[] = [
   { value: 'official', label: '正式時間' },
@@ -33,13 +75,23 @@ const MODE_OPTIONS: { value: MockExamMode; label: string }[] = [
 ];
 
 /** 模擬考開始前的說明：考科、時間、合格標準、最近成績 */
-export function MockExamIntro({ level, sittings, onStart, onOpenRecord }: MockExamIntroProps) {
+export function MockExamIntro({ level, onStart, onOpenRecord }: MockExamIntroProps) {
   const theme = useTheme();
   const config = MOCK_EXAM_CONFIG[level];
   const history = useMockExamHistory()[level] ?? [];
   const seenCount = useMockExamSeenCount(level);
   const [confirmClear, setConfirmClear] = useState(false);
   const [mode, setMode] = useState<MockExamMode>('official');
+  const [paperId, setPaperId] = useState(RANDOM_PAPER_ID);
+  const papers = fixedPapers(level);
+  const paper = findPaper(level, paperId);
+  // 換等級時回到隨機組卷
+  if (paperId !== RANDOM_PAPER_ID && !paper) setPaperId(RANDOM_PAPER_ID);
+  // 預覽題數和時間（隨機考卷用固定的預覽種子）
+  const sittings = useMemo(
+    () => (paper ? buildFixedPaper(level, paper) : buildMockExam(level)),
+    [level, paper],
+  );
   const totalQuestions = sittings.reduce((sum, s) => sum + s.questions.length, 0);
   const totalMinutes = sittings.reduce((sum, s) => sum + sittingSeconds(s, mode) / 60, 0);
 
@@ -62,7 +114,7 @@ export function MockExamIntro({ level, sittings, onStart, onOpenRecord }: MockEx
           後可以接著考；時間照截止時間計算，不會因為重新整理而增加。考試期間會暫停單字、閱讀和其他練習，離開考試畫面的次數會記在成績單。
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          每次換題：漢字讀法、表記、文脈語彙、文法從數千題的題庫裡挑，優先出沒考過的，錯題本裡的題目會再考一次。讀解、聽解、言い換え、句子重組目前是固定題目。
+          題庫現況：漢字讀法、表記、文脈語彙、文法形式有數千題可以挑；讀解、聽解、言い換え、句子重組的題數還少（正在擴充），所以隨機考卷的這些題型目前常會重複，題數也比正式考試少。
           {seenCount > 0 ? `已考過 ${seenCount} 題。` : ''}
         </ThemedText>
         {seenCount > 0 &&
@@ -114,6 +166,31 @@ export function MockExamIntro({ level, sittings, onStart, onOpenRecord }: MockEx
               </ThemedText>
             </Pressable>
           ))}
+        <ThemedText type="smallBold">考卷</ThemedText>
+        <View style={styles.papers}>
+          <PaperChip
+            label="隨機組卷"
+            selected={paperId === RANDOM_PAPER_ID}
+            onPress={() => setPaperId(RANDOM_PAPER_ID)}
+          />
+          {Array.from({ length: PLANNED_PAPERS }, (_, i) => {
+            const fixed = papers.find((p) => p.number === i + 1);
+            return (
+              <PaperChip
+                key={i}
+                label={fixed ? `第 ${i + 1} 回` : `第 ${i + 1} 回（準備中）`}
+                selected={fixed !== undefined && paperId === fixed.id}
+                onPress={fixed ? () => setPaperId(fixed.id) : undefined}
+              />
+            );
+          })}
+        </View>
+        <ThemedText type="small" themeColor="textSecondary">
+          {paper
+            ? `${paper.title}（第 ${latestPaperVersion(paper).version} 版）：題目和選項順序每次都一樣，適合重考比較進步。`
+            : '隨機組卷：依 JLPT 題型比例從題庫挑題，優先出錯題本和沒考過的題目，同一篇文章不會出兩次。'}
+        </ThemedText>
+        <ThemedText type="smallBold">時間</ThemedText>
         <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
         <ThemedText type="small" themeColor="textSecondary">
           {mode === 'official'
@@ -179,7 +256,7 @@ export function MockExamIntro({ level, sittings, onStart, onOpenRecord }: MockEx
 
       <PrimaryButton
         label={`開始模擬考（${MOCK_EXAM_MODE_LABELS[mode]}）`}
-        onPress={() => onStart(mode)}
+        onPress={() => onStart(mode, paperId)}
       />
       <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
         題目為依 JLPT 題型自編的原創練習題，以及用 App
@@ -218,6 +295,19 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   smallButton: {
+    minHeight: 44,
+    paddingHorizontal: Spacing.three,
+    borderWidth: 1,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  papers: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
+  },
+  paperChip: {
     minHeight: 44,
     paddingHorizontal: Spacing.three,
     borderWidth: 1,

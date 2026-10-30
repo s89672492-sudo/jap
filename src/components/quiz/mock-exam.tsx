@@ -19,7 +19,17 @@ import type { JlptLevel } from '@/data/vocab';
 import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { useFuriganaLoaded } from '@/lib/furigana';
-import { buildMockExam, restoreMockExam, scoreMockExam } from '@/lib/mock-exam';
+import {
+  RANDOM_PAPER_ID,
+  RANDOM_PAPER_VERSION,
+  buildFixedPaper,
+  buildRandomPaper,
+  findPaper,
+  latestPaperVersion,
+  paperLabel,
+} from '@/lib/exam-paper';
+import { newSeed } from '@/lib/exam-seed';
+import { restoreMockExam, scoreMockExam } from '@/lib/mock-exam';
 import { finishMockExam, type FinishedExam } from '@/lib/mock-exam-runner';
 import {
   MOCK_EXAM_MODE_LABELS,
@@ -85,16 +95,30 @@ function MockExamContent({ level, onScrollTop }: MockExamProps) {
   const draft = useMockExamDraft();
   const mistakes = useMistakes();
   const [view, setView] = useState<Screen>({ kind: 'intro' });
-  // 說明頁的預覽（題數、時間）；按開始時才重新出題、打亂選項
-  const preview = useMemo(() => buildMockExam(level), [level]);
 
   // 換等級時回到說明頁（進行中的考試不受影響，照原本的等級考完）
   if (useDepsChanged([level]) && view.kind !== 'report') setView({ kind: 'intro' });
 
-  const start = (mode: MockExamMode) => {
-    const sittings = buildMockExam(level, { mistakes, seen: getMockExamSeen(level) });
+  const start = (mode: MockExamMode, paperId: string) => {
+    const paper = paperId === RANDOM_PAPER_ID ? undefined : findPaper(level, paperId);
     const now = Date.now();
-    const fresh = createDraft(level, mode, sittings, now);
+    let fresh: MockExamDraft;
+    if (paper) {
+      const version = latestPaperVersion(paper).version;
+      fresh = createDraft(level, mode, buildFixedPaper(level, paper, version), now, {
+        paperId: paper.id,
+        paperVersion: version,
+      });
+    } else {
+      // 錯題本的題目會再出，其餘優先出沒考過的；種子存進紀錄
+      const seed = newSeed();
+      const history = { mistakes, seen: getMockExamSeen(level) };
+      fresh = createDraft(level, mode, buildRandomPaper(level, history, seed), now, {
+        paperId: RANDOM_PAPER_ID,
+        paperVersion: RANDOM_PAPER_VERSION,
+        seed,
+      });
+    }
     startedThisSession.add(fresh.sessionId);
     saveMockExamDraft(fresh);
     setView({ kind: 'intro' });
@@ -141,7 +165,6 @@ function MockExamContent({ level, onScrollTop }: MockExamProps) {
   return (
     <MockExamIntro
       level={level}
-      sittings={preview}
       onStart={start}
       onOpenRecord={(record) => {
         setView({ kind: 'record', record });
@@ -305,7 +328,7 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
     </Pressable>
   );
 
-  const examTag = `${draft.level}・${MOCK_EXAM_MODE_LABELS[draft.mode]}`;
+  const examTag = `${draft.level}・${paperLabel(draft.level, draft.paperId, draft.paperVersion)}・${MOCK_EXAM_MODE_LABELS[draft.mode]}`;
 
   if (draft.status === 'break') {
     const done = draft.sittingIndex;
