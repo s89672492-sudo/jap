@@ -11,7 +11,9 @@ import { Spacing } from '@/constants/theme';
 import { EXAM_TYPE_LABELS, type ExamQuestionType } from '@/data/exam';
 import { useTheme } from '@/hooks/use-theme';
 import type { MockExamResult } from '@/lib/mock-exam';
+import { MOCK_EXAM_MODE_LABELS } from '@/lib/mock-exam-session';
 import type { ExamRoundQuestion } from '@/lib/quiz';
+import type { MockExamRecord } from '@/stores/mock-exam-store';
 
 type MockExamReportProps = {
   result: MockExamResult;
@@ -19,6 +21,8 @@ type MockExamReportProps = {
   answers: Record<string, string>;
   /** 重看以前的考試時，考試的時間（ISO 字串） */
   date?: string;
+  /** 這次考試的紀錄（模式、離開次數、作答時間；舊紀錄可能沒有） */
+  record?: MockExamRecord;
   onRetry: () => void;
   onBack: () => void;
 };
@@ -36,6 +40,7 @@ export function MockExamReport({
   items,
   answers,
   date,
+  record,
   onRetry,
   onBack,
 }: MockExamReportProps) {
@@ -50,6 +55,14 @@ export function MockExamReport({
     if (answers[item.question.id] === item.answer) entry.correct++;
     byType.set(item.question.type, entry);
   }
+  const unanswered = items.filter((item) => answers[item.question.id] === undefined).length;
+  const totalMs = (record?.items ?? []).reduce((sum, item) => sum + (item.ms ?? 0), 0);
+  const details = [
+    record?.mode ? `${MOCK_EXAM_MODE_LABELS[record.mode]}模式` : null,
+    `未作答 ${unanswered} 題`,
+    totalMs > 0 ? `作答時間約 ${Math.max(1, Math.round(totalMs / 60000))} 分鐘` : null,
+    record?.leaveCount !== undefined ? `離開考試畫面 ${record.leaveCount} 次` : null,
+  ].filter(Boolean);
   const reviewItems = items.filter(
     (item) => filter === 'all' || answers[item.question.id] !== item.answer,
   );
@@ -77,6 +90,9 @@ export function MockExamReport({
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           合格點 {result.passMark} 分，且每科都要達到基準點
+        </ThemedText>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
+          {details.join('・')}
         </ThemedText>
       </View>
 

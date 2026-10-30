@@ -46,7 +46,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "check:data": "node scripts/check-data.js",
-    "check": "npm run typecheck && npm run lint && npm run check:data"
+    "check": "npm run typecheck && npm run lint && npm run check:data && npm run test:unit",
+    "test:unit": "node scripts/test-mock-exam-session.js"
   },
   "private": true
 }

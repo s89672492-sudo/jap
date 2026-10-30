@@ -13,6 +13,7 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
 import { EXAM_BY_LEVEL, EXAM_SECTION_TYPES, EXAM_TYPE_LABELS, type ExamSection } from '@/data/exam';
 import type { JlptLevel } from '@/data/vocab';
+import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { buildExamRound } from '@/lib/quiz';
 import { addMistake } from '@/stores/mistakes-store';
@@ -40,12 +41,17 @@ type ExamQuizProps = {
   onAnswered?: () => void;
   /** 換下一題時呼叫，讓外層捲回最上面 */
   onNext?: () => void;
+  /** 模擬考進行中：只顯示模擬考，不能切到題型練習（練習會看到解說） */
+  locked?: boolean;
 };
 
 /** 模擬試題：可以分題型練習，或照 JLPT 考科和時間做一次完整模擬考 */
-export function ExamQuiz({ level, onAnswered, onNext }: ExamQuizProps) {
-  const [mode, setMode] = useState<ExamMode>('practice');
-  const modePicker = (
+export function ExamQuiz({ level, onAnswered, onNext, locked = false }: ExamQuizProps) {
+  const [chosen, setMode] = useState<ExamMode>('practice');
+  const mode = locked ? 'mock' : chosen;
+  // 考完時停在模擬考的成績單
+  if (useDepsChanged([locked]) && !locked && chosen !== 'mock') setMode('mock');
+  const modePicker = locked ? null : (
     <SegmentedControl options={EXAM_MODE_OPTIONS} value={mode} onChange={setMode} />
   );
 

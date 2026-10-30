@@ -9,6 +9,7 @@ import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { LevelProgressList } from '@/components/home/level-progress-list';
 import { ProgressOverview } from '@/components/home/progress-overview';
 import { TodayTasks } from '@/components/home/today-tasks';
+import { ExamInProgressBanner } from '@/components/quiz/mock-exam/exam-lock';
 import { ThemedText } from '@/components/themed-text';
 import { ChipButton } from '@/components/ui/chip-button';
 import { LoadingNote } from '@/components/ui/loading-note';
@@ -91,6 +92,8 @@ export default function HomeScreen() {
                 </ThemedText>
               </View>
             </View>
+
+            <ExamInProgressBanner />
 
             {progress ? (
               <TodayTasks level={level} progress={progress} daily={daily} />

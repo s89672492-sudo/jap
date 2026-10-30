@@ -1,45 +1,61 @@
+import { useIsFocused } from 'expo-router';
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, View } from 'react-native';
 
 import { ExamQuestionView } from './exam-question-view';
+import { QuestionNavigator } from './mock-exam/question-navigator';
+import { SubmitReview } from './mock-exam/submit-review';
 import { MockExamIntro } from './mock-exam-intro';
 import { MockExamReport } from './mock-exam-report';
 
 import { ThemedText } from '@/components/themed-text';
+import { LoadingNote } from '@/components/ui/loading-note';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
-import { LoadingNote } from '@/components/ui/loading-note';
 import { Spacing } from '@/constants/theme';
 import { EXAM_TYPE_LABELS } from '@/data/exam';
 import { useAllLevelData } from '@/data/level-data';
 import type { JlptLevel } from '@/data/vocab';
 import { useDepsChanged } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
-import {
-  buildMockExam,
-  restoreMockExam,
-  scoreMockExam,
-  type MockExamResult,
-  type MockSitting,
-} from '@/lib/mock-exam';
 import { useFuriganaLoaded } from '@/lib/furigana';
-import { stopSpeaking } from '@/lib/speech';
-import { addMistake, useMistakes } from '@/stores/mistakes-store';
+import { buildMockExam, restoreMockExam, scoreMockExam } from '@/lib/mock-exam';
+import { finishMockExam, type FinishedExam } from '@/lib/mock-exam-runner';
 import {
-  getMockExamSeen,
-  markMockExamSeen,
-  recordMockExam,
-  type MockExamRecord,
-} from '@/stores/mock-exam-store';
-import { recordStudy } from '@/stores/study-store';
-
-type Phase = 'intro' | 'sitting' | 'break' | 'report' | 'record';
+  MOCK_EXAM_MODE_LABELS,
+  addEvent,
+  answerQuestion,
+  canAnswer,
+  createDraft,
+  expireIfNeeded,
+  goToQuestion,
+  startNextSitting,
+  submitSitting,
+  toggleMark,
+  type MockExamDraft,
+  type MockExamMode,
+} from '@/lib/mock-exam-session';
+import { stopSpeaking } from '@/lib/speech';
+import { useMistakes } from '@/stores/mistakes-store';
+import {
+  getMockExamDraft,
+  saveMockExamDraft,
+  useMockExamDraft,
+  useMockExamDraftLoaded,
+  useMockExamSaveError,
+} from '@/stores/mock-exam-draft-store';
+import { getMockExamSeen, type MockExamRecord } from '@/stores/mock-exam-store';
 
 type MockExamProps = {
   level: JlptLevel;
   /** 換題、換節時呼叫，讓外層捲回最上面 */
   onScrollTop?: () => void;
 };
+
+type Screen =
+  | { kind: 'intro' }
+  | { kind: 'report'; finished: FinishedExam }
+  | { kind: 'record'; record: MockExamRecord };
 
 function formatTime(ms: number) {
   const total = Math.ceil(ms / 1000);
@@ -48,231 +64,322 @@ function formatTime(ms: number) {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+/** 這次打開 App 後才開始的考試（重新整理後接著考的不算），用來記錄「接著考」 */
+const startedThisSession = new Set<string>();
+
 /**
  * 完整模擬考：說明 → 第 1 節 → 休息 → 第 2 節 → … → 成績單。
- * 每節計時（用截止時間計算，切到背景再回來也準確），時間到自動交卷。
+ * 進行中的考試存在手機裡（mock-exam-draft），重新整理或關掉 App 後接著考；
+ * 每節用截止時間計時，時間到自動交卷。
  */
 export function MockExam(props: MockExamProps) {
   // 自動出題要用到全部等級的單字、文法和注音，載入後才開始
   const all = useAllLevelData();
   const furiganaReady = useFuriganaLoaded();
-  if (!all || !furiganaReady) return <LoadingNote text="準備模擬考題庫…" />;
+  const draftLoaded = useMockExamDraftLoaded();
+  if (!all || !furiganaReady || !draftLoaded) return <LoadingNote text="準備模擬考題庫…" />;
   return <MockExamContent {...props} />;
 }
 
 function MockExamContent({ level, onScrollTop }: MockExamProps) {
-  const theme = useTheme();
-  const [phase, setPhase] = useState<Phase>('intro');
-  // 說明頁先用一份預覽（題數、時間），按開始時再重新出題、打亂選項
-  const preview = useMemo(() => buildMockExam(level), [level]);
+  const draft = useMockExamDraft();
   const mistakes = useMistakes();
-  // 從「最近成績」打開的舊考試紀錄
-  const [record, setRecord] = useState<MockExamRecord | null>(null);
-  const [sittings, setSittings] = useState<MockSitting[]>(preview);
-  const [sittingIndex, setSittingIndex] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [deadline, setDeadline] = useState(0);
-  const [now, setNow] = useState(() => Date.now());
-  const [confirming, setConfirming] = useState(false);
-  const [result, setResult] = useState<MockExamResult | null>(null);
-  const finishing = useRef(false);
+  const [view, setView] = useState<Screen>({ kind: 'intro' });
+  // 說明頁的預覽（題數、時間）；按開始時才重新出題、打亂選項
+  const preview = useMemo(() => buildMockExam(level), [level]);
 
-  // 換等級時回到說明頁
-  if (useDepsChanged([preview])) {
-    setPhase('intro');
-    setSittings(preview);
-  }
+  // 換等級時回到說明頁（進行中的考試不受影響，照原本的等級考完）
+  if (useDepsChanged([level]) && view.kind !== 'report') setView({ kind: 'intro' });
 
-  const sitting = sittings[sittingIndex];
-  const remaining = Math.max(0, deadline - now);
-
-  const startSitting = (index: number) => {
-    setSittingIndex(index);
-    setQuestionIndex(0);
-    setConfirming(false);
-    setDeadline(Date.now() + sittings[index].seconds * 1000);
-    setNow(Date.now());
-    finishing.current = false;
-    setPhase('sitting');
+  const start = (mode: MockExamMode) => {
+    const sittings = buildMockExam(level, { mistakes, seen: getMockExamSeen(level) });
+    const now = Date.now();
+    const fresh = createDraft(level, mode, sittings, now);
+    startedThisSession.add(fresh.sessionId);
+    saveMockExamDraft(fresh);
+    setView({ kind: 'intro' });
     onScrollTop?.();
   };
 
-  const start = () => {
-    // 錯題本的題目會再出，其餘優先出沒考過的
-    const fresh = buildMockExam(level, {
-      mistakes,
-      seen: getMockExamSeen(level),
-    });
-    setSittings(fresh);
-    setAnswers({});
-    setResult(null);
-    setSittingIndex(0);
-    setQuestionIndex(0);
-    setConfirming(false);
-    setDeadline(Date.now() + fresh[0].seconds * 1000);
-    setNow(Date.now());
-    finishing.current = false;
-    setPhase('sitting');
-    onScrollTop?.();
-  };
-
-  const finishSitting = () => {
-    if (finishing.current) return;
-    finishing.current = true;
-    stopSpeaking();
-    if (sittingIndex + 1 < sittings.length) {
-      setPhase('break');
-      onScrollTop?.();
-      return;
-    }
-    // 全部考完：計分、記錄、把錯題加入錯題本
-    const items = sittings.flatMap((s) => s.questions);
-    const scored = scoreMockExam(level, items, answers);
-    for (const item of items) {
-      const correct = answers[item.question.id] === item.answer;
-      recordStudy(item.question.id, correct);
-      if (!correct) addMistake(item.question.id);
-    }
-    markMockExamSeen(
-      level,
-      items.map((item) => item.question.id),
-    );
-    recordMockExam(level, {
-      date: new Date().toISOString(),
-      total: scored.total,
-      passed: scored.passed,
-      sections: scored.sections.map((s) => ({
-        label: s.section.label,
-        score: s.score,
-        max: s.section.max,
-      })),
-      items: items.map((item) => ({
-        id: item.question.id,
-        mine: answers[item.question.id] ?? null,
-      })),
-    });
-    setResult(scored);
-    setPhase('report');
-    onScrollTop?.();
-  };
-
-  // 計時：每秒更新一次，時間到自動交卷（用截止時間算，切到背景再回來也準確）
-  const tick = useEffectEvent(() => {
-    const time = Date.now();
-    setNow(time);
-    if (deadline > 0 && time >= deadline) finishSitting();
-  });
-  useEffect(() => {
-    if (phase !== 'sitting') return;
-    const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
-  }, [phase]);
-
-  // 離開模擬考（切換模式、等級或分頁）時停止聽解播放
-  useEffect(() => () => stopSpeaking(), []);
-
-  if (phase === 'intro') {
+  if (draft) {
     return (
-      <MockExamIntro
-        level={level}
-        sittings={preview}
-        onStart={start}
-        onOpenRecord={(opened) => {
-          setRecord(opened);
-          setPhase('record');
+      <MockExamSession
+        draft={draft}
+        onScrollTop={onScrollTop}
+        onFinished={(finished) => {
+          setView({ kind: 'report', finished });
           onScrollTop?.();
         }}
       />
     );
   }
 
-  if (phase === 'record' && record?.items) {
-    return (
-      <SavedReport
-        level={level}
-        record={record}
-        onRetry={start}
-        onBack={() => {
-          setPhase('intro');
-          onScrollTop?.();
-        }}
-      />
-    );
-  }
+  const backToIntro = () => {
+    setView({ kind: 'intro' });
+    onScrollTop?.();
+  };
 
-  if (phase === 'report' && result) {
+  if (view.kind === 'report') {
     return (
       <MockExamReport
-        result={result}
-        items={sittings.flatMap((s) => s.questions)}
-        answers={answers}
-        onRetry={start}
-        onBack={() => {
-          setPhase('intro');
-          onScrollTop?.();
-        }}
+        result={view.finished.result}
+        items={view.finished.items}
+        answers={view.finished.answers}
+        record={view.finished.record}
+        onRetry={backToIntro}
+        onBack={backToIntro}
       />
     );
   }
 
-  if (phase === 'break') {
-    const nextSitting = sittings[sittingIndex + 1];
+  if (view.kind === 'record' && view.record.items) {
+    return (
+      <SavedReport level={level} record={view.record} onRetry={backToIntro} onBack={backToIntro} />
+    );
+  }
+
+  return (
+    <MockExamIntro
+      level={level}
+      sittings={preview}
+      onStart={start}
+      onOpenRecord={(record) => {
+        setView({ kind: 'record', record });
+        onScrollTop?.();
+      }}
+    />
+  );
+}
+
+type SessionProps = {
+  draft: MockExamDraft;
+  onScrollTop?: () => void;
+  onFinished: (finished: FinishedExam) => void;
+};
+
+/** 進行中的考試：作答、休息。每個動作都存到手機 */
+function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
+  const theme = useTheme();
+  const saveError = useMockExamSaveError();
+  const focused = useIsFocused();
+  const [now, setNow] = useState(() => Date.now());
+  const [reviewing, setReviewing] = useState(false);
+  const [confirmQuit, setConfirmQuit] = useState(false);
+  const wasFocused = useRef(focused);
+
+  /** 用手機裡最新的進度計算下一步並存檔（避免用到畫面上舊的資料） */
+  const update = (fn: (current: MockExamDraft, time: number) => MockExamDraft) => {
+    const current = getMockExamDraft();
+    if (!current || current.sessionId !== draft.sessionId) return;
+    const time = Date.now();
+    const next = fn(current, time);
+    // 存檔會更新 store，畫面跟著重畫
+    if (next !== current) saveMockExamDraft(next);
+  };
+
+  const finish = async (final: MockExamDraft) => {
+    stopSpeaking();
+    const finished = await finishMockExam(final);
+    if (finished) onFinished(finished);
+  };
+
+  /** 交出目前這一節（手動或時間到）；最後一節交卷後結算 */
+  const submit = (auto: boolean) => {
+    const current = getMockExamDraft();
+    if (!current || current.sessionId !== draft.sessionId) return;
+    const result = submitSitting(current, Date.now(), auto);
+    if (result.draft === current) return;
+    setReviewing(false);
+    stopSpeaking();
+    // 先存「這一節已交卷」，結算途中關掉 App 也不能回來重新作答
+    saveMockExamDraft(result.draft).then(() => {
+      if (result.finished) finish(result.draft);
+    });
+    if (!result.finished) onScrollTop?.();
+  };
+
+  // 計時：每秒檢查一次截止時間；剛打開（例如重新整理後）時間已經過了，也會自動交卷
+  const tick = useEffectEvent(() => {
+    const current = getMockExamDraft();
+    const time = Date.now();
+    setNow(time);
+    if (!current || current.sessionId !== draft.sessionId) return;
+    const expired = expireIfNeeded(current, time);
+    if (!expired.expired) return;
+    setReviewing(false);
+    stopSpeaking();
+    saveMockExamDraft(expired.draft).then(() => {
+      if (expired.finished) finish(expired.draft);
+    });
+  });
+  useEffect(() => {
+    // 第一次檢查放到下一輪，不在 effect 裡直接更新畫面
+    const first = setTimeout(tick, 0);
+    if (draft.status !== 'sitting') return () => clearTimeout(first);
+    const timer = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(timer);
+    };
+  }, [draft.status, draft.sittingIndex]);
+
+  // 重新整理或重新打開 App 後接著考：記一筆「接著考」
+  const markResume = useEffectEvent(() => {
+    if (!startedThisSession.has(draft.sessionId)) {
+      startedThisSession.add(draft.sessionId);
+      update((d, t) => addEvent(d, 'resume', t));
+    }
+  });
+  useEffect(() => {
+    markResume();
+  }, []);
+
+  // App 切到背景、離開考試畫面（其他分頁）都記下來
+  const onAppState = useEffectEvent((state: string) => {
+    if (state === 'background' || state === 'inactive') {
+      update((d, t) => (d.status === 'sitting' ? addEvent(d, 'background', t) : d));
+    } else if (state === 'active') {
+      update((d, t) => (d.status === 'sitting' ? addEvent(d, 'foreground', t) : d));
+    }
+  });
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', onAppState);
+    return () => sub.remove();
+  }, []);
+  const onFocusChange = useEffectEvent((isFocused: boolean) => {
+    if (isFocused === wasFocused.current) return;
+    wasFocused.current = isFocused;
+    if (!isFocused) stopSpeaking();
+    update((d, t) => (d.status === 'sitting' ? addEvent(d, isFocused ? 'return' : 'leave', t) : d));
+  });
+  useEffect(() => {
+    onFocusChange(focused);
+  }, [focused]);
+
+  // 離開模擬考畫面時停止聽解播放
+  useEffect(() => () => stopSpeaking(), []);
+
+  const saveWarning = saveError ? (
+    <View style={[styles.warning, { borderColor: theme.accent }]} accessibilityLiveRegion="polite">
+      <ThemedText type="smallBold" style={{ color: theme.accent }}>
+        ⚠ 作答進度沒有存到手機
+      </ThemedText>
+      <ThemedText type="small">
+        可能是儲存空間已滿或瀏覽器不允許存資料。可以繼續作答，但重新整理或關掉 App
+        會遺失這次的進度。
+      </ThemedText>
+      <SecondaryButton
+        label="再試一次儲存"
+        onPress={() => update((d, t) => ({ ...d, updatedAt: t }))}
+      />
+    </View>
+  ) : null;
+
+  const quit = confirmQuit ? (
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: theme.backgroundElement, borderColor: theme.accent },
+      ]}>
+      <ThemedText type="smallBold">放棄這次模擬考？</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        這次的作答不會計分，也不會留下成績紀錄。以前的成績、錯題本不受影響。
+      </ThemedText>
+      <PrimaryButton
+        label="確定放棄"
+        onPress={() => {
+          stopSpeaking();
+          saveMockExamDraft(null);
+        }}
+      />
+      <SecondaryButton label="繼續考試" onPress={() => setConfirmQuit(false)} />
+    </View>
+  ) : (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => setConfirmQuit(true)}
+      style={({ pressed }) => [styles.quit, pressed && styles.pressed]}>
+      <ThemedText type="small" themeColor="textSecondary">
+        放棄這次考試
+      </ThemedText>
+    </Pressable>
+  );
+
+  const examTag = `${draft.level}・${MOCK_EXAM_MODE_LABELS[draft.mode]}`;
+
+  if (draft.status === 'break') {
+    const done = draft.sittingIndex;
+    const next = draft.sittings[done + 1];
+    const lastEvent = [...draft.events]
+      .reverse()
+      .find((e) => e.sitting === done && (e.kind === 'submit' || e.kind === 'auto-submit'));
+    if (!next) {
+      // 最後一節已交卷但還沒結算完（例如結算時關掉 App）：再結算一次
+      return <FinishPending draft={draft} onFinish={finish} />;
+    }
     return (
       <View style={styles.container}>
+        {saveWarning}
         <View
           style={[
             styles.card,
-            {
-              backgroundColor: theme.backgroundElement,
-              borderColor: theme.border,
-            },
+            { backgroundColor: theme.backgroundElement, borderColor: theme.border },
           ]}>
+          <ThemedText type="small" themeColor="textSecondary">
+            {examTag}
+          </ThemedText>
           <ThemedText type="smallBold" style={{ color: theme.accent }}>
-            第 {sittingIndex + 1} 節結束
+            第 {done + 1} 節結束{lastEvent?.kind === 'auto-submit' ? '（時間到，已自動交卷）' : ''}
           </ThemedText>
           <ThemedText type="small">
-            下一節：{nextSitting.label}（{nextSitting.questions.length} 題・
-            {nextSitting.seconds / 60} 分鐘）
+            下一節：{next.label}（{next.questions.length} 題・{next.seconds / 60} 分鐘）
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            可以先休息一下，準備好再開始。開始後才會計時。
+            可以先休息一下，準備好再開始。開始後才會計時；已交卷的節不能再修改。
           </ThemedText>
         </View>
-        <PrimaryButton label="開始下一節" onPress={() => startSitting(sittingIndex + 1)} />
+        <PrimaryButton
+          label="開始下一節"
+          onPress={() => {
+            update((d, t) => startNextSitting(d, t));
+            onScrollTop?.();
+          }}
+        />
+        {quit}
       </View>
     );
   }
 
-  const item = sitting.questions[questionIndex];
-  const picked = answers[item.question.id] ?? null;
-  const answeredCount = sitting.questions.filter((q) => answers[q.question.id]).length;
-  const unanswered = sitting.questions.length - answeredCount;
-  const isLast = questionIndex + 1 >= sitting.questions.length;
+  const sitting = draft.sittings[draft.sittingIndex];
+  const item = sitting.questions[draft.questionIndex];
+  const picked = draft.answers[item.question.id] ?? null;
+  const marked = draft.marked.includes(item.question.id);
+  const remaining = Math.max(0, draft.deadline - now);
   const lowTime = remaining <= 60_000;
+  const isLastQuestion = draft.questionIndex + 1 >= sitting.questions.length;
+  const isLastSitting = draft.sittingIndex + 1 >= draft.sittings.length;
+  const open = canAnswer(draft, now);
 
   const goTo = (index: number) => {
-    setQuestionIndex(index);
-    setConfirming(false);
+    setReviewing(false);
+    update((d, t) => goToQuestion(d, index, t));
     onScrollTop?.();
   };
 
   return (
     <View style={styles.container}>
+      {saveWarning}
       <View
         style={[
           styles.header,
-          {
-            backgroundColor: theme.backgroundElement,
-            borderColor: theme.border,
-          },
+          { backgroundColor: theme.backgroundElement, borderColor: theme.border },
         ]}>
         <View style={styles.headerText}>
-          <ThemedText type="smallBold" numberOfLines={2}>
-            第 {sittingIndex + 1} 節　{sitting.label}
-          </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            已作答 {answeredCount} / {sitting.questions.length}
+            {examTag}
+          </ThemedText>
+          <ThemedText type="smallBold" numberOfLines={2}>
+            第 {draft.sittingIndex + 1} 節　{sitting.label}
           </ThemedText>
         </View>
         <View
@@ -284,86 +391,96 @@ function MockExamContent({ level, onScrollTop }: MockExamProps) {
         </View>
       </View>
 
-      {/* 題號：點了可以跳到那一題，已作答的塗滿 */}
-      <View style={styles.numbers}>
-        {sitting.questions.map((q, i) => {
-          const done = Boolean(answers[q.question.id]);
-          const current = i === questionIndex;
-          return (
-            <Pressable
-              key={q.question.id}
-              accessibilityRole="button"
-              accessibilityLabel={`第 ${i + 1} 題${done ? '，已作答' : ''}`}
-              onPress={() => goTo(i)}
-              hitSlop={2}
-              style={[
-                styles.number,
-                {
-                  borderColor: current ? theme.accent : theme.border,
-                  backgroundColor: done ? theme.primary : theme.backgroundElement,
-                },
-              ]}>
-              <ThemedText
-                type="smallBold"
-                style={[
-                  styles.numberText,
-                  { color: done ? theme.onPrimary : theme.textSecondary },
-                ]}>
-                {i + 1}
-              </ThemedText>
-            </Pressable>
-          );
-        })}
-      </View>
+      <QuestionNavigator
+        questions={sitting.questions}
+        answers={draft.answers}
+        marked={draft.marked}
+        current={draft.questionIndex}
+        onJump={goTo}
+      />
 
-      <ThemedText type="small" themeColor="textSecondary">
-        第 {questionIndex + 1} 題・{EXAM_TYPE_LABELS[item.question.type]}
-      </ThemedText>
+      <View style={styles.questionHead}>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+          第 {draft.questionIndex + 1} 題・{EXAM_TYPE_LABELS[item.question.type]}
+        </ThemedText>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={marked ? '取消標記這一題' : '標記這一題，稍後檢查'}
+          accessibilityState={{ selected: marked }}
+          onPress={() => update((d, t) => toggleMark(d, item.question.id, t))}
+          style={({ pressed }) => [
+            styles.markButton,
+            {
+              borderColor: marked ? theme.gold : theme.border,
+              backgroundColor: marked ? theme.backgroundSelected : theme.backgroundElement,
+            },
+            pressed && styles.pressed,
+          ]}>
+          <ThemedText type="smallBold" style={{ color: marked ? theme.gold : theme.text }}>
+            {marked ? '🚩 已標記' : '🚩 標記'}
+          </ThemedText>
+        </Pressable>
+      </View>
       <ExamQuestionView
         item={item}
         picked={picked}
         reveal={false}
         getState={(option) => (option === picked ? 'selected' : 'idle')}
-        onPick={(option) => setAnswers((current) => ({ ...current, [item.question.id]: option }))}
+        onPick={(option) => {
+          if (open) update((d, t) => answerQuestion(d, item.question.id, option, t));
+        }}
       />
 
       <View style={styles.navRow}>
         <View style={styles.flex}>
-          <SecondaryButton label="上一題" onPress={() => goTo(Math.max(0, questionIndex - 1))} />
+          <SecondaryButton
+            label="上一題"
+            onPress={() => goTo(Math.max(0, draft.questionIndex - 1))}
+          />
         </View>
-        {!isLast && (
+        {!isLastQuestion && (
           <View style={styles.flex}>
-            <PrimaryButton label="下一題" onPress={() => goTo(questionIndex + 1)} />
+            <PrimaryButton label="下一題" onPress={() => goTo(draft.questionIndex + 1)} />
           </View>
         )}
       </View>
 
-      {confirming ? (
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: theme.backgroundElement,
-              borderColor: theme.accent,
-            },
-          ]}>
-          <ThemedText type="smallBold">
-            {unanswered > 0 ? `還有 ${unanswered} 題沒作答，確定要交卷嗎？` : '確定要交卷嗎？'}
-          </ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            交卷後就不能再修改這一節的答案。
-          </ThemedText>
-          <PrimaryButton label="確定交卷" onPress={finishSitting} />
-          <SecondaryButton label="繼續作答" onPress={() => setConfirming(false)} />
-        </View>
+      {reviewing ? (
+        <SubmitReview
+          questions={sitting.questions}
+          answers={draft.answers}
+          marked={draft.marked}
+          isLast={isLastSitting}
+          onJump={goTo}
+          onSubmit={() => submit(false)}
+          onCancel={() => setReviewing(false)}
+        />
       ) : (
         <SecondaryButton
-          label={sittingIndex + 1 < sittings.length ? '交卷，結束這一節' : '交卷，查看成績'}
-          onPress={() => setConfirming(true)}
+          label={isLastSitting ? '交卷，查看成績' : '交卷，結束這一節'}
+          onPress={() => setReviewing(true)}
         />
       )}
+      {quit}
     </View>
   );
+}
+
+/** 最後一節交卷後還沒結算完成時（例如結算途中關掉 App），打開就再結算一次 */
+function FinishPending({
+  draft,
+  onFinish,
+}: {
+  draft: MockExamDraft;
+  onFinish: (draft: MockExamDraft) => void;
+}) {
+  const run = useEffectEvent(() => {
+    onFinish(draft);
+  });
+  useEffect(() => {
+    run();
+  }, []);
+  return <LoadingNote text="計算成績…" />;
 }
 
 type SavedReportProps = {
@@ -373,9 +490,12 @@ type SavedReportProps = {
   onBack: () => void;
 };
 
-/** 重看以前的模擬考：找回當時的題目和答案，重新算一次成績單 */
+/** 重看以前的模擬考：有考卷快照就照當時的考卷還原，舊紀錄用題目 id 找回 */
 function SavedReport({ level, record, onRetry, onBack }: SavedReportProps) {
-  const restored = useMemo(() => restoreMockExam(level, record.items ?? []), [level, record]);
+  const restored = useMemo(
+    () => restoreMockExam(level, record.items ?? [], record.snapshot),
+    [level, record],
+  );
   const result = useMemo(
     () => scoreMockExam(level, restored.items, restored.answers),
     [level, restored],
@@ -385,6 +505,7 @@ function SavedReport({ level, record, onRetry, onBack }: SavedReportProps) {
       result={{ ...result, total: record.total, passed: record.passed }}
       items={restored.items}
       answers={restored.answers}
+      record={record}
       date={record.date}
       onRetry={onRetry}
       onBack={onBack}
@@ -398,6 +519,12 @@ const styles = StyleSheet.create({
   },
   card: {
     borderWidth: 1,
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.two,
+  },
+  warning: {
+    borderWidth: 2,
     borderRadius: Spacing.three,
     padding: Spacing.three,
     gap: Spacing.two,
@@ -429,22 +556,18 @@ const styles = StyleSheet.create({
     fontWeight: 700,
     fontVariant: ['tabular-nums'],
   },
-  numbers: {
+  questionHead: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.one,
+    alignItems: 'center',
+    gap: Spacing.two,
   },
-  number: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
+  markButton: {
+    minHeight: 44,
+    paddingHorizontal: Spacing.three,
+    borderRadius: 22,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  numberText: {
-    fontSize: 13,
-    fontVariant: ['tabular-nums'],
   },
   navRow: {
     flexDirection: 'row',
@@ -452,5 +575,14 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+  },
+  quit: {
+    alignSelf: 'center',
+    minHeight: 44,
+    paddingHorizontal: Spacing.three,
+    justifyContent: 'center',
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });

@@ -18,9 +18,10 @@ import { ChipButton } from '@/components/ui/chip-button';
 import { KeepAlive } from '@/components/ui/keep-alive';
 import { LevelPicker } from '@/components/ui/level-picker';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useDepsChanged } from '@/hooks/use-hydrated';
+import { useDepsChanged, useHydrated } from '@/hooks/use-hydrated';
 import { useTheme } from '@/hooks/use-theme';
 import { useJlptLevel } from '@/stores/jlpt-level-store';
+import { useMockExamDraft } from '@/stores/mock-exam-draft-store';
 
 export default function QuizScreen() {
   const theme = useTheme();
@@ -28,12 +29,24 @@ export default function QuizScreen() {
   const level = useJlptLevel();
   // 從首頁「今日任務」進來時（例如 /quiz?mode=review），直接打開那個模式
   const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
-  const requested = QUIZ_MODES.find((m) => m.value === modeParam)?.value ?? null;
+  // 網頁版預先產生的畫面沒有網址參數，載入到裝置後才看參數，避免兩份畫面不一致
+  const hydrated = useHydrated();
+  const requested = hydrated
+    ? (QUIZ_MODES.find((m) => m.value === modeParam)?.value ?? null)
+    : null;
   // null：顯示模式選單；選了模式才開始答題
-  const [mode, setMode] = useState<QuizMode | null>(requested);
+  const [chosenMode, setMode] = useState<QuizMode | null>(requested);
+  // 模擬考進行中：固定在模擬考，不能切到其他練習（避免看到解說和答案）
+  const examActive = useMockExamDraft() !== null;
+  const mode = examActive ? 'exam' : chosenMode;
   const [visited, setVisited] = useState<ReadonlySet<QuizMode>>(
     () => new Set(requested ? [requested] : []),
   );
+  // 考完（或放棄）時停在模擬考，才看得到成績單
+  if (useDepsChanged([examActive]) && !examActive && chosenMode !== 'exam') {
+    setMode('exam');
+    if (!visited.has('exam')) setVisited(new Set([...visited, 'exam']));
+  }
   const current = QUIZ_MODES.find((m) => m.value === mode);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -74,7 +87,13 @@ export default function QuizScreen() {
         ]}>
         <View style={styles.inner}>
           <View style={styles.titleRow}>
-            {current ? (
+            {examActive ? (
+              <View style={styles.titleStart}>
+                <ThemedText type="subtitle" style={styles.modeTitle} numberOfLines={1}>
+                  🔒 模擬考中
+                </ThemedText>
+              </View>
+            ) : current ? (
               <View style={styles.titleStart}>
                 <ChipButton
                   label="‹ 模式"
@@ -90,8 +109,8 @@ export default function QuizScreen() {
                 推理測驗
               </ThemedText>
             )}
-            {/* 換等級會重新開始一輪 */}
-            <LevelPicker />
+            {/* 換等級會重新開始一輪；模擬考中照考試開始時的等級考完，不顯示 */}
+            {!examActive && <LevelPicker />}
           </View>
         </View>
       </View>
@@ -132,7 +151,12 @@ export default function QuizScreen() {
             <SpeakingPractice level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
           </KeepAlive>
           <KeepAlive active={mode === 'exam'}>
-            <ExamQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
+            <ExamQuiz
+              level={level}
+              onAnswered={scrollToEnd}
+              onNext={scrollToTop}
+              locked={examActive}
+            />
           </KeepAlive>
           <KeepAlive active={mode === 'listening'}>
             <ListeningQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />

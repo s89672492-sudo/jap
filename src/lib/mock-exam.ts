@@ -218,14 +218,21 @@ export function buildMockExam(level: JlptLevel, history?: PickHistory): MockSitt
   });
 }
 
-/** 從考試紀錄找回題目和自己的答案，重看題目和解說用（找不到的題目略過） */
+/**
+ * 從考試紀錄找回題目和自己的答案，重看題目和解說用。
+ * 有考卷快照的紀錄（第 2 版）照當時的題目和選項順序還原；
+ * 舊紀錄用題目 id 從目前的題庫找回（找不到的題目略過）。
+ */
 export function restoreMockExam(
   level: JlptLevel,
   items: { id: string; mine: string | null }[],
+  snapshot?: ExamRoundQuestion[],
 ): { items: ExamRoundQuestion[]; answers: Record<string, string> } {
-  const restored: ExamRoundQuestion[] = [];
   const answers: Record<string, string> = {};
-  for (const { id, mine } of items) {
+  for (const { id, mine } of items) if (mine !== null) answers[id] = mine;
+  if (snapshot && snapshot.length > 0) return { items: snapshot, answers };
+  const restored: ExamRoundQuestion[] = [];
+  for (const { id } of items) {
     const question = findExamQuestion(level, id);
     if (!question) continue;
     restored.push({
@@ -233,7 +240,6 @@ export function restoreMockExam(
       options: shuffle([...question.options]),
       answer: question.options[0],
     });
-    if (mine !== null) answers[id] = mine;
   }
   return { items: restored, answers };
 }
