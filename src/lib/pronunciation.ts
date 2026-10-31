@@ -34,7 +34,9 @@ export function similarity(a: string, b: string): number {
 
 /** 目標的每個字有沒有被唸到（用最長共同子序列對齊） */
 function matchedFlags(target: string, heard: string): boolean[] {
-  const dp = Array.from({ length: target.length + 1 }, () => new Array<number>(heard.length + 1).fill(0));
+  const dp = Array.from({ length: target.length + 1 }, () =>
+    new Array<number>(heard.length + 1).fill(0),
+  );
   for (let i = target.length - 1; i >= 0; i--) {
     for (let j = heard.length - 1; j >= 0; j--) {
       dp[i][j] =
@@ -70,7 +72,12 @@ export type PronunciationResult = {
  * targets 例如 ['食べる', 'たべる']；alternatives 是辨識器給的候選文字。
  */
 export function checkPronunciation(targets: string[], alternatives: string[]): PronunciationResult {
-  let best: PronunciationResult = { heard: alternatives[0] ?? '', score: 0, target: normalizeJapanese(targets[0] ?? ''), matched: [] };
+  let best: PronunciationResult = {
+    heard: alternatives[0] ?? '',
+    score: 0,
+    target: normalizeJapanese(targets[0] ?? ''),
+    matched: [],
+  };
   for (const alt of alternatives) {
     const heard = normalizeJapanese(alt);
     for (const raw of targets) {
@@ -85,7 +92,11 @@ export function checkPronunciation(targets: string[], alternatives: string[]): P
 }
 
 /** 分數的評語 */
-export function verdict(score: number): { mark: string; label: string; level: 'good' | 'close' | 'retry' } {
+export function verdict(score: number): {
+  mark: string;
+  label: string;
+  level: 'good' | 'close' | 'retry';
+} {
   if (score >= 0.85) return { mark: '○', label: '說得很好！', level: 'good' };
   if (score >= 0.6) return { mark: '△', label: '很接近了，再試一次', level: 'close' };
   return { mark: '×', label: '和目標差比較多，先聽一次再說', level: 'retry' };

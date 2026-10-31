@@ -241,6 +241,10 @@ for (const lv of LEVELS) {
   const bank = fs.existsSync(path.join(DATA, bankFile))
     ? loadTs(bankFile)[`${lv.toUpperCase()}_EXAM_BANK`]
     : [];
+  const listeningFile = `exam/bank/${lv}-listening.ts`;
+  if (fs.existsSync(path.join(DATA, listeningFile))) {
+    bank.push(...loadTs(listeningFile)[`${lv.toUpperCase()}_LISTENING_BANK`]);
+  }
   for (const q of [...load(`exam/${lv}.ts`), ...bank]) {
     const where = `試題 ${q.id ?? '(沒有 id)'}`;
     examCount++;
@@ -259,16 +263,18 @@ for (const lv of LEVELS) {
     else if (!JAPANESE.test(sentence)) error(where, '題目沒有日文');
     if (q.options?.some((o) => /\[[^|\]]+\|/.test(o))) error(where, '選項不能有注音標記');
     if (!isText(q.explanation)) error(where, '缺少解說（正確答案的說明）');
-    checkOptions(where, q.options);
+    // 聽解的發話表現、即時應答只有 3 個選項（和 JLPT 一樣）
+    const spokenOptions = ['utterance', 'quick-response'].includes(q.subcategory);
+    checkOptions(where, q.options, spokenOptions ? 3 : 4);
     if (q.options?.some((o) => !isText(o))) error(where, '有空白的選項');
     checkMeta(where, q);
     if (q.optionNotes !== undefined) {
       if (
         !Array.isArray(q.optionNotes) ||
-        q.optionNotes.length !== 4 ||
+        q.optionNotes.length !== q.options?.length ||
         !q.optionNotes.every(isText)
       ) {
-        error(where, '每個選項的解說要剛好 4 個');
+        error(where, '每個選項都要有解說（數量和選項一樣）');
       }
     }
     if (q.difficulty === undefined) noDifficulty++;
@@ -291,9 +297,10 @@ for (const lv of LEVELS) {
     const passage = rawPassage?.replace(/\[([^|\]]+)\|[^\]]+\]/g, '$1');
     const script = q.script ?? group?.script;
     if (q.type === 'reading' && !isText(passage)) error(where, '讀解題缺少文章（passage 或題組）');
-    if (q.type === 'listening' && !(Array.isArray(script) && script.length > 1)) {
-      error(where, '聽解題缺少對話');
-    }
+    // 聽解：發話表現只要情境（題目句子）；即時應答至少一句話；其他要有情境說明＋對話
+    const minLines = q.subcategory === 'utterance' ? 0 : q.subcategory === 'quick-response' ? 1 : 2;
+    const lines = Array.isArray(script) ? script.length : 0;
+    if (q.type === 'listening' && lines < minLines) error(where, '聽解題缺少對話');
     if (
       ['kanji-reading', 'orthography', 'paraphrase'].includes(q.type) &&
       !/［.+］/.test(q.sentence)

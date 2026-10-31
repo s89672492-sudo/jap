@@ -63,6 +63,8 @@ export type MockExamDraft = {
   marked: string[];
   /** 每題停留的時間（毫秒） */
   spent: Record<string, number>;
+  /** 聽解題完整播放過幾次（正式模式只播一次，重新整理也不會再播；舊存檔沒有） */
+  played?: Record<string, number>;
   /** 已交卷的節（不能再作答） */
   completed: number[];
   startedAt: number;
@@ -176,6 +178,13 @@ export function answerQuestion(
   return { ...draft, answers: { ...draft.answers, [id]: option }, updatedAt: now };
 }
 
+/** 聽解題播完了：記下來，正式模式就不再播放 */
+export function markPlayed(draft: MockExamDraft, id: string, now: number): MockExamDraft {
+  if (!canAnswer(draft, now)) return draft;
+  const played = draft.played ?? {};
+  return { ...draft, played: { ...played, [id]: (played[id] ?? 0) + 1 }, updatedAt: now };
+}
+
 export function toggleMark(draft: MockExamDraft, id: string, now: number): MockExamDraft {
   if (!canAnswer(draft, now)) return draft;
   const marked = draft.marked.includes(id)
@@ -273,7 +282,7 @@ export function isExamQuestion(value: unknown): value is ExamQuestion {
     isString(q.type) &&
     isString(q.sentence) &&
     Array.isArray(q.options) &&
-    q.options.length === 4 &&
+    (q.options.length === 4 || q.options.length === 3) &&
     q.options.every(isString) &&
     isString(q.explanation)
   );
@@ -340,6 +349,7 @@ export function parseDraft(value: unknown): MockExamDraft | null {
     Array.isArray(d.marked) &&
     d.marked.every(isString) &&
     isNumberRecord(d.spent) &&
+    (d.played === undefined || isNumberRecord(d.played)) &&
     Array.isArray(d.completed) &&
     d.completed.every((n) => Number.isInteger(n)) &&
     isNumber(d.startedAt) &&

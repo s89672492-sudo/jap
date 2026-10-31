@@ -112,7 +112,7 @@ export type ExamQuestion = {
   /** 讀解、聽力題組 */
   groupId?: string;
   /** 每個選項的解說，順序和 options 相同（第一個是正確答案的說明） */
-  optionNotes?: [string, string, string, string];
+  optionNotes?: [string, string, string, string] | [string, string, string];
   /** 題目句子的中文翻譯（考後顯示） */
   translation?: string;
   // ── 讀進來時由題組補上（資料檔裡不用寫） ──
@@ -121,8 +121,8 @@ export type ExamQuestion = {
   /** 文章或對話的中文翻譯 */
   passageTranslation?: string;
   sentence: string;
-  /** 第一個是正確答案；出題時會打亂順序 */
-  options: [string, string, string, string];
+  /** 第一個是正確答案；出題時會打亂順序。聽解的發話表現、即時應答和 JLPT 一樣只有 3 個 */
+  options: [string, string, string, string] | [string, string, string];
   /** 中文解說，作答後顯示 */
   explanation: string;
   /** 讀解：要閱讀的文章 */

@@ -13,7 +13,7 @@ import { LoadingNote } from '@/components/ui/loading-note';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { Spacing } from '@/constants/theme';
-import { EXAM_TYPE_LABELS } from '@/data/exam';
+import { EXAM_SUBCATEGORY_LABELS, EXAM_TYPE_LABELS, type ExamQuestion } from '@/data/exam';
 import { useAllLevelData } from '@/data/level-data';
 import type { JlptLevel } from '@/data/vocab';
 import { useDepsChanged } from '@/hooks/use-hydrated';
@@ -39,12 +39,14 @@ import {
   createDraft,
   expireIfNeeded,
   goToQuestion,
+  markPlayed,
   startNextSitting,
   submitSitting,
   toggleMark,
   type MockExamDraft,
   type MockExamMode,
 } from '@/lib/mock-exam-session';
+import { answerSeconds } from '@/lib/audio-manager';
 import { stopSpeaking } from '@/lib/speech';
 import { useMistakes } from '@/stores/mistakes-store';
 import {
@@ -72,6 +74,14 @@ function formatTime(ms: number) {
   const m = Math.floor(total / 60);
   const s = total % 60;
   return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+/** 題號旁的題型：讀解、聽解顯示細分的大問（例如「即時應答」） */
+function questionLabel(question: ExamQuestion): string {
+  if ((question.type === 'reading' || question.type === 'listening') && question.subcategory) {
+    return EXAM_SUBCATEGORY_LABELS[question.subcategory];
+  }
+  return EXAM_TYPE_LABELS[question.type];
 }
 
 /** 這次打開 App 後才開始的考試（重新整理後接著考的不算），用來記錄「接著考」 */
@@ -188,6 +198,8 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
   const [now, setNow] = useState(() => Date.now());
   const [reviewing, setReviewing] = useState(false);
   const [confirmQuit, setConfirmQuit] = useState(false);
+  // 正式模式的聽解：播完後的作答時間，時間到自動換下一題
+  const [answerWindow, setAnswerWindow] = useState<{ id: string; until: number } | null>(null);
   const wasFocused = useRef(focused);
 
   /** 用手機裡最新的進度計算下一步並存檔（避免用到畫面上舊的資料） */
@@ -227,6 +239,15 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
     const time = Date.now();
     setNow(time);
     if (!current || current.sessionId !== draft.sessionId) return;
+    if (answerWindow && time >= answerWindow.until) {
+      const questions = current.sittings[current.sittingIndex].questions;
+      const onThatQuestion = questions[current.questionIndex]?.question.id === answerWindow.id;
+      setAnswerWindow(null);
+      if (onThatQuestion && current.questionIndex + 1 < questions.length) {
+        saveMockExamDraft(goToQuestion(current, current.questionIndex + 1, time));
+        onScrollTop?.();
+      }
+    }
     const expired = expireIfNeeded(current, time);
     if (!expired.expired) return;
     setReviewing(false);
@@ -385,6 +406,7 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
 
   const goTo = (index: number) => {
     setReviewing(false);
+    setAnswerWindow(null);
     update((d, t) => goToQuestion(d, index, t));
     onScrollTop?.();
   };
@@ -424,7 +446,7 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
 
       <View style={styles.questionHead}>
         <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
-          第 {draft.questionIndex + 1} 題・{EXAM_TYPE_LABELS[item.question.type]}
+          第 {draft.questionIndex + 1} 題・{questionLabel(item.question)}
         </ThemedText>
         <Pressable
           accessibilityRole="button"
@@ -448,12 +470,34 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
         item={item}
         picked={picked}
         reveal={false}
+        listening={
+          // 正式模式：聽解只播一次，播完後有固定的作答時間，接著自動換下一題
+          draft.mode === 'official'
+            ? {
+                allowReplay: false,
+                played: (draft.played?.[item.question.id] ?? 0) > 0,
+                onPlayed: () => {
+                  update((d, t) => markPlayed(d, item.question.id, t));
+                  setAnswerWindow({
+                    id: item.question.id,
+                    until: Date.now() + answerSeconds(item) * 1000,
+                  });
+                },
+              }
+            : undefined
+        }
         getState={(option) => (option === picked ? 'selected' : 'idle')}
         onPick={(option) => {
           if (open) update((d, t) => answerQuestion(d, item.question.id, option, t));
         }}
       />
 
+      {answerWindow?.id === item.question.id && (
+        <ThemedText type="small" themeColor="textSecondary" accessibilityLiveRegion="polite">
+          作答時間：還有 {Math.max(0, Math.ceil((answerWindow.until - now) / 1000))}{' '}
+          秒，之後自動進入下一題
+        </ThemedText>
+      )}
       <View style={styles.navRow}>
         <View style={styles.flex}>
           <SecondaryButton

@@ -2,7 +2,9 @@ import type { JlptLevel } from '@/data/vocab/types';
 import { stripRuby } from '@/lib/furigana';
 
 import { N4_EXAM_BANK } from './bank/n4';
+import { N4_LISTENING_BANK } from './bank/n4-listening';
 import { N5_EXAM_BANK } from './bank/n5';
+import { N5_LISTENING_BANK } from './bank/n5-listening';
 import { N1_EXAM_GROUPS } from './groups/n1';
 import { N2_EXAM_GROUPS } from './groups/n2';
 import { N3_EXAM_GROUPS } from './groups/n3';
@@ -38,8 +40,8 @@ export type {
 
 const RAW_EXAM: Record<JlptLevel, ExamQuestion[]> = {
   // 原有的 50 題＋擴充題庫（新題型、讀解題組）
-  N5: [...N5_EXAM, ...N5_EXAM_BANK],
-  N4: [...N4_EXAM, ...N4_EXAM_BANK],
+  N5: [...N5_EXAM, ...N5_EXAM_BANK, ...N5_LISTENING_BANK],
+  N4: [...N4_EXAM, ...N4_EXAM_BANK, ...N4_LISTENING_BANK],
   N3: N3_EXAM,
   N2: N2_EXAM,
   N1: N1_EXAM,

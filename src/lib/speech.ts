@@ -80,3 +80,28 @@ export function speakAndWait(text: string, language: 'ja-JP' | 'zh-TW' = 'ja-JP'
     Speech.speak(text, { language, voice, rate, onDone: done, onStopped: done, onError: done });
   });
 }
+
+/**
+ * 用說話者的聲音唸一句並等到唸完（聽解播放用）。
+ * 有些裝置不會回報唸完，所以依字數設一個最長等待時間。
+ */
+export function speakLineAndWait(text: string, speaker: ScriptSpeaker = 'narrator'): Promise<void> {
+  return new Promise((resolve) => {
+    const rate = SPEECH_RATES[getSettings().speechSpeed];
+    const timeout = setTimeout(resolve, (1500 + text.length * 350) / rate);
+    const done = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+    const { voice, pitch } = voiceFor(speaker);
+    Speech.speak(text, {
+      language: 'ja-JP',
+      voice,
+      rate,
+      pitch,
+      onDone: done,
+      onStopped: done,
+      onError: done,
+    });
+  });
+}

@@ -75,15 +75,17 @@ export function findExamQuestion(level: JlptLevel, id: string): ExamQuestion | n
 /** 讀解每題（含讀文章）給的秒數；等級越高文章越長 */
 const READING_SECONDS: Record<JlptLevel, number> = { N5: 120, N4: 150, N3: 180, N2: 210, N1: 240 };
 
-/** 練習模式的時間：語彙 45 秒、文法 60 秒、句子重組 90 秒、文章文法 90 秒、讀解 2〜4 分鐘、聽解 90 秒 */
+/** 練習模式的時間：語彙 45 秒、文法 60 秒、句子重組 90 秒、文章文法 90 秒、讀解 2〜4 分鐘、聽解 75 秒 */
 function secondsFor(type: ExamQuestionType, level: JlptLevel): number {
   switch (type) {
     case 'grammar':
       return 60;
     case 'sentence-order':
     case 'text-grammar':
-    case 'listening':
       return 90;
+    case 'listening':
+      // 正式考試大約每題 75 秒（N5：30 分鐘 24 題）
+      return 75;
     case 'reading':
       return READING_SECONDS[level];
     default:

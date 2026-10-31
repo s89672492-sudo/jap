@@ -115,7 +115,7 @@ export function MockExamIntro({ level, onStart, onOpenRecord }: MockExamIntroPro
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           {level === 'N5' || level === 'N4'
-            ? '題庫現況：文字語彙、文法、讀解（短篇、中篇、資訊檢索、文章文法）已照正式題型比例出題；聽解目前只有 10 題（正在擴充），所以聽解科的題數比正式考試少。'
+            ? '題庫現況：文字語彙、文法、讀解、聽解都照正式題型比例出題。聽解用手機內建語音播放（還沒有真人音檔），發話表現用文字說明情境（還沒有插圖）。'
             : '題庫現況：漢字讀法、表記、文脈語彙、文法形式有數千題可以挑；讀解、聽解、言い換え、句子重組的題數還少（正在擴充），所以這些題型常會重複，題數也比正式考試少。'}
           {seenCount > 0 ? `已考過 ${seenCount} 題。` : ''}
         </ThemedText>
@@ -197,7 +197,7 @@ export function MockExamIntro({ level, onStart, onOpenRecord }: MockExamIntroPro
         <ThemedText type="small" themeColor="textSecondary">
           {mode === 'official'
             ? '正式時間：每節照 JLPT 官方時間。這份模擬考的題數比正式考試少，所以時間會比較寬鬆。'
-            : '練習：依這份考卷的題數換算時間（語彙每題 45 秒、文法 60 秒、讀解 2〜4 分鐘、聽解 90 秒）。'}
+            : '練習：依這份考卷的題數換算時間（語彙每題 45 秒、文法 60 秒、讀解 2〜4 分鐘、聽解 75 秒）。'}
         </ThemedText>
         {sittings.map((sitting, i) => (
           <View key={sitting.label} style={[styles.row, { borderTopColor: theme.border }]}>
