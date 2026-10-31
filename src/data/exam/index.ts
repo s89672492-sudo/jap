@@ -5,6 +5,8 @@ import { N4_EXAM_BANK } from './bank/n4';
 import { N4_LISTENING_BANK } from './bank/n4-listening';
 import { N5_EXAM_BANK } from './bank/n5';
 import { N5_LISTENING_BANK } from './bank/n5-listening';
+import { N4_FROZEN } from './frozen/n4';
+import { N5_FROZEN } from './frozen/n5';
 import { N1_EXAM_GROUPS } from './groups/n1';
 import { N2_EXAM_GROUPS } from './groups/n2';
 import { N3_EXAM_GROUPS } from './groups/n3';
@@ -105,8 +107,20 @@ export const EXAM_BY_LEVEL: Record<JlptLevel, ExamQuestion[]> = {
   N1: RAW_EXAM.N1.map((q) => normalizeQuestion('N1', q)),
 };
 
+/**
+ * 固定考卷用、已固定下來的自動出題（frozen/）：只有固定考卷、考試紀錄、錯題本會用到，
+ * 不放進隨機組卷和題型練習（那裡已經有自動出的同一題）。
+ */
+export const FROZEN_BY_LEVEL: Record<JlptLevel, ExamQuestion[]> = {
+  N5: N5_FROZEN.map(({ from: _from, ...q }) => normalizeQuestion('N5', q)),
+  N4: N4_FROZEN.map(({ from: _from, ...q }) => normalizeQuestion('N4', q)),
+  N3: [],
+  N2: [],
+  N1: [],
+};
+
 const QUESTION_BY_ID = new Map(
-  Object.values(EXAM_BY_LEVEL)
+  [...Object.values(EXAM_BY_LEVEL), ...Object.values(FROZEN_BY_LEVEL)]
     .flat()
     .map((question) => [question.id, question]),
 );

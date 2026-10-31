@@ -11,7 +11,7 @@ import { LoadingNote } from '@/components/ui/loading-note';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useAllLevelData, type LevelData } from '@/data/level-data';
-import { EXAM_BY_LEVEL, EXAM_TYPE_LABELS, type ExamQuestion } from '@/data/exam';
+import { EXAM_BY_LEVEL, EXAM_TYPE_LABELS, FROZEN_BY_LEVEL, type ExamQuestion } from '@/data/exam';
 import { type JlptLevel } from '@/data/vocab';
 import { useQuizRound } from '@/hooks/use-quiz-round';
 import { useFuriganaLoaded } from '@/lib/furigana';
@@ -63,7 +63,7 @@ function ReviewQuizContent({
   const missedWords = words.filter((w) => mistakes.has(w.id));
   // 模擬試題的錯題：自編的題目，加上模擬考裡自動出的題目
   const missedExam = [
-    ...EXAM_BY_LEVEL[level].filter((q) => mistakes.has(q.id)),
+    ...[...EXAM_BY_LEVEL[level], ...FROZEN_BY_LEVEL[level]].filter((q) => mistakes.has(q.id)),
     ...[...mistakes]
       .filter((id) => parseGeneratedId(id)?.level === level)
       .map(getGeneratedQuestion)

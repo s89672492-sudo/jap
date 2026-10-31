@@ -39,7 +39,10 @@ export function ListeningQuestionView({
         聽到的是哪一個單字？
       </ThemedText>
       <View
-        style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+        style={[
+          styles.card,
+          { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        ]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="再聽一次"

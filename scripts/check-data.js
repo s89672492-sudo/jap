@@ -241,6 +241,11 @@ for (const lv of LEVELS) {
   const bank = fs.existsSync(path.join(DATA, bankFile))
     ? loadTs(bankFile)[`${lv.toUpperCase()}_EXAM_BANK`]
     : [];
+  // 固定考卷用、已固定下來的自動出題
+  const frozenFile = `exam/frozen/${lv}.ts`;
+  if (fs.existsSync(path.join(DATA, frozenFile))) {
+    bank.push(...loadTs(frozenFile)[`${lv.toUpperCase()}_FROZEN`]);
+  }
   const listeningFile = `exam/bank/${lv}-listening.ts`;
   if (fs.existsSync(path.join(DATA, listeningFile))) {
     bank.push(...loadTs(listeningFile)[`${lv.toUpperCase()}_LISTENING_BANK`]);
