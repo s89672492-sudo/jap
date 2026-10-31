@@ -250,6 +250,10 @@ for (const lv of LEVELS) {
   if (fs.existsSync(path.join(DATA, listeningFile))) {
     bank.push(...loadTs(listeningFile)[`${lv.toUpperCase()}_LISTENING_BANK`]);
   }
+  const listeningFile2 = `exam/bank/${lv}-listening-2.ts`;
+  if (fs.existsSync(path.join(DATA, listeningFile2))) {
+    bank.push(...loadTs(listeningFile2)[`${lv.toUpperCase()}_LISTENING_BANK_2`]);
+  }
   for (const q of [...load(`exam/${lv}.ts`), ...bank]) {
     const where = `試題 ${q.id ?? '(沒有 id)'}`;
     examCount++;
