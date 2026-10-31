@@ -14,7 +14,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '接た形表示過去經驗；接辭書形「〜ことがある」則是「有時會〜」，常考兩者區別。',
     quiz: {
       blank: 'ことがあります',
-      distractors: ['ことにします', 'ところです', 'ほうがいいです'],
+      distractors: ['ことがします', 'ことがいます', 'ことをあります'],
     },
   },
   {
@@ -28,7 +28,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '留学するつもりです',
     },
     tip: '「つもり」表事先已有的打算；「（よ）うと思う」偏當下的想法。否定可用「ないつもり」或「つもりはない」。',
-    quiz: { blank: 'つもりです', distractors: ['ようです', 'そうです', 'ところです'] },
+    quiz: { blank: 'つもりです', distractors: ['たいです', 'ながらです', 'てしまいます'] },
   },
   {
     id: 'n4-g03',
@@ -43,7 +43,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '表能力或習慣的變化；否定的變化用「〜なくなる」，不說「ないようになる」。',
     quiz: {
       blank: 'ようになりました',
-      distractors: ['ようにしました', 'ことになりました', 'そうになりました'],
+      distractors: ['ようにでした', 'そうになりました', 'ようなりました'],
     },
   },
   {
@@ -70,7 +70,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '予約しておきます',
     },
     tip: '表事先準備或維持現狀；口語縮約為「〜とく」（予約しとく）。注意與「〜てある」區別。',
-    quiz: { blank: 'おきます', distractors: ['しまいます', 'みます', 'くれます'] },
+    quiz: { blank: 'おきます', distractors: ['おきでした', 'おくます', 'おきです'] },
   },
   {
     id: 'n4-g06',
@@ -96,7 +96,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '着いたら',
     },
     tip: '可表假設或確定的「〜之後」；後句可接請求、意志，這點和「〜と」不同。',
-    quiz: { blank: 'たら', distractors: ['たり', 'ても', 'たのに'] },
+    quiz: { blank: 'たら', distractors: ['たり', 'たまで', 'たのに'] },
   },
   {
     id: 'n4-g08',
@@ -105,7 +105,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '如果〜就〜',
     example: { ja: '急げば、間に合います。', zh: '快一點的話就來得及。', highlight: '急げば' },
     tip: '一般條件；後句是意志、請求時前句多為狀態性。い形容詞為〜ければ，名詞・な形為〜なら(ば)。',
-    quiz: { blank: '急げば', distractors: ['急いでも', '急ぐのに', '急がなければ'] },
+    quiz: { blank: '急げば', distractors: ['急げて', '急ぐのに', '急ぎば'] },
   },
   {
     id: 'n4-g09',
@@ -131,7 +131,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '書きやすい',
     },
     tip: 'ます形＋やすい表容易；反義「〜にくい」。注意易混淆的「〜づらい」（帶主觀辛苦感）。',
-    quiz: { blank: 'やすい', distractors: ['にくい', 'たい', 'そう'] },
+    quiz: { blank: 'やすい', distractors: ['すぎ', 'たい', 'そう'] },
   },
   {
     id: 'n4-g11',
@@ -144,7 +144,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '留学するために',
     },
     tip: '表目的時前後主語相同且接意志動詞；非意志動詞、可能形用「〜ように」。名詞＋のために也可表原因。',
-    quiz: { blank: 'ために', distractors: ['のに', 'ので', 'ながら'] },
+    quiz: { blank: 'ために', distractors: ['ためで', 'ながら', 'たり'] },
   },
   {
     id: 'n4-g12',
@@ -157,7 +157,10 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '踏まれました',
     },
     tip: '一段動詞＋られる、五段改あ段＋れる；動作者用「に」標示，是被動句基本考點。',
-    quiz: { blank: '踏まれました', distractors: ['踏みました', '踏ませました', '踏んでいました'] },
+    quiz: {
+      blank: '踏まれました',
+      distractors: ['踏みられました', '踏まられました', '踏まりました'],
+    },
   },
   {
     id: 'n4-g13',
@@ -170,7 +173,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '降るかもしれません',
     },
     tip: '表可能性約50%的推測；比「でしょう」不確定。な形・名詞直接接，不加だ。',
-    quiz: { blank: 'かもしれません', distractors: ['そうです', 'ようにします', 'つもりです'] },
+    quiz: { blank: 'かもしれません', distractors: ['かもしれます', 'ようにします', 'つもりです'] },
   },
   {
     id: 'n4-g14',
@@ -183,7 +186,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '寝たほうがいい',
     },
     tip: '肯定多接た形，否定接ない形（〜ないほうがいい），不說「なかったほうがいい」。',
-    quiz: { blank: 'ほうがいい', distractors: ['ばかり', 'つもり', 'そう'] },
+    quiz: { blank: 'ほうがいい', distractors: ['ほうでいい', 'ほうにいい', 'ほうもいい'] },
   },
   {
     id: 'n4-g15',
@@ -196,7 +199,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '飲みすぎて',
     },
     tip: '接ます形或形容詞語幹；いい→よすぎる、ない→なさすぎる為常考例外。',
-    quiz: { blank: 'すぎて', distractors: ['やすくて', 'にくくて', 'たくて'] },
+    quiz: { blank: 'すぎて', distractors: ['すぎで', 'にくくて', 'たくて'] },
   },
   {
     id: 'n4-g16',
@@ -222,7 +225,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '食べてみて',
     },
     tip: '表試著做看看；和「〜てみたい」「〜てみてください」搭配常考。',
-    quiz: { blank: 'みて', distractors: ['おいて', 'しまって', 'あって'] },
+    quiz: { blank: 'みて', distractors: ['あって', 'みで', 'みり'] },
   },
   {
     id: 'n4-g18',
@@ -235,7 +238,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '教えてあげました',
     },
     tip: '我→別人；對長輩用「〜てさしあげる」，對晚輩・動物用「〜てやる」。當面對長輩使用會失禮。',
-    quiz: { blank: 'あげました', distractors: ['もらいました', 'くれました', 'いただきました'] },
+    quiz: { blank: 'あげました', distractors: ['くれました', 'あげりました', 'あげいました'] },
   },
   {
     id: 'n4-g19',
@@ -248,7 +251,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '送ってもらいました',
     },
     tip: '主語是受惠者，施惠者用「に」；與「〜てくれる」主語相反，是授受考點。',
-    quiz: { blank: 'もらいました', distractors: ['あげました', 'くれました', 'やりました'] },
+    quiz: { blank: 'もらいました', distractors: ['くれました', 'もらえりました', 'もらいでした'] },
   },
   {
     id: 'n4-g20',
@@ -261,7 +264,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '作ってくれました',
     },
     tip: '別人為我（或我方）做；施惠者當主語用「が」，受惠者是我，不用「てもらう」的に。',
-    quiz: { blank: 'くれました', distractors: ['もらいました', 'あげました', 'いただきました'] },
+    quiz: { blank: 'くれました', distractors: ['もらいました', 'くれりました', 'いただきました'] },
   },
   {
     id: 'n4-g21',
@@ -276,7 +279,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '表為養成習慣而努力；「〜ようになる」是自然變化，「〜ことにする」是一次性決定。',
     quiz: {
       blank: 'ようにしています',
-      distractors: ['ようになっています', 'そうにしています', 'ためにしています'],
+      distractors: ['ようにしていります', 'そうにしています', 'ためにしています'],
     },
   },
   {
@@ -305,7 +308,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '表自己的決定；「ことにしている」表規定自己的習慣。與「ことになる」（非自己決定）常對比考。',
     quiz: {
       blank: 'ことにしました',
-      distractors: ['ことになりました', 'ようにしました', 'つもりでした'],
+      distractors: ['ことがしました', 'ことにでした', 'ようにでした'],
     },
   },
   {
@@ -321,7 +324,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '表外部或自然形成的決定；「ことになっている」表規定、慣例。與「ことにする」對比。',
     quiz: {
       blank: 'ことになりました',
-      distractors: ['ことがありました', 'ところでした', 'そうでした'],
+      distractors: ['ことにでした', 'ことがなりました', 'ところになりました'],
     },
   },
   {
@@ -361,7 +364,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '降っても',
     },
     tip: '表逆接假定；な形・名詞用「〜でも」。疑問詞＋ても＝「無論〜都」。',
-    quiz: { blank: 'ても', distractors: ['たら', 'たり', 'ては'] },
+    quiz: { blank: 'ても', distractors: ['でも', 'たり', 'ては'] },
   },
   {
     id: 'n4-g28',
@@ -376,7 +379,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '五段改あ段＋せる、一段＋させる、する→させる。他動詞的對象用に，自動詞的對象用を。',
     quiz: {
       blank: '書かせました',
-      distractors: ['書かれました', '書きました', '書かせられました'],
+      distractors: ['書かれせました', '書きさせました', '書かさせられました'],
     },
   },
   {
@@ -392,7 +395,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '五段可縮約為「〜される」（書かされる），但す結尾不可（話させられる）。表被迫做不想做的事。',
     quiz: {
       blank: '食べさせられました',
-      distractors: ['食べさせました', '食べられました', '食べさせてもらいました'],
+      distractors: ['食べさせれました', '食べさられました', '食べられさせました'],
     },
   },
   {
@@ -406,7 +409,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '引っ越してきたらしい',
     },
     tip: '根據外部資訊的推測，語氣較客觀；名詞＋らしい也可表「典型的〜」（男らしい）。',
-    quiz: { blank: 'らしい', distractors: ['ところ', 'ばかり', 'つもり'] },
+    quiz: { blank: 'らしい', distractors: ['らしいだ', 'そうに', 'つもり'] },
   },
   {
     id: 'n4-g31',
@@ -419,7 +422,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '留守のようだ',
     },
     tip: '根據自己觀察的推測；口語為「みたいだ」。名詞要加「の」（留守のようだ）。',
-    quiz: { blank: 'ようだ', distractors: ['そうだ', 'らしい', 'ためだ'] },
+    quiz: { blank: 'ようだ', distractors: ['そうだ', 'らしい', 'みたいだ'] },
   },
   {
     id: 'n4-g32',
@@ -445,7 +448,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '食べないで',
     },
     tip: '表附帶狀況「不做〜就〜」；「〜なくて」表原因，不能用於此。書面語為「〜ずに」。',
-    quiz: { blank: 'ないで', distractors: ['なくて', 'ながら', 'たら'] },
+    quiz: { blank: 'ないで', distractors: ['なくで', 'ずで', 'たら'] },
   },
   {
     id: 'n4-g34',
@@ -458,7 +461,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '使わずに',
     },
     tip: '「〜ないで」的書面說法；する要變「せずに」，不說「しずに」，為常考點。',
-    quiz: { blank: 'ずに', distractors: ['なくて', 'ないと', 'ないのに'] },
+    quiz: { blank: 'ずに', distractors: ['ずで', 'ないと', 'ずのに'] },
   },
   {
     id: 'n4-g35',
@@ -471,7 +474,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '貼ってあります',
     },
     tip: '他動詞＋てある表有人刻意做後留下的狀態；自動詞＋ている（貼ってある vs 開いている）常對比。',
-    quiz: { blank: 'あります', distractors: ['います', 'おきます', 'しまいます'] },
+    quiz: { blank: 'あります', distractors: ['あきます', 'おきます', 'しまいます'] },
   },
   {
     id: 'n4-g36',
@@ -512,7 +515,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '接意向形；「〜（よ）うとする」是「正要／試圖〜」，意思不同，常考混淆。',
     quiz: {
       blank: 'と思っています',
-      distractors: ['としています', 'つもりです', 'ようにしています'],
+      distractors: ['とでいます', 'つもりです', 'ようにしています'],
     },
   },
   {
@@ -539,7 +542,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '金曜日までに',
     },
     tip: '「までに」表期限（之前某時完成一次）；「まで」表持續到某時。是常考對比。',
-    quiz: { blank: 'までに', distractors: ['から', 'だけ', 'ごろ'] },
+    quiz: { blank: 'までに', distractors: ['までで', 'だけ', 'ほど'] },
   },
   {
     id: 'n4-g41',
@@ -552,7 +555,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '友達に誕生日のプレゼントをあげた',
     },
     tip: '我→別人（同輩）；對長輩用さしあげる，對晚輩、動植物用やる。',
-    quiz: { blank: 'あげた', distractors: ['くれた', 'もらった', 'いただいた'] },
+    quiz: { blank: 'あげた', distractors: ['くれた', 'あげれた', 'あげえた'] },
   },
   {
     id: 'n4-g42',
@@ -565,7 +568,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '依頼人に古い写真をもらった',
     },
     tip: '主語是接受者，給予者用「に」或「から」；從公司、團體得到時只能用「から」。',
-    quiz: { blank: 'もらった', distractors: ['あげた', 'くれた', 'やった'] },
+    quiz: { blank: 'もらった', distractors: ['くれた', 'もらえった', 'もらいた'] },
   },
   {
     id: 'n4-g43',
@@ -593,7 +596,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: 'あげる的謙讓語，用於給長輩；授受方向同あげる。',
     quiz: {
       blank: 'さしあげました',
-      distractors: ['くださいました', 'いただきました', 'くれました'],
+      distractors: ['くださいました', 'さしあげりました', 'くれました'],
     },
   },
   {
@@ -609,7 +612,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: 'もらう的謙讓語，主語是我；施予者為長輩，用「に／から」。',
     quiz: {
       blank: 'いただきました',
-      distractors: ['さしあげました', 'くださいました', 'くれました'],
+      distractors: ['くださいました', 'くれました', 'いただきでした'],
     },
   },
   {
@@ -652,7 +655,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '教えてさしあげた',
     },
     tip: '為長輩做事的謙讓表達；當面直接說可能顯得施恩，常改用「お〜します」。',
-    quiz: { blank: 'さしあげた', distractors: ['くださった', 'いただいた', 'くれた'] },
+    quiz: { blank: 'さしあげた', distractors: ['くださった', 'さしあげれた', 'くれた'] },
   },
   {
     id: 'n4-g49',
@@ -667,7 +670,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: 'もらう的謙讓語，主語為受惠者「我」，施惠長輩用「に」。',
     quiz: {
       blank: 'いただきました',
-      distractors: ['さしあげました', 'くださいました', 'やりました'],
+      distractors: ['くださいました', 'やりました', 'いただけりました'],
     },
   },
   {
@@ -694,7 +697,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '手伝ってやった',
     },
     tip: '為晚輩、動物做事；也可表「（報復地）給你好看」（〜てやる！）。',
-    quiz: { blank: 'やった', distractors: ['くれた', 'もらった', 'くださった'] },
+    quiz: { blank: 'やった', distractors: ['くれた', 'やれった', 'くださった'] },
   },
   {
     id: 'n4-g52',
@@ -709,7 +712,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '向平輩或晚輩的請求；更客氣依序為「てもらえませんか」「ていただけませんか」。',
     quiz: {
       blank: 'くれませんか',
-      distractors: ['あげませんか', 'もらいませんか', 'おきませんか'],
+      distractors: ['くれりませんか', 'もらいませんか', 'くれませか'],
     },
   },
   {
@@ -725,7 +728,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '用可能形否定疑問，比「てくれませんか」更客氣；主語是說話者。',
     quiz: {
       blank: 'もらえませんか',
-      distractors: ['あげませんか', 'くれましょうか', 'もらいましょうか'],
+      distractors: ['もらえりませんか', 'くれましょうか', 'もらいましょうか'],
     },
   },
   {
@@ -741,7 +744,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '最常用的客氣請求；注意是「いただけませんか」（可能形），不是「いただきませんか」。',
     quiz: {
       blank: 'いただけませんか',
-      distractors: ['さしあげませんか', 'くださいましょうか', 'いただきましょうか'],
+      distractors: ['いただけりませんか', 'くださいましょうか', 'いただきましょうか'],
     },
   },
   {
@@ -757,7 +760,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: 'くれる的尊敬語＋ませんか，用於向長輩請求；與「ていただけませんか」客氣程度相當。',
     quiz: {
       blank: 'くださいませんか',
-      distractors: ['いただきませんか', 'さしあげませんか', 'くれましょうか'],
+      distractors: ['いただきませんか', 'くださいまんか', 'くれましょうか'],
     },
   },
   {
@@ -771,7 +774,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '話してほしい',
     },
     tip: '希望別人做某事，對象用「に」；自己想要東西用「名詞がほしい」，想做用「〜たい」。',
-    quiz: { blank: 'ほしい', distractors: ['みたい', 'あげたい', 'おきたい'] },
+    quiz: { blank: 'ほしい', distractors: ['ほしいだ', 'ほしいに', 'ほしいで'] },
   },
   {
     id: 'n4-g57',
@@ -797,7 +800,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '解いてもらいたい',
     },
     tip: '與「〜てほしい」意思相近；對方用「に」。對長輩用「〜ていただきたい」。',
-    quiz: { blank: 'もらいたい', distractors: ['あげたい', 'くれたい', 'やりたい'] },
+    quiz: { blank: 'もらいたい', distractors: ['もらえたい', 'くれたい', 'やりたい'] },
   },
   {
     id: 'n4-g59',
@@ -857,7 +860,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '以謙遜方式表示自己要做某事（請容我〜）；する動詞為「〜させていただく」。',
     quiz: {
       blank: 'させていただきます',
-      distractors: ['していただきます', 'させてくださいます', 'されていただきます'],
+      distractors: ['さしていただきまし', 'させてくださいます', 'されていただきます'],
     },
   },
   {
@@ -871,7 +874,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '遊ばせてあげた',
     },
     tip: '允許或讓別人做某事；對長輩不用，對方用「に」。',
-    quiz: { blank: 'せてあげた', distractors: ['せてもらった', 'れてあげた', 'せられた'] },
+    quiz: { blank: 'せてあげた', distractors: ['せてあげれた', 'れてあげた', 'せてあげりた'] },
   },
   {
     id: 'n4-g64',
@@ -884,7 +887,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '旅行させてくれた',
     },
     tip: '別人允許我做某事，含感謝語氣；與「させられる」（被迫）意思相反。',
-    quiz: { blank: 'させてくれた', distractors: ['させてあげた', 'させられた', 'してくれた'] },
+    quiz: { blank: 'させてくれた', distractors: ['させてあげた', 'させてくれれた', 'してくれた'] },
   },
   {
     id: 'n4-g65',
@@ -926,7 +929,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '起きられなかった',
     },
     tip: '一段動詞與来る的可能形；口語常說「起きれる」（ら抜き），考試以「られる」為正解。',
-    quiz: { blank: 'られなかった', distractors: ['させなかった', 'たくなかった', 'すぎなかった'] },
+    quiz: { blank: 'られなかった', distractors: ['られないだ', 'らなかった', 'られずだ'] },
   },
   {
     id: 'n4-g68',
@@ -950,7 +953,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '尊敬用法形同被動，但敬意比「お〜になる」低；需靠語境判斷不是被動。',
     quiz: {
       blank: '戻られますか',
-      distractors: ['お戻りしますか', '戻らせますか', '戻られさせますか'],
+      distractors: ['お戻りしますか', '戻られりますか', '戻られさせますか'],
     },
   },
   {
@@ -977,7 +980,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '財布を盗まれた',
     },
     tip: '被動作的是自己的東西時，主語是人，物用「を」；不說「私の財布が盗まれた」表受害。',
-    quiz: { blank: '盗まれた', distractors: ['盗んだ', '盗ませた', '盗めた'] },
+    quiz: { blank: '盗まれた', distractors: ['盗みられた', '盗まさせた', '盗まりた'] },
   },
   {
     id: 'n4-g72',
@@ -990,7 +993,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '建てられた',
     },
     tip: '無生物主語的被動多用於客觀敘述；創作、建造者用「によって」而非「に」。',
-    quiz: { blank: '建てられた', distractors: ['建てさせた', '建てていた', '建てた'] },
+    quiz: { blank: '建てられた', distractors: ['建てれた', '建てらせた', '建てられれた'] },
   },
   {
     id: 'n4-g73',
@@ -1016,7 +1019,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '好きな仕事をさせて',
     },
     tip: '使役也可表許可、放任；常與「〜てくれる」「〜てあげる」連用表示允許。',
-    quiz: { blank: 'させて', distractors: ['させられて', 'されて', 'して'] },
+    quiz: { blank: 'させて', distractors: ['させられて', 'されて', 'させれて'] },
   },
   {
     id: 'n4-g75',
@@ -1029,7 +1032,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: 'みんなを笑わせた',
     },
     tip: '自動詞使役的對象用「を」（みんなを笑わせる）；他動詞使役因已有を，對象改用に。',
-    quiz: { blank: 'を笑わせた', distractors: ['に笑われた', 'を笑った', 'が笑わせた'] },
+    quiz: { blank: 'を笑わせた', distractors: ['に笑わせた', 'が笑わせた', 'を笑わされた'] },
   },
   {
     id: 'n4-g76',
@@ -1081,7 +1084,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: 'お待ちください',
     },
     tip: '「〜てください」的尊敬說法；和語動詞用お，漢語名詞用ご（ご記入ください）。',
-    quiz: { blank: 'ください', distractors: ['します', 'いたします', 'になります'] },
+    quiz: { blank: 'ください', distractors: ['くださり', 'くだされ', 'なさり'] },
   },
   {
     id: 'n4-g80',
@@ -1094,7 +1097,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: 'ご記入ください',
     },
     tip: '接漢語動作名詞；和語動詞用「お〜ください」。例外：お電話ください等。',
-    quiz: { blank: 'ください', distractors: ['します', 'いたします', 'になります'] },
+    quiz: { blank: 'ください', distractors: ['くださり', 'くだされ', 'になれ'] },
   },
   {
     id: 'n4-g81',
@@ -1119,7 +1122,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '（謙讓語）我為您〜',
     example: { ja: '会議室までご案内します。', zh: '我帶您到會議室。', highlight: 'ご案内します' },
     tip: '漢語名詞的謙讓語；更謙恭為「ご〜いたします」。注意與尊敬「ご〜になる」區分。',
-    quiz: { blank: 'します', distractors: ['になります', 'ください', 'されます'] },
+    quiz: { blank: 'します', distractors: ['になれます', 'くださる', 'されます'] },
   },
   {
     id: 'n4-g83',
@@ -1132,7 +1135,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: 'お届けいたします',
     },
     tip: '比「お〜する」更謙恭；漢語名詞用「ご〜いたす」（ご案内いたします）。',
-    quiz: { blank: 'いたします', distractors: ['になります', 'ください', 'なさいます'] },
+    quiz: { blank: 'いたします', distractors: ['になれます', 'くださり', 'なさいまし'] },
   },
   {
     id: 'n4-g84',
@@ -1141,7 +1144,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '（尊敬語）您正在〜',
     example: { ja: 'どなたをお探しですか。', zh: '您在找哪一位呢？', highlight: 'お探しですか' },
     tip: '「お〜になっている」的簡潔尊敬說法，表對方當下的狀態或動作。',
-    quiz: { blank: 'ですか', distractors: ['しますか', 'いたしますか', 'くださいますか'] },
+    quiz: { blank: 'ですか', distractors: ['しまし', 'いたしまし', 'くださいますか'] },
   },
   {
     id: 'n4-g85',
@@ -1230,7 +1233,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '客氣的建議；比「〜たらどうですか」禮貌。對長輩也常用。',
     quiz: {
       blank: 'はいかがですか',
-      distractors: ['もいいですか', 'はいけません', 'からどうですか'],
+      distractors: ['もいいですか', 'はいかがます', 'からどうですか'],
     },
   },
   {
@@ -1244,7 +1247,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '泥棒が入ったって',
     },
     tip: '口語傳聞，等於「〜そうだ」；也可表引用「〜と言っていた」。',
-    quiz: { blank: 'って', distractors: ['ばかり', 'ところ', 'ため'] },
+    quiz: { blank: 'って', distractors: ['ってだ', 'とって', 'っで'] },
   },
   {
     id: 'n4-g92',
@@ -1257,7 +1260,10 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '家にいたと言っていた',
     },
     tip: '「と言っていた」轉述第三者說過的話；「と言った」只陳述當時說了，「と言われた」是被別人說。',
-    quiz: { blank: 'と言っていた', distractors: ['を言っていた', 'と言われた', 'と言わせた'] },
+    quiz: {
+      blank: 'と言っていた',
+      distractors: ['を言っていた', 'と言っていいた', 'とを言っていた'],
+    },
   },
   {
     id: 'n4-g93',
@@ -1270,7 +1276,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '逃げたということだ',
     },
     tip: '「ということだ」為較正式的傳聞，同「そうだ（傳聞）」；別與「ところだ（正要/剛）」混淆。',
-    quiz: { blank: 'ということだ', distractors: ['ところだ', 'はずだ', 'ことにした'] },
+    quiz: { blank: 'ということだ', distractors: ['というようだ', 'というそうだ', 'とかいうだ'] },
   },
   {
     id: 'n4-g94',
@@ -1457,7 +1463,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '知りたがる',
     },
     tip: '「〜たい」vs「〜たがる」：たがる用於第三人稱，常以「たがっている」表現在狀態。',
-    quiz: { blank: 'たがる', distractors: ['たい', 'たがらない', 'そうだ'] },
+    quiz: { blank: 'たがる', distractors: ['たい', 'たがれる', 'そうだ'] },
   },
   {
     id: 'n4-g109',
@@ -1496,7 +1502,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '勉強していく',
     },
     tip: '「ていく」表變化或動作從現在持續到未來，常與「これから」搭配；過去到現在用「てくる」。',
-    quiz: { blank: 'ていく', distractors: ['てある', 'てくる', 'てあげる'] },
+    quiz: { blank: 'ていく', distractors: ['てある', 'てきる', 'てあげる'] },
   },
   {
     id: 'n4-g112',
@@ -1509,7 +1515,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '見てくる',
     },
     tip: '「てくる」可表「去做〜再回來」，如「買ってくる」；與表變化的「てくる」靠語境區分。',
-    quiz: { blank: 'てくる', distractors: ['てある', 'ていった', 'てきた'] },
+    quiz: { blank: 'てくる', distractors: ['てある', 'てこる', 'てけ'] },
   },
   {
     id: 'n4-g113',
@@ -1522,7 +1528,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '走っていった',
     },
     tip: '移動方向：「ていく」表離說話者而去，「てくる」表朝說話者而來。',
-    quiz: { blank: 'ていった', distractors: ['てあった', 'ておいた', 'てみた'] },
+    quiz: { blank: 'ていった', distractors: ['てあった', 'ておいた', 'ていけた'] },
   },
   {
     id: 'n4-g114',
@@ -1561,7 +1567,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '読み終わった',
     },
     tip: '「ます形＋終わる」＝做完；意志性動作也可用「終える」。注意與「〜てしまう」的語感差異。',
-    quiz: { blank: '終わった', distractors: ['続けた', '始めた', '出した'] },
+    quiz: { blank: '終わった', distractors: ['続けた', '終われた', '出した'] },
   },
   {
     id: 'n4-g117',
@@ -1622,7 +1628,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '正在〜中',
     example: { ja: '社長は今、会議中です。', zh: '社長現在正在開會。', highlight: '会議中' },
     tip: '「中（ちゅう）」表正在進行，接動作名詞：会議中・電話中；別與「じゅう」混淆。',
-    quiz: { blank: '中', distractors: ['間', '後', '前'] },
+    quiz: { blank: '中', distractors: ['間', '内', '時'] },
   },
   {
     id: 'n4-g122',
@@ -1648,7 +1654,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '夏休みの間',
     },
     tip: '「間」表整段期間持續，後接持續性狀態（ずっと〜）；「間に」表期間中的某一時點。',
-    quiz: { blank: '間', distractors: ['うちに', '中に', '前に'] },
+    quiz: { blank: '間', distractors: ['うちに', '中に', '間で'] },
   },
   {
     id: 'n4-g124',
@@ -1674,7 +1680,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '帰らないことがある',
     },
     tip: '「辭書形／ない形＋ことがある」＝有時會；「た形＋ことがある」＝曾經，考題常比較這兩者。',
-    quiz: { blank: 'ことがある', distractors: ['ことにする', 'ことになる', 'ことができる'] },
+    quiz: { blank: 'ことがある', distractors: ['ことがする', 'ことをある', 'ことにある'] },
   },
   {
     id: 'n4-g126',
@@ -1687,7 +1693,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '捨てちゃった',
     },
     tip: '「てしまう→ちゃう」「でしまう→じゃう」，過去式為ちゃった／じゃった。',
-    quiz: { blank: 'ちゃった', distractors: ['じゃった', 'ちゃおう', 'ちゃだめ'] },
+    quiz: { blank: 'ちゃった', distractors: ['じゃった', 'ちゃっだ', 'じゃおう'] },
   },
   {
     id: 'n4-g127',
@@ -1696,7 +1702,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '先〜好（ておく的口語）',
     example: { ja: '鍵は机の上に置いとくね。', zh: '鑰匙我先放在桌上喔。', highlight: '置いとく' },
     tip: '「ておく→とく」「でおく→どく」，如「読んどく」；屬口語縮約。',
-    quiz: { blank: 'とく', distractors: ['どく', 'ちゃう', 'じゃう'] },
+    quiz: { blank: 'とく', distractors: ['どく', 'とか', 'じゃう'] },
   },
   {
     id: 'n4-g128',
@@ -1709,7 +1715,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '気づけばよかった',
     },
     tip: '「ばよかった」表後悔已發生的事；「ばいい」是建議，不含後悔語意。',
-    quiz: { blank: 'ばよかった', distractors: ['ばいい', 'てよかった', 'ばならない'] },
+    quiz: { blank: 'ばよかった', distractors: ['ばよくった', 'ばよいった', 'ばならない'] },
   },
   {
     id: 'n4-g129',
@@ -1724,7 +1730,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '「たらどうですか」為建議，更禮貌說「たらいかがですか」；不能對上司直接使用。',
     quiz: {
       blank: 'たらどうですか',
-      distractors: ['てもいいですか', 'たほうがどうですか', 'ながらどうですか'],
+      distractors: ['てもどうですか', 'たほうがどうですか', 'ながらどうですか'],
     },
   },
   {
@@ -1738,7 +1744,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '待ったらいい',
     },
     tip: '「たらいいですか」常用於詢問建議；「ばいい」「といい」意思相近但語感略異。',
-    quiz: { blank: 'たらいい', distractors: ['てもいい', 'たほうが', 'たがる'] },
+    quiz: { blank: 'たらいい', distractors: ['たらいく', 'たほうが', 'たがる'] },
   },
   {
     id: 'n4-g131',
@@ -1751,7 +1757,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '聞けばいい',
     },
     tip: '「ばいい」＝只要〜就好，表最簡單的方法；問句「どうすればいいですか」很常考。',
-    quiz: { blank: 'ばいい', distractors: ['ばよかった', 'てはいけない', 'なさい'] },
+    quiz: { blank: 'ばいい', distractors: ['ばいく', 'てはいけない', 'なさい'] },
   },
   {
     id: 'n4-g132',
@@ -1792,7 +1798,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '「なくてはいけない」＝必須；同義有「なければならない」「ないといけない」。',
     quiz: {
       blank: 'なくてはいけない',
-      distractors: ['なくてもいい', 'ないではいけない', 'なければいい'],
+      distractors: ['なくてもいく', 'ないではいけない', 'なくはいけない'],
     },
   },
   {
@@ -1806,7 +1812,10 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '帰らないといけない',
     },
     tip: '「ないといけない」比「なければならない」口語；注意別與「てはいけない（禁止）」混淆。',
-    quiz: { blank: 'ないといけない', distractors: ['なくてもいい', 'ないといい', 'てはいけない'] },
+    quiz: {
+      blank: 'ないといけない',
+      distractors: ['なくてもいく', 'ないとだめる', 'てはいけない'],
+    },
   },
   {
     id: 'n4-g136',
@@ -1819,7 +1828,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '急がなきゃ',
     },
     tip: '「なきゃ」＝なければ，「なくちゃ」＝なくては，皆為口語，後面常省略いけない。',
-    quiz: { blank: 'なきゃ', distractors: ['なくても', 'ないので', 'なければいい'] },
+    quiz: { blank: 'なきゃ', distractors: ['なきゃて', 'なけりゃて', 'なければいい'] },
   },
   {
     id: 'n4-g137',
@@ -1832,7 +1841,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '触ってはだめだ',
     },
     tip: '「てはだめだ」＝禁止，同「てはいけない」；口語縮約為「ちゃだめ／じゃだめ」。',
-    quiz: { blank: 'てはだめだ', distractors: ['てもいい', 'たほうがいい', 'てみたい'] },
+    quiz: { blank: 'てはだめだ', distractors: ['てはだめる', 'てはだめな', 'たはだめだ'] },
   },
   {
     id: 'n4-g138',
@@ -1854,7 +1863,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '給我〜；〜吧（命令）',
     example: { ja: '早く寝なさい。', zh: '快去睡覺。', highlight: '寝なさい' },
     tip: '「なさい」多用於上對下（父母對小孩、試題指示），對長輩不可使用。',
-    quiz: { blank: 'なさい', distractors: ['ないで', 'たがる', 'ながら'] },
+    quiz: { blank: 'なさい', distractors: ['なさえ', 'たがる', 'ながら'] },
   },
   {
     id: 'n4-g140',
@@ -1872,7 +1881,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '不准〜',
     example: { ja: 'ここに入るな。', zh: '不准進來這裡。', highlight: '入るな' },
     tip: '禁止「辭書形＋な」語氣強硬；別與ます形＋な（なさい的省略，如「早く寝な」）混淆。',
-    quiz: { blank: 'な', distractors: ['ね', 'よ', 'ぞ'] },
+    quiz: { blank: 'な', distractors: ['なか', 'に', 'を'] },
   },
   {
     id: 'n4-g142',
@@ -1881,7 +1890,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '〜吧（常體的邀約、意志）',
     example: { ja: '一緒に犯人を探そう。', zh: '一起找犯人吧。', highlight: '探そう' },
     tip: '意向形：五段改お段＋う（探そう），一段＋よう（見よう），する→しよう，来る→来よう。',
-    quiz: { blank: 'そう', distractors: ['せ', 'す', 'さない'] },
+    quiz: { blank: 'そう', distractors: ['さよう', 'せよう', 'すろう'] },
   },
   {
     id: 'n4-g143',
@@ -1890,7 +1899,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '要不要〜呢；我來〜吧',
     example: { ja: 'そろそろ帰ろうか。', zh: '差不多該回去了吧？', highlight: '帰ろうか' },
     tip: '「（よ）うか」可表提議「〜吧？」或主動提出「我來〜吧」；回答常用「うん、そうしよう」。',
-    quiz: { blank: 'ろうか', distractors: ['れか', 'ったか', 'りか'] },
+    quiz: { blank: 'ろうか', distractors: ['れか', 'るうか', 'りか'] },
   },
   {
     id: 'n4-g144',
@@ -1919,7 +1928,10 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '行かないつもりだ',
     },
     tip: '否定的打算用「ないつもりだ」；「つもりはない」語氣更強，表完全沒有那個意思。',
-    quiz: { blank: 'ないつもりだ', distractors: ['ないはずだ', 'ないそうだ', 'なかったつもりだ'] },
+    quiz: {
+      blank: 'ないつもりだ',
+      distractors: ['なかったつもりだ', 'ずつもりだ', 'ないつもりがる'],
+    },
   },
   {
     id: 'n4-g146',
@@ -1960,7 +1972,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     tip: '「ように言う」為間接轉述命令或請求；被動「ように言われた」表被人叫去做。',
     quiz: {
       blank: 'ように言われた',
-      distractors: ['ようと言われた', 'そうに言われた', 'ように言った'],
+      distractors: ['ようと言われた', 'そうに言われた', 'ように言わられた'],
     },
   },
   {
@@ -2175,7 +2187,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '乗らないで',
     },
     tip: '「ないで（替代）」＝不做A而做B；「なくて」表原因，考題常比較這兩者。',
-    quiz: { blank: 'ないで', distractors: ['なくて', 'ずで', 'ないと'] },
+    quiz: { blank: 'ないで', distractors: ['ないでで', 'ずで', 'ないと'] },
   },
   {
     id: 'n4-g165',
@@ -2345,7 +2357,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '無論〜都〜',
     example: { ja: 'この問題なら誰でも解ける。', zh: '這個問題誰都解得開。', highlight: '誰でも' },
     tip: '「疑問詞＋でも」＝全面肯定（誰でも）；「疑問詞＋も＋否定」＝全面否定。',
-    quiz: { blank: 'でも', distractors: ['か', 'しか', 'まで'] },
+    quiz: { blank: 'でも', distractors: ['に', 'しか', 'まで'] },
   },
   {
     id: 'n4-g179',
@@ -2354,7 +2366,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
     meaning: '某〜（不確定）',
     example: { ja: '誰かが窓から入ったようだ。', zh: '好像有人從窗戶進來了。', highlight: '誰か' },
     tip: '「疑問詞＋か」表不確定的某物（誰か・何か・どこか），與「も」「でも」的意思不同。',
-    quiz: { blank: 'かが', distractors: ['もが', 'にが', 'までが'] },
+    quiz: { blank: 'かが', distractors: ['しか', 'にが', 'までが'] },
   },
   {
     id: 'n4-g180',
@@ -2367,7 +2379,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '何も聞こえなかった',
     },
     tip: '「疑問詞＋も」後必須接否定＝全面否定；「何か」表不確定的某物。',
-    quiz: { blank: 'も', distractors: ['か', 'しか', 'まで'] },
+    quiz: { blank: 'も', distractors: ['に', 'しか', 'まで'] },
   },
   {
     id: 'n4-g181',
@@ -2380,7 +2392,7 @@ export const N4_GRAMMAR: GrammarPoint[] = [
       highlight: '一人ずつ',
     },
     tip: '「數量詞＋ずつ」表平均分配或每次相同數量：少しずつ・一つずつ。',
-    quiz: { blank: 'ずつ', distractors: ['だけ', 'まで', 'しか'] },
+    quiz: { blank: 'ずつ', distractors: ['ずって', 'まで', 'しか'] },
   },
   {
     id: 'n4-g182',
