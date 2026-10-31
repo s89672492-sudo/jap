@@ -38,7 +38,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '出かけようとした',
     },
     tip: '意向形＋とする＝正要做某事的瞬間；「ようにする」是努力做到，兩者常被混用。',
-    quiz: { blank: 'ようとした', distractors: ['ようにした', 'ることにした', 'させた'] },
+    quiz: { blank: 'ようとした', distractors: ['ようにした', 'るようとした', 'ようとなった'] },
   },
   {
     id: 'n3-g04',
@@ -162,7 +162,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
     tip: '「ことにしている」是自己決定的習慣；「ことになっている」是外部規定，常考對比。',
     quiz: {
       blank: 'ことにしている',
-      distractors: ['ことになっている', 'ことがある', 'ことはない'],
+      distractors: ['ことをしている', 'ことがしている', 'ようにしてある'],
     },
   },
   {
@@ -202,7 +202,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '聞くたびに',
     },
     tip: '「每次〜就一定〜」，前接辭書形或名詞＋の；後句不用意志表現。',
-    quiz: { blank: 'たびに', distractors: ['ついでに', 'とたん', 'うちに'] },
+    quiz: { blank: 'たびに', distractors: ['ついでに', 'とたん', 'ばかりに'] },
   },
   {
     id: 'n3-g17',
@@ -228,7 +228,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '会議の最中に',
     },
     tip: '強調動作正在進行的高峰期被打斷，後句多為突發事件；接「ている形」或名詞の。',
-    quiz: { blank: '最中に', distractors: ['ついでに', 'とたんに', 'たびに'] },
+    quiz: { blank: '最中に', distractors: ['ついでに', 'とたんに', 'ままに'] },
   },
   {
     id: 'n3-g19',
@@ -293,7 +293,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '嘘をつくわけがない',
     },
     tip: '說話者強烈主觀否定「絕不可能」；近義「はずがない」，但「わけではない」是部分否定。',
-    quiz: { blank: 'わけがない', distractors: ['わけではない', 'わけだ', 'ことがある'] },
+    quiz: { blank: 'わけがない', distractors: ['わけではない', 'わけだ', 'ところだ'] },
   },
   {
     id: 'n3-g24',
@@ -380,7 +380,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '父のかわりに',
     },
     tip: '有「代替」與「交換」兩義；名詞＋にかわって只有「代替」義。',
-    quiz: { blank: 'かわりに', distractors: ['おかげで', 'せいで', 'たびに'] },
+    quiz: { blank: 'かわりに', distractors: ['ばかりに', 'とたんに', 'たびに'] },
   },
   {
     id: 'n3-g31',
@@ -395,7 +395,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
     tip: '表示允許、讓步，比「てもいい」略正式；否定「てはいけない」是禁止。',
     quiz: {
       blank: 'も構いません',
-      distractors: ['はいけません', 'はなりません', 'も仕方がありません'],
+      distractors: ['は構いません', 'も構えません', 'を構いません'],
     },
   },
   {
@@ -487,7 +487,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: 'つけたまま',
     },
     tip: '維持前項狀態去做後項（常為不自然狀態）；否定「ないまま」，名詞須加「の」。',
-    quiz: { blank: 'たまま', distractors: ['ないまま', 'ながら', 'るうちに'] },
+    quiz: { blank: 'たまま', distractors: ['るまま', 'ながら', 'るうちに'] },
   },
   {
     id: 'n3-g39',
@@ -633,7 +633,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: 'やみそうにない',
     },
     tip: '樣態「そうだ」的否定，表示看起來不太可能；也可說「そうもない」。',
-    quiz: { blank: 'そうにない', distractors: ['そうだ', 'ようにない', 'わけがない'] },
+    quiz: { blank: 'そうにない', distractors: ['そうがない', 'ようにない', 'わけがない'] },
   },
   {
     id: 'n3-g50',
@@ -646,7 +646,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '犯人のはずがない',
     },
     tip: '有根據的強烈否定「不可能」；名詞接「の」，與「わけがない」近義。',
-    quiz: { blank: 'はずがない', distractors: ['はずだ', 'ようがない', 'ことがない'] },
+    quiz: { blank: 'はずがない', distractors: ['はずをない', 'ようがない', 'ことがない'] },
   },
   {
     id: 'n3-g51',
@@ -659,7 +659,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '来るはずだった',
     },
     tip: '「原本應該〜」但結果不符；與後悔的「べきだった」不同，不表責備。',
-    quiz: { blank: 'はずだった', distractors: ['はずがなかった', 'ところだった', 'ことにした'] },
+    quiz: { blank: 'はずだった', distractors: ['はずがなかった', 'ところだった', 'ことだった'] },
   },
   {
     id: 'n3-g52',
@@ -672,7 +672,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '疑うべきではない',
     },
     tip: '表示道理上的義務；「する」可作「すべき」，否定為「べきではない」。',
-    quiz: { blank: 'べきではない', distractors: ['はずがない', 'わけではない', 'ようではない'] },
+    quiz: { blank: 'べきではない', distractors: ['はずがない', 'べからない', 'ようではない'] },
   },
   {
     id: 'n3-g53',
@@ -685,7 +685,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '相談するべきだった',
     },
     tip: '表示對過去該做而沒做的後悔或責備；與「はずだった」（預定落空）不同。',
-    quiz: { blank: 'べきだった', distractors: ['ところだった', 'ことにした', 'わけだった'] },
+    quiz: { blank: 'べきだった', distractors: ['ところだった', 'ことにあった', 'わけだった'] },
   },
   {
     id: 'n3-g54',
@@ -711,7 +711,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '隠すおそれがある',
     },
     tip: '表示有發生壞事的可能，多用於新聞、報告；只用於負面事態。',
-    quiz: { blank: 'おそれがある', distractors: ['ことがある', 'わけがある', 'ところがある'] },
+    quiz: { blank: 'おそれがある', distractors: ['おそれをする', 'わけがある', 'ところがある'] },
   },
   {
     id: 'n3-g56',
@@ -763,7 +763,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '後悔しても仕方がない',
     },
     tip: '「做了也沒用」帶放棄語氣；注意與「て仕方がない」（非常〜）只差一個「も」。',
-    quiz: { blank: 'も仕方がない', distractors: ['はいけない', 'も構わない', 'ばかりいる'] },
+    quiz: { blank: 'も仕方がない', distractors: ['も仕方がある', 'は仕方がない', 'ばかりある'] },
   },
   {
     id: 'n3-g60',
@@ -776,7 +776,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '優しい一方で',
     },
     tip: '對比同一事物的兩個面向；「反面」偏重正反兩面，一方で也可表同時進行。',
-    quiz: { blank: '一方で', distractors: ['うえに', 'ばかりに', 'おかげで'] },
+    quiz: { blank: '一方で', distractors: ['ついでに', 'ばかりに', 'おかげで'] },
   },
   {
     id: 'n3-g61',
@@ -789,7 +789,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '便利な反面',
     },
     tip: '同一事物具有相反的兩面，前後多為正負對比；な形容詞要加「な」。',
-    quiz: { blank: '反面', distractors: ['うえに', 'ために', 'ついでに'] },
+    quiz: { blank: '反面', distractors: ['ついでに', 'ために', 'とおりに'] },
   },
   {
     id: 'n3-g62',
@@ -802,7 +802,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '正しいとは限らない',
     },
     tip: '部分否定「不一定〜」，常與「必ずしも」呼應。',
-    quiz: { blank: 'とは限らない', distractors: ['に決まっている', 'わけがない', 'はずだ'] },
+    quiz: { blank: 'とは限らない', distractors: ['とは決まらない', 'とは限る', 'はずがある'] },
   },
   {
     id: 'n3-g63',
@@ -817,7 +817,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
     tip: '婉轉否定前面推論「並不是說〜」；比「わけではない」多一層引述語氣。',
     quiz: {
       blank: 'というわけではない',
-      distractors: ['というわけだ', 'に決まっている', 'わけがない'],
+      distractors: ['にわけではない', 'というはずではない', 'とは限る'],
     },
   },
   {
@@ -847,7 +847,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '過ぎているじゃないか',
     },
     tip: '口語中表示責備、驚訝或要對方確認；句尾音調下降。',
-    quiz: { blank: 'じゃないか', distractors: ['だろうか', 'ものか', 'ことか'] },
+    quiz: { blank: 'じゃないか', distractors: ['ものの', 'ばかりか', 'ことか'] },
   },
   {
     id: 'n3-g66',
@@ -873,7 +873,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '通らないことがある',
     },
     tip: '表示偶爾發生；與經驗「たことがある」區分，這裡接辭書形或ない形。',
-    quiz: { blank: 'ことがある', distractors: ['ことにする', 'ことはない', 'ことだ'] },
+    quiz: { blank: 'ことがある', distractors: ['ことにする', 'ことをする', 'ことだ'] },
   },
   {
     id: 'n3-g68',
@@ -912,7 +912,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '手を触れないこと',
     },
     tip: '用於規定、注意事項的句尾，表示指示或命令；常見於公告、校規。',
-    quiz: { blank: 'こと', distractors: ['もの', 'よう', 'わけ'] },
+    quiz: { blank: 'こと', distractors: ['もの', 'ため', 'わけ'] },
   },
   {
     id: 'n3-g71',
@@ -925,7 +925,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '見かけによらないものだ',
     },
     tip: '表示一般常理或本性；た形＋ものだ則是懷念過去，常考兩者區別。',
-    quiz: { blank: 'ものだ', distractors: ['ことだ', 'わけだ', 'はずだ'] },
+    quiz: { blank: 'ものだ', distractors: ['ことだ', 'ところだ', 'はずだ'] },
   },
   {
     id: 'n3-g72',
@@ -938,7 +938,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '遊んだものだ',
     },
     tip: '回憶過去常做的事，常與「よく」呼應；與表示本性的「ものだ」區分。',
-    quiz: { blank: 'ものだ', distractors: ['ことだ', 'わけだ', 'ところだ'] },
+    quiz: { blank: 'ものだ', distractors: ['ことだ', 'ものか', 'ところだ'] },
   },
   {
     id: 'n3-g73',
@@ -951,7 +951,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '読むものではない',
     },
     tip: '以常理勸誡「不應該〜」，語氣比「べきではない」柔和。',
-    quiz: { blank: 'ものではない', distractors: ['ことではない', 'わけではない', 'はずではない'] },
+    quiz: { blank: 'ものではない', distractors: ['ことではない', 'ものがない', 'はずではない'] },
   },
   {
     id: 'n3-g74',
@@ -1081,7 +1081,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '二人きり',
     },
     tip: '「只有〜」限定數量；口語可說「っきり」，如「二人っきり」。',
-    quiz: { blank: 'きり', distractors: ['まで', 'ほど', 'ずつ'] },
+    quiz: { blank: 'きり', distractors: ['まで', 'ほど', 'ごと'] },
   },
   {
     id: 'n3-g84',
@@ -1094,7 +1094,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '子どもにまで',
     },
     tip: '舉極端例子「連〜都」，常帶意外感；與「さえ」相近。',
-    quiz: { blank: 'まで', distractors: ['だけ', 'しか', 'ほど'] },
+    quiz: { blank: 'まで', distractors: ['ごろ', 'しか', 'ほど'] },
   },
   {
     id: 'n3-g85',
@@ -1159,7 +1159,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '台風による',
     },
     tip: '修飾名詞的形態「由〜造成的〜」；連接動詞時用「によって」。',
-    quiz: { blank: 'による', distractors: ['によって', 'にとって', 'について'] },
+    quiz: { blank: 'による', distractors: ['にとる', 'にとって', 'について'] },
   },
   {
     id: 'n3-g90',
@@ -1185,7 +1185,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '事件に関する',
     },
     tip: '「に関して」的連體形，後接名詞；「について」修飾名詞則是「についての」。',
-    quiz: { blank: 'に関する', distractors: ['に関して', 'に対して', 'にとって'] },
+    quiz: { blank: 'に関する', distractors: ['に関すて', 'に対して', 'にとって'] },
   },
   {
     id: 'n3-g92',
@@ -1211,7 +1211,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '社長にかわって',
     },
     tip: '名詞＋にかわって＝代替某人；「かわりに」還有「交換」意義。',
-    quiz: { blank: 'にかわって', distractors: ['にとって', 'に対して', 'に関して'] },
+    quiz: { blank: 'にかわって', distractors: ['にとって', 'にかけて', 'につれて'] },
   },
   {
     id: 'n3-g94',
@@ -1289,7 +1289,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '初心者向き',
     },
     tip: '「適合〜」，結果剛好合適；「向け」是一開始就以〜為對象製作。',
-    quiz: { blank: '向き', distractors: ['っぽい', 'がち', 'だらけ'] },
+    quiz: { blank: '向き', distractors: ['ぎみ', 'がち', 'だらけ'] },
   },
   {
     id: 'n3-g100',
@@ -1328,7 +1328,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '現代社会における',
     },
     tip: '「において」的連體形，後接名詞，多用於書面正式文章。',
-    quiz: { blank: 'における', distractors: ['において', 'にとって', 'について'] },
+    quiz: { blank: 'における', distractors: ['におけて', 'にとって', 'について'] },
   },
   {
     id: 'n3-g103',
@@ -1584,7 +1584,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: 'いつでも',
     },
     tip: '疑問詞＋でも＝全面肯定（いつでも、だれでも）；疑問詞＋か＝不確定（いつか、だれか）。',
-    quiz: { blank: 'でも', distractors: ['か', 'まで', 'ごろ'] },
+    quiz: { blank: 'でも', distractors: ['しか', 'まで', 'ごろ'] },
   },
   {
     id: 'n3-g123',
@@ -1623,7 +1623,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '兄と違って',
     },
     tip: '「AとBは違う」的副詞子句形，修飾名詞時用「〜と違う＋名詞」。',
-    quiz: { blank: 'と違って', distractors: ['と同じく', 'のように', 'として'] },
+    quiz: { blank: 'と違って', distractors: ['に違って', 'ほど', 'として'] },
   },
   {
     id: 'n3-g126',
@@ -1714,7 +1714,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '子どもだって',
     },
     tip: '名詞＋だって＝「〜でも」的口語，意為就連〜也；句首的「だって」則是「可是、因為」。',
-    quiz: { blank: 'だって', distractors: ['しか', 'こそ', 'ほど'] },
+    quiz: { blank: 'だって', distractors: ['しか', 'ごと', 'ほど'] },
   },
   {
     id: 'n3-g133',
@@ -1892,7 +1892,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '田中さんっていう',
     },
     tip: '「〜っていう＋名詞」＝「〜という」的口語，用於介紹對方不熟悉的名稱。',
-    quiz: { blank: 'っていう', distractors: ['みたいな', 'らしい', 'のような'] },
+    quiz: { blank: 'っていう', distractors: ['みたく', 'らしく', 'のよう'] },
   },
   {
     id: 'n3-g147',
@@ -1905,7 +1905,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '病院だったんだって',
     },
     tip: '「んだって」表傳聞，常用語尾上揚；名詞、な形容詞現在式要用「〜なんだって」。',
-    quiz: { blank: 'んだって', distractors: ['っけ', 'のに', 'ので'] },
+    quiz: { blank: 'んだって', distractors: ['ほど', 'ずつ', 'ばかり'] },
   },
   {
     id: 'n3-g148',
@@ -1949,7 +1949,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
     meaning: '〜喔！（男性語氣、強調）',
     example: { ja: '気をつけろ、だれか来るぞ。', zh: '小心，有人來了！', highlight: '来るぞ' },
     tip: '「ぞ」為男性強烈語氣，用於提醒、警告或自我激勵；對長輩不使用。',
-    quiz: { blank: 'ぞ', distractors: ['っけ', 'か', 'な'] },
+    quiz: { blank: 'ぞ', distractors: ['っけ', 'ずつ', 'ほど'] },
   },
   {
     id: 'n3-g152',
@@ -1962,7 +1962,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '見てごらん',
     },
     tip: '「〜てごらん」是「〜てみなさい」的委婉說法，只用於對晚輩或小孩。',
-    quiz: { blank: 'ごらん', distractors: ['いる', 'しまう', 'ある'] },
+    quiz: { blank: 'ごらん', distractors: ['ござい', 'ごらんだ', 'ある'] },
   },
   {
     id: 'n3-g153',
@@ -1988,7 +1988,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '相談してはどうか',
     },
     tip: '「〜てはどうか」為較書面的建議；口語用「〜たらどう」，敬語用「〜てはいかがですか」。',
-    quiz: { blank: 'はどうか', distractors: ['もいいか', 'ばかりか', 'からか'] },
+    quiz: { blank: 'はどうか', distractors: ['はいいか', 'ばかりか', 'からか'] },
   },
   {
     id: 'n3-g155',
@@ -2001,7 +2001,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '見つかってよかった',
     },
     tip: '「〜てよかった」表慶幸；「〜ばよかった」表後悔，是常見混淆點。',
-    quiz: { blank: 'よかった', distractors: ['ほしかった', 'しまった', 'いけない'] },
+    quiz: { blank: 'よかった', distractors: ['よいだ', 'いけた', 'あった'] },
   },
   {
     id: 'n3-g156',
@@ -2039,7 +2039,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '解いてみせる',
     },
     tip: '「〜てみせる」表強烈決心或示範給人看；「〜てみる」只是嘗試，語氣差很多。',
-    quiz: { blank: 'みせる', distractors: ['みる', 'おく', 'ある'] },
+    quiz: { blank: 'みせる', distractors: ['ある', 'みせす', 'みせろう'] },
   },
   {
     id: 'n3-g159',
@@ -2096,7 +2096,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: 'かけたつもり',
     },
     tip: '「た形＋つもり」表自以為已經做了，實際上可能不是；與「辭書形＋つもり（打算）」區分。',
-    quiz: { blank: 'つもり', distractors: ['ふり', 'ため', 'ところ'] },
+    quiz: { blank: 'つもり', distractors: ['ふり', 'ため', 'ほど'] },
   },
   {
     id: 'n3-g164',
@@ -2359,7 +2359,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '辞書なしで',
     },
     tip: '「〜なしで」表在缺少某物的狀態下做；「〜抜きで」多指刻意去掉原本該有的東西。',
-    quiz: { blank: 'なしで', distractors: ['だらけで', 'として', 'ごとに'] },
+    quiz: { blank: 'なしで', distractors: ['だらけで', 'ぶりで', 'ごとに'] },
   },
   {
     id: 'n3-g187',
@@ -2372,7 +2372,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '冗談抜きで',
     },
     tip: '「冗談抜きで」為慣用語，意為「說真的」；「〜抜き」強調刻意省去。',
-    quiz: { blank: '抜きで', distractors: ['だらけで', 'ばかりで', 'として'] },
+    quiz: { blank: '抜きで', distractors: ['だらけで', 'ぶりで', 'ごとで'] },
   },
   {
     id: 'n3-g188',
@@ -2472,7 +2472,7 @@ export const N3_GRAMMAR: GrammarPoint[] = [
       highlight: '「黒猫」という',
     },
     tip: '「〜という＋名詞」用於介紹名稱；口語為「〜っていう」。',
-    quiz: { blank: 'という', distractors: ['のような', 'として', 'による'] },
+    quiz: { blank: 'という', distractors: ['のよう', 'として', 'による'] },
   },
   {
     id: 'n3-g196',
