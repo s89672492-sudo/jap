@@ -28,7 +28,10 @@ export default function QuizScreen() {
   const insets = useSafeAreaInsets();
   const level = useJlptLevel();
   // 從首頁「今日任務」進來時（例如 /quiz?mode=review），直接打開那個模式
-  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
+  const { mode: modeParam, focus: focusParam } = useLocalSearchParams<{
+    mode?: string;
+    focus?: string;
+  }>();
   // 網頁版預先產生的畫面沒有網址參數，載入到裝置後才看參數，避免兩份畫面不一致
   const hydrated = useHydrated();
   const requested = hydrated
@@ -69,7 +72,7 @@ export default function QuizScreen() {
   useEffect(() => {
     if (!requested) return;
     scrollRef.current?.scrollTo({ y: 0, animated: false });
-    router.setParams({ mode: undefined });
+    router.setParams({ mode: undefined, focus: undefined });
   }, [requested]);
 
   return (
@@ -156,6 +159,8 @@ export default function QuizScreen() {
               onAnswered={scrollToEnd}
               onNext={scrollToTop}
               locked={examActive}
+              // 從弱點分析「開始針對練習」進來：只練這個大問
+              focus={hydrated && requested === 'exam' ? (focusParam ?? null) : null}
             />
           </KeepAlive>
           <KeepAlive active={mode === 'listening'}>

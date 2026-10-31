@@ -9,7 +9,12 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
 import type { JlptLevel } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
+import { ExamTrends } from '@/components/quiz/mock-exam/exam-trends';
+import { WeaknessAnalysis } from '@/components/quiz/mock-exam/weakness-analysis';
+import { BLUEPRINTS, officialQuestionCount } from '@/data/exam/blueprints';
 import { PLANNED_PAPERS } from '@/data/exam/papers';
+import { useLearningProgress } from '@/hooks/use-learning-progress';
+import { studyAdvice, weakestTypes } from '@/lib/exam-analysis';
 import {
   RANDOM_PAPER_ID,
   buildFixedPaper,
@@ -69,6 +74,57 @@ function PaperChip({
   );
 }
 
+/** 歷次趨勢、最近幾次的弱點、今天的練習建議 */
+function ExamAnalysis({ level, history }: { level: JlptLevel; history: MockExamRecord[] }) {
+  const theme = useTheme();
+  const progress = useLearningProgress();
+  const weak = weakestTypes(history);
+  const advice = progress
+    ? studyAdvice(
+        level,
+        weak,
+        progress.levels[level].dueWords,
+        history[0]?.date ?? null,
+        progress.now,
+      )
+    : [];
+  return (
+    <>
+      <ExamTrends level={level} records={history} />
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        ]}>
+        <ThemedText type="smallBold" style={{ color: theme.accent }}>
+          弱點診斷（最近 5 次）
+        </ThemedText>
+        <WeaknessAnalysis weak={weak} />
+      </View>
+      {advice.length > 0 && (
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+          ]}>
+          <ThemedText type="smallBold" style={{ color: theme.accent }}>
+            今天的練習建議
+          </ThemedText>
+          {advice.map((a) => (
+            <ThemedText key={a.label} type="small">
+              <ThemedText type="smallBold">{a.label}：</ThemedText>
+              {a.detail}
+            </ThemedText>
+          ))}
+          <ThemedText type="small" themeColor="textSecondary">
+            這些只是建議，不會改變單字的複習排程。
+          </ThemedText>
+        </View>
+      )}
+    </>
+  );
+}
+
 const MODE_OPTIONS: { value: MockExamMode; label: string }[] = [
   { value: 'official', label: '正式時間' },
   { value: 'practice', label: '練習' },
@@ -93,6 +149,12 @@ export function MockExamIntro({ level, onStart, onOpenRecord }: MockExamIntroPro
     [level, paper],
   );
   const totalQuestions = sittings.reduce((sum, s) => sum + s.questions.length, 0);
+  // 題數比正式考試少很多（例如題庫還在擴充的等級）時，提醒正式時間會比較寬鬆
+  const officialTotal = BLUEPRINTS[level].sittings.reduce(
+    (sum, x) => sum + officialQuestionCount(x),
+    0,
+  );
+  const fewerThanOfficial = totalQuestions < officialTotal * 0.9;
   const totalMinutes = sittings.reduce((sum, s) => sum + sittingSeconds(s, mode) / 60, 0);
 
   return (
@@ -196,7 +258,9 @@ export function MockExamIntro({ level, onStart, onOpenRecord }: MockExamIntroPro
         <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
         <ThemedText type="small" themeColor="textSecondary">
           {mode === 'official'
-            ? '正式時間：每節照 JLPT 官方時間。這份模擬考的題數比正式考試少，所以時間會比較寬鬆。'
+            ? fewerThanOfficial
+              ? '正式時間：每節照 JLPT 官方時間。這份模擬考的題數比正式考試少，所以時間會比較寬鬆。'
+              : '正式時間：每節照 JLPT 官方時間，題數也和正式考試差不多。聽解每題只播一次。'
             : '練習：依這份考卷的題數換算時間（語彙每題 45 秒、文法 60 秒、讀解 2〜4 分鐘、聽解 75 秒）。'}
         </ThemedText>
         {sittings.map((sitting, i) => (
@@ -232,6 +296,8 @@ export function MockExamIntro({ level, onStart, onOpenRecord }: MockExamIntroPro
           分數依答對比例換算，正式考試用的是等化後的分數，結果僅供參考。
         </ThemedText>
       </View>
+
+      {history.length > 0 && <ExamAnalysis level={level} history={history} />}
 
       {history.length > 0 && (
         <View

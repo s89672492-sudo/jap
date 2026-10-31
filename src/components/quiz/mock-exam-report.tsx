@@ -8,14 +8,19 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Spacing } from '@/constants/theme';
-import { EXAM_TYPE_LABELS, type ExamQuestionType } from '@/data/exam';
+import { EXAM_SUBCATEGORY_LABELS, TYPE_DEFAULTS, type ExamSubcategory } from '@/data/exam';
+import type { JlptLevel } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
+import { compareWithPrevious, MIN_ITEMS_FOR_WEAKNESS } from '@/lib/exam-analysis';
 import type { MockExamResult } from '@/lib/mock-exam';
 import { MOCK_EXAM_MODE_LABELS } from '@/lib/mock-exam-session';
 import type { ExamRoundQuestion } from '@/lib/quiz';
-import type { MockExamRecord } from '@/stores/mock-exam-store';
+import { useMockExamHistory, type MockExamRecord } from '@/stores/mock-exam-store';
+
+import { WeaknessAnalysis } from './mock-exam/weakness-analysis';
 
 type MockExamReportProps = {
+  level: JlptLevel;
   result: MockExamResult;
   items: ExamRoundQuestion[];
   answers: Record<string, string>;
@@ -36,6 +41,7 @@ const FILTER_OPTIONS: { value: ReviewFilter; label: string }[] = [
 
 /** 模擬考成績單：合格判定、各科分數、各題型正確率、逐題檢討 */
 export function MockExamReport({
+  level,
   result,
   items,
   answers,
@@ -47,20 +53,39 @@ export function MockExamReport({
   const theme = useTheme();
   const [filter, setFilter] = useState<ReviewFilter>('wrong');
 
-  // 各題型正確率（依出題順序）
-  const byType = new Map<ExamQuestionType, { correct: number; total: number }>();
+  const history = useMockExamHistory()[level] ?? [];
+  // 各大問的答對率（依出題順序）
+  const byType = new Map<ExamSubcategory, { correct: number; total: number }>();
   for (const item of items) {
-    const entry = byType.get(item.question.type) ?? { correct: 0, total: 0 };
+    const sub = item.question.subcategory ?? TYPE_DEFAULTS[item.question.type].subcategory;
+    const entry = byType.get(sub) ?? { correct: 0, total: 0 };
     entry.total++;
     if (answers[item.question.id] === item.answer) entry.correct++;
-    byType.set(item.question.type, entry);
+    byType.set(sub, entry);
   }
+  // 這次考試最弱的大問（題數太少的不算）
+  const weak = [...byType.entries()]
+    .map(([subcategory, { correct, total }]) => ({
+      subcategory,
+      label: EXAM_SUBCATEGORY_LABELS[subcategory],
+      correct,
+      total,
+      rate: total === 0 ? 0 : correct / total,
+    }))
+    .filter((s) => s.total >= Math.min(MIN_ITEMS_FOR_WEAKNESS, 3) && s.rate < 0.8)
+    .sort((a, b) => a.rate - b.rate)
+    .slice(0, 3);
+  const comparison = record ? compareWithPrevious(record, history) : null;
+  const answeredCount = (record?.items ?? []).filter((item) => (item.ms ?? 0) > 0).length;
   const unanswered = items.filter((item) => answers[item.question.id] === undefined).length;
   const totalMs = (record?.items ?? []).reduce((sum, item) => sum + (item.ms ?? 0), 0);
   const details = [
     record?.mode ? `${MOCK_EXAM_MODE_LABELS[record.mode]}模式` : null,
     `未作答 ${unanswered} 題`,
     totalMs > 0 ? `作答時間約 ${Math.max(1, Math.round(totalMs / 60000))} 分鐘` : null,
+    totalMs > 0 && answeredCount > 0
+      ? `每題平均 ${Math.round(totalMs / answeredCount / 1000)} 秒`
+      : null,
     record?.leaveCount !== undefined ? `離開考試畫面 ${record.leaveCount} 次` : null,
   ].filter(Boolean);
   const reviewItems = items.filter(
@@ -154,7 +179,7 @@ export function MockExamReport({
           return (
             <View key={type} style={styles.typeRow}>
               <ThemedText type="small" style={styles.typeLabel}>
-                {EXAM_TYPE_LABELS[type]}
+                {EXAM_SUBCATEGORY_LABELS[type]}
               </ThemedText>
               <View
                 style={[styles.track, styles.flex, { backgroundColor: theme.backgroundSelected }]}>
@@ -180,6 +205,39 @@ export function MockExamReport({
         <ThemedText type="small" themeColor="textSecondary">
           正確率低於六成的題型（黃色）建議優先加強。答錯的題目已加入錯題本。
         </ThemedText>
+      </View>
+
+      {comparison && (
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+          ]}>
+          <ThemedText type="smallBold" style={{ color: theme.accent }}>
+            和上一次比較
+          </ThemedText>
+          <ThemedText type="smallBold">
+            總分 {comparison.totalDiff > 0 ? '+' : ''}
+            {comparison.totalDiff} 分
+          </ThemedText>
+          {comparison.sections.map((s) => (
+            <ThemedText key={s.label} type="small" themeColor="textSecondary">
+              ・{s.label}：{s.diff > 0 ? '+' : ''}
+              {s.diff}
+            </ThemedText>
+          ))}
+        </View>
+      )}
+
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        ]}>
+        <ThemedText type="smallBold" style={{ color: theme.accent }}>
+          這次最弱的題型
+        </ThemedText>
+        <WeaknessAnalysis weak={weak} />
       </View>
 
       <ThemedText type="smallBold">逐題檢討</ThemedText>
@@ -210,7 +268,11 @@ export function MockExamReport({
                 第 {number} 題 {correct ? '○' : '×'}
               </ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                {EXAM_TYPE_LABELS[item.question.type]}
+                {
+                  EXAM_SUBCATEGORY_LABELS[
+                    item.question.subcategory ?? TYPE_DEFAULTS[item.question.type].subcategory
+                  ]
+                }
               </ThemedText>
             </View>
             {!mine && (

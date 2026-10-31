@@ -7,6 +7,7 @@ import { AppBackground } from '@/components/app-background';
 import { CaseCard } from '@/components/detective/case-card';
 import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { DueWordsReview } from '@/components/home/due-words-review';
+import { ExamSummary } from '@/components/home/exam-summary';
 import { LevelProgressList } from '@/components/home/level-progress-list';
 import { ProgressOverview } from '@/components/home/progress-overview';
 import { TodayTasks } from '@/components/home/today-tasks';
@@ -111,6 +112,8 @@ export default function HomeScreen() {
             ) : (
               <LoadingNote text="讀取今日任務…" />
             )}
+
+            {progress && <ExamSummary level={level} />}
 
             <CaseCard label="CASE 001" title="單字之謎">
               <ThemedText type="small" themeColor="textSecondary">

@@ -1,3 +1,4 @@
+import type { JlptLevel } from '@/data/vocab';
 import { scoreMockExam, type MockExamResult } from '@/lib/mock-exam';
 import { allQuestions, type MockExamDraft } from '@/lib/mock-exam-session';
 import type { ExamRoundQuestion } from '@/lib/quiz';
@@ -13,6 +14,7 @@ import {
 import { recordStudy } from '@/stores/study-store';
 
 export type FinishedExam = {
+  level: JlptLevel;
   result: MockExamResult;
   items: ExamRoundQuestion[];
   answers: Record<string, string>;
@@ -74,7 +76,7 @@ export async function finishMockExam(draft: MockExamDraft): Promise<FinishedExam
     }
     await whenMockExamDraftLoaded();
     await saveMockExamDraft(null);
-    return { result, items, answers: draft.answers, record };
+    return { level: draft.level, result, items, answers: draft.answers, record };
   } finally {
     finishing.delete(draft.sessionId);
   }

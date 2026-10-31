@@ -156,6 +156,7 @@ function MockExamContent({ level, onScrollTop }: MockExamProps) {
   if (view.kind === 'report') {
     return (
       <MockExamReport
+        level={view.finished.level}
         result={view.finished.result}
         items={view.finished.items}
         answers={view.finished.answers}
@@ -569,6 +570,7 @@ function SavedReport({ level, record, onRetry, onBack }: SavedReportProps) {
   );
   return (
     <MockExamReport
+      level={level}
       result={{ ...result, total: record.total, passed: record.passed }}
       items={restored.items}
       answers={restored.answers}
