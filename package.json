@@ -47,7 +47,7 @@
     "typecheck": "tsc --noEmit",
     "check:data": "node scripts/check-data.js",
     "check": "npm run typecheck && npm run lint && npm run check:data && npm run test:unit",
-    "test:unit": "node scripts/test-mock-exam-session.js && node scripts/test-exam-paper.js && node scripts/test-exam-analysis.js"
+    "test:unit": "node scripts/test-mock-exam-session.js && node scripts/test-exam-paper.js && node scripts/test-exam-analysis.js && node scripts/test-word-class.js"
   },
   "private": true
 }

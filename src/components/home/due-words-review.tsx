@@ -9,7 +9,7 @@ import { SecondaryButton } from '@/components/ui/secondary-button';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { Spacing } from '@/constants/theme';
 import { useLevelData } from '@/data/level-data';
-import { PART_OF_SPEECH_LABELS, type JlptLevel, type VocabWord } from '@/data/vocab';
+import { wordClassLabel, type JlptLevel, type VocabWord } from '@/data/vocab';
 import { useNow } from '@/hooks/use-learning-progress';
 import { useTheme } from '@/hooks/use-theme';
 import { recallChance } from '@/lib/srs';
@@ -158,7 +158,7 @@ function WordRow({
         <View style={styles.wordText}>
           <ThemedText type="small" themeColor="textSecondary">
             {showReading ? `${word.reading}・` : ''}
-            {PART_OF_SPEECH_LABELS[word.pos]}
+            {wordClassLabel(word)}
           </ThemedText>
           <ThemedText style={styles.wordTitle}>{word.word}</ThemedText>
           <ThemedText type="small" style={{ color: theme.accent }}>

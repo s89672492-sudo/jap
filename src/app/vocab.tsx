@@ -23,7 +23,7 @@ import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import type { GrammarPoint } from '@/data/grammar';
 import { useAllLevelData, useLevelData } from '@/data/level-data';
-import type { VocabWord } from '@/data/vocab';
+import { matchesPosFilter, wordClass, type VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { searchGrammar, searchWords } from '@/lib/search';
 import { useBookmarks } from '@/stores/bookmarks-store';
@@ -69,14 +69,20 @@ export default function VocabScreen() {
 
   const words = useMemo(() => {
     const all = levelData?.words ?? NO_WORDS;
-    return pos === 'all' ? all : all.filter((word) => word.pos === pos);
+    return pos === 'all' ? all : all.filter((word) => matchesPosFilter(word, pos));
   }, [levelData, pos]);
 
   // 篩選選單上每個詞性的數量
   const posCounts = useMemo(() => {
     const all = levelData?.words ?? NO_WORDS;
     const counts: Partial<Record<PosFilter, number>> = { all: all.length };
-    for (const word of all) counts[word.pos] = (counts[word.pos] ?? 0) + 1;
+    for (const word of all) {
+      counts[word.pos] = (counts[word.pos] ?? 0) + 1;
+      const detail = wordClass(word);
+      if (detail === 'i-adjective' || detail === 'na-adjective') {
+        counts[detail] = (counts[detail] ?? 0) + 1;
+      }
+    }
     return counts;
   }, [levelData]);
 
@@ -84,7 +90,7 @@ export default function VocabScreen() {
   const wordResults = useMemo(() => {
     if (!hasQuery || !allData) return NO_WORDS;
     const results = searchWords(allData.words, deferredQuery);
-    return pos === 'all' ? results : results.filter((word) => word.pos === pos);
+    return pos === 'all' ? results : results.filter((word) => matchesPosFilter(word, pos));
   }, [hasQuery, allData, deferredQuery, pos]);
   const grammarResults = useMemo(
     () => (hasQuery && allData ? searchGrammar(allData.grammar, deferredQuery) : NO_GRAMMAR),
