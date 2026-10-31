@@ -139,6 +139,28 @@ for (const lv of LEVELS) {
   }
 }
 
+// 相似文法、常見錯誤（notes/）：id 要對得上，內容不能空，錯的和對的不能一樣
+let noteCount = 0;
+for (const lv of LEVELS) {
+  const file = `grammar/notes/${lv}.ts`;
+  if (!fs.existsSync(path.join(DATA, file))) continue;
+  const notes = loadTs(file)[`${lv.toUpperCase()}_GRAMMAR_NOTES`];
+  for (const [id, note] of Object.entries(notes)) {
+    const where = `文法說明 ${id}`;
+    noteCount++;
+    if (!grammarIds.has(id) || !id.startsWith(`${lv}-`)) error(where, '找不到這個文法或等級不一致');
+    for (const s of note.similar ?? []) {
+      if (!isText(s.pattern) || !isText(s.diff)) error(where, '相似文法缺少句型或差別');
+      if (s.id !== undefined && !grammarIds.has(s.id)) error(where, `相似文法的 id ${s.id} 不存在`);
+      if (s.id === id) error(where, '相似文法不能指向自己');
+    }
+    for (const m of note.mistakes ?? []) {
+      if (!isText(m.wrong) || !isText(m.right) || !isText(m.why)) error(where, '常見錯誤缺少內容');
+      else if (m.wrong === m.right) error(where, '錯誤和正確的說法一樣');
+    }
+  }
+}
+
 // ── 模擬試題、題組、固定考卷 ──
 const EXAM_TYPES = new Set([
   'kanji-reading',
@@ -469,7 +491,7 @@ for (const lv of LEVELS) {
 
 // ── 結果 ──
 console.log(
-  `單字 ${wordCount}・文法 ${grammarCount}・試題 ${examCount}・題組 ${groupCount}・固定考卷 ${paperCount}・文章 ${articleIds.size}・注音句 ${Object.keys(map).length}`,
+  `單字 ${wordCount}・文法 ${grammarCount}（說明 ${noteCount}）・試題 ${examCount}・題組 ${groupCount}・固定考卷 ${paperCount}・文章 ${articleIds.size}・注音句 ${Object.keys(map).length}`,
 );
 if (warnings.length > 0) {
   console.log(`\n提醒 ${warnings.length} 項：`);

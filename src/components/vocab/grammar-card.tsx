@@ -6,6 +6,7 @@ import { BookmarkButton } from '@/components/ui/bookmark-button';
 import { LevelTag } from '@/components/ui/level-tag';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { FuriganaText } from '@/components/vocab/furigana-text';
+import { GrammarNotes } from '@/components/vocab/grammar-notes';
 import { Spacing } from '@/constants/theme';
 import type { GrammarPoint } from '@/data/grammar';
 import { useTheme } from '@/hooks/use-theme';
@@ -18,7 +19,7 @@ type GrammarCardProps = {
   showLevel?: boolean;
 };
 
-/** 文法卡：句型、中文意思、接續方式、考試重點，下方是例句（句型以強調色標出） */
+/** 文法卡：句型、中文意思、接續方式、考試重點，下方是例句（句型以強調色標出）和相似文法、常見錯誤 */
 export const GrammarCard = memo(function GrammarCard({
   item,
   showLevel = false,
@@ -90,6 +91,7 @@ export const GrammarCard = memo(function GrammarCard({
           </View>
           <SpeakButton text={ja} />
         </View>
+        <GrammarNotes similar={item.similar} mistakes={item.mistakes} />
       </View>
     </View>
   );
