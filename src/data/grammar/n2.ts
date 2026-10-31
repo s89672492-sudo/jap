@@ -25,7 +25,10 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '逮捕するわけにはいかない',
     },
     tip: '基於道理、常識或立場而「不能做」；注意與「わけがない（不可能）」「わけではない（並非）」區別。',
-    quiz: { blank: 'わけにはいかない', distractors: ['わけにはいく', 'わけでもいかない', 'しかない'] },
+    quiz: {
+      blank: 'わけにはいかない',
+      distractors: ['わけにはいく', 'わけでもいかない', 'しかない'],
+    },
   },
   {
     id: 'n2-g03',
@@ -2055,7 +2058,10 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '待つより仕方がない',
     },
     tip: '同「〜ほかない」「〜しかない」，表示沒有其他辦法。也常說「よりほかない」。',
-    quiz: { blank: 'より仕方がない', distractors: ['より仕方がある', 'より仕方をない', 'にほかない'] },
+    quiz: {
+      blank: 'より仕方がない',
+      distractors: ['より仕方がある', 'より仕方をない', 'にほかない'],
+    },
   },
   {
     id: 'n2-g158',
@@ -2390,7 +2396,10 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: 'いたのではないだろうか',
     },
     tip: '委婉表達自己的意見或推測，書面論說文常用。比「〜と思う」語氣更保留。',
-    quiz: { blank: 'のではないだろうか', distractors: ['とではないだろうか', 'ものか', 'のではあるだろうか'] },
+    quiz: {
+      blank: 'のではないだろうか',
+      distractors: ['とではないだろうか', 'ものか', 'のではあるだろうか'],
+    },
   },
   {
     id: 'n2-g183',
