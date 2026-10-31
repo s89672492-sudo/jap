@@ -1,0 +1,2 @@
+__d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.withNotes=function(t,n){return t.map(t=>n[t.id]?{...t,...n[t.id]}:t)}},1225,[]);
+__d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.withExamples=function(n,u){return n.map(n=>{const s=u[n.id];return s?{...n,example:{ja:(0,t.stripRuby)(s.ja),zh:s.zh,furigana:s.ja}}:n})};var t=r(d[0])},1229,[1230]);
