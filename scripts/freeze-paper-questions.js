@@ -40,6 +40,27 @@ const REJECTED = new Set([
   'gen-gr-n5-g94',
   'gen-gr-n4-g145',
   'gen-gr-n4-g75',
+  // 文脈規定：其他選項放進去也說得通（第 3～5 回檢查時排除）
+  'gen-cx-n5-036', // （新しい／軽い／青い）くつ
+  'gen-cx-n5-305', // （昼ご飯／お姉さん）は弁当です
+  'gen-cx-n5-641', // 駅は（どっち／あれ／そちら）ですか
+  'gen-cx-n5-854', // とても（男らしい／格好悪い）人
+  'gen-cx-n5-271', // （傘／箸）を持っていきましょう
+  'gen-cx-n5-318', // （塩／上）を取ってください
+  'gen-cx-n5-022', // わたしの（家／店）は駅から近い
+  'gen-cx-n5-844', // パンの（香ばしい／気持ち悪い）におい
+  'gen-cx-n5-663', // では、（いただきます／すみません／ありがとう）
+  'gen-cx-n5-106', // （妹／二人）は小学生です
+  'gen-cx-n5-457', // この傘は（誰／病院）のですか
+  'gen-cx-n4-675', // 週末は（温泉／見学／森）に行きたい
+  'gen-cx-n4-1126', // 公園で（落ち合う／見せ合う）ことにした
+  'gen-cx-n4-847', // 寝る前に（推理小説／作り方）を読む
+  'gen-cx-n4-679', // 初めて（海外／市役所）へ行きます
+  'gen-cx-n4-1425', // 夜中に激しい（雷雨／地震）があった
+  'gen-cx-n5-691', // （空腹／小学生）のときは何でもおいしい
+  'gen-cx-n5-697', // 母に（プレゼント／テーブル／テレビゲーム）をあげました
+  'gen-cx-n5-328', // 毎日、（日本語／動物）を勉強しています
+  'gen-cx-n4-505', // 祖母が編んだ（セーター／スカート）は暖かい
 ]);
 const SHORT = { 'kanji-reading': 'kr', orthography: 'or', context: 'cx', grammar: 'gf' };
 
@@ -59,15 +80,20 @@ async function main() {
   const used = new Set([...existing.matchAll(/from: '([^']+)'/g)].map((m) => m[1]));
   const rng = createRng(`${LEVEL}-paper-${number}`);
   const frozen = [];
+  const paperWords = new Set();
   for (const [type, count] of Object.entries(PLAN[LEVEL])) {
     let n = 0;
     for (const id of seededShuffle(generated.generatedCandidateIds(LEVEL, type), rng)) {
       if (n >= count) break;
       if (used.has(id) || REJECTED.has(id)) continue;
+      // 同一回不考同一個單字兩次（讀音題和表記題用同一個單字，一題會洩漏另一題的答案）
+      const word = id.match(/-(\d+)$/)?.[1];
+      if (type !== 'grammar' && word && paperWords.has(word)) continue;
       const q = generated.getGeneratedQuestion(id);
       if (!q) continue;
       n++;
       used.add(id);
+      if (type !== 'grammar' && word) paperWords.add(word);
       frozen.push({ ...q, id: `${prefix}${SHORT[type]}-${String(n).padStart(2, '0')}`, from: id });
     }
     if (n < count) throw new Error(`${type} 只找到 ${n} 題`);
