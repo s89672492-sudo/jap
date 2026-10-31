@@ -25,7 +25,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '逮捕するわけにはいかない',
     },
     tip: '基於道理、常識或立場而「不能做」；注意與「わけがない（不可能）」「わけではない（並非）」區別。',
-    quiz: { blank: 'わけにはいかない', distractors: ['わけがない', 'わけではない', 'しかない'] },
+    quiz: { blank: 'わけにはいかない', distractors: ['わけにはいく', 'わけでもいかない', 'しかない'] },
   },
   {
     id: 'n2-g03',
@@ -38,7 +38,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '疑わざるを得ない',
     },
     tip: '書面語，表示被迫不得不做；「する」要變「せざるを得ない」是常考陷阱。',
-    quiz: { blank: 'ざるを得ない', distractors: ['ずにすむ', 'ずじまいだ', 'ないでもない'] },
+    quiz: { blank: 'ざるを得ない', distractors: ['ざるにいる', 'ずじまいだ', 'ざるをしない'] },
   },
   {
     id: 'n2-g04',
@@ -51,7 +51,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: 'にもかかわらず',
     },
     tip: '「儘管〜卻」表逆接，後項多為意外結果；勿與「にかかわらず（不論）」混淆。',
-    quiz: { blank: 'にもかかわらず', distractors: ['にかかわらず', 'をきっかけに', 'に応じて'] },
+    quiz: { blank: 'にもかかわらず', distractors: ['をかかわらず', 'をきっかけに', 'に応じて'] },
   },
   {
     id: 'n2-g05',
@@ -64,7 +64,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: 'いたに違いない',
     },
     tip: '說話者依據推斷的強烈確信；書面版為「に相違ない」。名詞、な形直接接，不加「だ」。',
-    quiz: { blank: 'に違いない', distractors: ['にすぎない', 'わけがない', 'おそれがある'] },
+    quiz: { blank: 'に違いない', distractors: ['に違いある', 'に違わない', 'にちがえない'] },
   },
   {
     id: 'n2-g06',
@@ -142,7 +142,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: 'なりかねない',
     },
     tip: '「很可能造成壞結果」只用於負面；肯定形「かねない」反而是「有可能」，與「かねる（難以）」相反。',
-    quiz: { blank: 'かねない', distractors: ['かねる', 'っこない', '得ない'] },
+    quiz: { blank: 'かねない', distractors: ['かねる', 'かねなく', '得ない'] },
   },
   {
     id: 'n2-g12',
@@ -246,7 +246,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '東京をはじめ',
     },
     tip: '舉出代表例再擴及同類，後項常有「など」「全国」「多くの」。',
-    quiz: { blank: 'をはじめ', distractors: ['をめぐって', 'を除いて', 'を問わず'] },
+    quiz: { blank: 'をはじめ', distractors: ['をめぐって', 'をこめて', 'を問わず'] },
   },
   {
     id: 'n2-g20',
@@ -372,7 +372,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '食べられないことはない',
     },
     tip: '雙重否定表「也不是不〜」，語氣消極保留；與「ないわけにはいかない（不能不）」不同。',
-    quiz: { blank: 'ないことはない', distractors: ['っこない', 'ずにすむ', 'ないではいられない'] },
+    quiz: { blank: 'ないことはない', distractors: ['っこある', 'ずにすむ', 'ないではいられない'] },
   },
   {
     id: 'n2-g30',
@@ -398,7 +398,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: 'なりがちだ',
     },
     tip: '表容易出現負面傾向或頻率高；「気味」指輕微的狀態，「がち」重在次數多。',
-    quiz: { blank: 'がちだ', distractors: ['かねる', 'っこない', '次第だ'] },
+    quiz: { blank: 'がちだ', distractors: ['かねる', 'がちる', '次第だ'] },
   },
   {
     id: 'n2-g32',
@@ -518,7 +518,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '減りつつある',
     },
     tip: '書面語「正逐漸〜」，表變化持續進行；只接變化動詞，不用於「食べる」等動作。',
-    quiz: { blank: 'つつある', distractors: ['かねない', 'っこない', '得る'] },
+    quiz: { blank: 'つつある', distractors: ['かねる', 'つつなる', 'がちる'] },
   },
   {
     id: 'n2-g41',
@@ -570,7 +570,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '先着十名に限り',
     },
     tip: '公告、廣告常用的限定條件「僅限〜」；「に限らず」意思相反。',
-    quiz: { blank: 'に限り', distractors: ['に限らず', 'をはじめ', 'にわたって'] },
+    quiz: { blank: 'に限り', distractors: ['にかけて', 'をはじめ', 'にわたって'] },
   },
   {
     id: 'n2-g45',
@@ -731,7 +731,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
     tip: '表程度輕「只不過是〜」，帶輕視語氣；常與「にほかならない」對照出題。',
     quiz: {
       blank: 'にすぎない',
-      distractors: ['にほかならない', 'に越したことはない', 'に値する'],
+      distractors: ['にほかなる', 'に越したことはない', 'に値する'],
     },
   },
   {
@@ -994,7 +994,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '事件を契機に',
     },
     tip: '書面語，與「をきっかけに」同義，表轉折點；也作「を契機として」。',
-    quiz: { blank: 'を契機に', distractors: ['をめぐって', 'を問わず', 'を抜きにして'] },
+    quiz: { blank: 'を契機に', distractors: ['をこめて', 'を問わず', 'を抜きにして'] },
   },
   {
     id: 'n2-g77',
@@ -1189,7 +1189,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '遊んだものだ',
     },
     tip: '接動詞た形，常與「よく」「昔は」呼應表懷念的回憶；與表感慨、常理的「ものだ」區分。',
-    quiz: { blank: 'ものだ', distractors: ['ことだ', 'わけだ', 'ところだ'] },
+    quiz: { blank: 'ものだ', distractors: ['ことだ', 'ものか', 'ところだ'] },
   },
   {
     id: 'n2-g92',
@@ -1215,7 +1215,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '食べられたものではない',
     },
     tip: '接可能形た形，強烈否定「根本無法〜」，帶批評語氣；口語「たもんじゃない」。',
-    quiz: { blank: 'たものではない', distractors: ['ないことはない', 'たものだ', 'がちだ'] },
+    quiz: { blank: 'たものではない', distractors: ['たことではない', 'たものだ', 'がちだ'] },
   },
   {
     id: 'n2-g94',
@@ -1228,7 +1228,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '救えないものか',
     },
     tip: '接可能形ない形，表強烈希望「難道不能〜嗎」；與單純否定的「ものか」不同。',
-    quiz: { blank: 'ものか', distractors: ['ものだ', 'もので', 'ことに'] },
+    quiz: { blank: 'ものか', distractors: ['ものの', 'もので', 'ことに'] },
   },
   {
     id: 'n2-g95',
@@ -1269,7 +1269,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
     tip: '表說話者斷言「這才是〜」的本質；否定形「というものではない」意思為並非。',
     quiz: {
       blank: 'というものだ',
-      distractors: ['というものではない', 'に越したことはない', 'どころではない'],
+      distractors: ['とするものだ', 'に越したことはない', 'どころではない'],
     },
   },
   {
@@ -1285,7 +1285,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
     tip: '表部分否定「並不是〜就好」，常接「ば〜いい」；與「わけではない」相近。',
     quiz: {
       blank: 'というものではない',
-      distractors: ['というものだ', 'に違いない', 'わけにはいかない'],
+      distractors: ['というものがない', 'に違いある', 'わけにはいかない'],
     },
   },
   {
@@ -1513,7 +1513,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '正しいとすると',
     },
     tip: '以前項為前提進行推論，後項為判斷。「としても」是讓步（即使〜也），勿混淆。',
-    quiz: { blank: 'とすると', distractors: ['としても', 'とはいえ', 'どころか'] },
+    quiz: { blank: 'とすると', distractors: ['ときたら', 'とはいえ', 'どころか'] },
   },
   {
     id: 'n2-g116',
@@ -1591,7 +1591,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '調べてこそ',
     },
     tip: '「〜てこそ」強調只有做了前項，後項才有意義或成立，後項多為正面評價。',
-    quiz: { blank: 'てこそ', distractors: ['てでも', 'てまで', 'ても'] },
+    quiz: { blank: 'てこそ', distractors: ['てでも', 'てまで', 'てしか'] },
   },
   {
     id: 'n2-g122',
@@ -1838,7 +1838,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '開けっぱなし',
     },
     tip: '表示做了之後放著不管，帶負面語氣。也可表持續狀態，如「立ちっぱなし」。',
-    quiz: { blank: 'っぱなし', distractors: ['かけ', 'きり', 'がち'] },
+    quiz: { blank: 'っぱなし', distractors: ['ぬき', 'きり', 'がち'] },
   },
   {
     id: 'n2-g141',
@@ -2042,7 +2042,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '釈放するほかない',
     },
     tip: '表示別無選擇只好做，與「しかない」「よりほかない」同義，帶無奈語氣。',
-    quiz: { blank: 'ほかない', distractors: ['わけがない', 'はずがない', 'までもない'] },
+    quiz: { blank: 'ほかない', distractors: ['ほかある', 'ほかならない', 'までもある'] },
   },
   {
     id: 'n2-g157',
@@ -2055,7 +2055,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '待つより仕方がない',
     },
     tip: '同「〜ほかない」「〜しかない」，表示沒有其他辦法。也常說「よりほかない」。',
-    quiz: { blank: 'より仕方がない', distractors: ['ことはない', 'わけがない', 'はずがない'] },
+    quiz: { blank: 'より仕方がない', distractors: ['より仕方がある', 'より仕方をない', 'にほかない'] },
   },
   {
     id: 'n2-g158',
@@ -2298,7 +2298,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '見た目はともかく',
     },
     tip: '表示暫且不談前項，重點在後項。與「はさておき」「は別として」接近；「はもとより」意思相反。',
-    quiz: { blank: 'はともかく', distractors: ['はもとより', 'のみならず', 'ばかりか'] },
+    quiz: { blank: 'はともかく', distractors: ['をもとに', 'のみならず', 'ばかりか'] },
   },
   {
     id: 'n2-g176',
@@ -2324,7 +2324,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '動機は別として',
     },
     tip: '表示把前項排除在考量外，也作「は別にして」。常與「〜かどうかは別として」搭配。',
-    quiz: { blank: 'は別として', distractors: ['はもとより', 'のみならず', 'にもまして'] },
+    quiz: { blank: 'は別として', distractors: ['をもとに', 'のみならず', 'をまして'] },
   },
   {
     id: 'n2-g178',
@@ -2377,7 +2377,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '遅れるとのことです',
     },
     tip: '轉達聽來的消息，比「〜そうだ」正式，常用於商務場合傳話。',
-    quiz: { blank: 'とのことです', distractors: ['ものです', 'わけがありません', 'ところです'] },
+    quiz: { blank: 'とのことです', distractors: ['ものです', 'とのことか', 'ことのとです'] },
   },
   {
     id: 'n2-g182',
@@ -2390,7 +2390,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: 'いたのではないだろうか',
     },
     tip: '委婉表達自己的意見或推測，書面論說文常用。比「〜と思う」語氣更保留。',
-    quiz: { blank: 'のではないだろうか', distractors: ['わけがない', 'ものか', 'にすぎない'] },
+    quiz: { blank: 'のではないだろうか', distractors: ['とではないだろうか', 'ものか', 'のではあるだろうか'] },
   },
   {
     id: 'n2-g183',
@@ -2442,7 +2442,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '本物とされている',
     },
     tip: '表示一般被認定、公認的說法，屬書面語，常見於報導或論文。',
-    quiz: { blank: 'とされている', distractors: ['どころではない', 'ほかない', 'とは限らない'] },
+    quiz: { blank: 'とされている', distractors: ['どころではない', 'ほかない', 'としている'] },
   },
   {
     id: 'n2-g187',
@@ -2551,7 +2551,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
     tip: '比「〜てもいい」正式客氣，用於表示許可。「さしつかえ」寫作「差し支え」。',
     quiz: {
       blank: 'てもさしつかえない',
-      distractors: ['てはいけない', 'てはいられない', 'ても始まらない'],
+      distractors: ['てはさしつかえない', 'てはいられない', 'ても始まらない'],
     },
   },
   {
@@ -2658,7 +2658,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
     tip: '表示情況緊迫不能再繼續某狀態，常與「いつまでも」「のんびり」搭配。',
     quiz: {
       blank: 'てはいられない',
-      distractors: ['てもかまわない', 'てばかりいる', 'てならない'],
+      distractors: ['てもかまわれない', 'てばかりある', 'てならない'],
     },
   },
   {
@@ -2683,7 +2683,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
     tip: '表示除此之外找不到其他說法，帶強烈主觀評價。名詞直接接續。',
     quiz: {
       blank: 'としか言いようがない',
-      distractors: ['とは限らない', 'どころではない', 'ばかりだ'],
+      distractors: ['とは言いようがない', 'どころではない', 'ばかりだ'],
     },
   },
   {
