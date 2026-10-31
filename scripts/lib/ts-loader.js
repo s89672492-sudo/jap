@@ -54,4 +54,9 @@ function loadModule(name) {
   return requireTs(file);
 }
 
-module.exports = { loadModule };
+/** 載入指定路徑的 TypeScript 檔（相對 import 以那個檔案的位置為準） */
+function loadFile(file) {
+  return requireTs(path.resolve(file));
+}
+
+module.exports = { loadModule, loadFile };

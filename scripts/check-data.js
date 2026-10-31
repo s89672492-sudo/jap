@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const { loadFile } = require('./lib/ts-loader');
 
 const ROOT = path.join(__dirname, '..');
 // DATA_DIR 只給檢查程式自己的測試用（拿一份故意改壞的資料確認抓得到錯）
@@ -31,17 +32,9 @@ function load(file) {
   return sandbox.module.exports;
 }
 
-/** 讀取含有型別宣告的 TypeScript 檔（用專案的 TypeScript 轉換），回傳所有 export */
+/** 讀取 TypeScript 資料檔（用專案的 TypeScript 轉換，可以 import 同一資料夾的出題工具），回傳所有 export */
 function loadTs(file) {
-  const ts = require('typescript');
-  const source = fs.readFileSync(path.join(DATA, file), 'utf8').replace(/^import .*$/gm, '');
-  const js = ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  const sandbox = { module: { exports: {} }, exports: {} };
-  sandbox.exports = sandbox.module.exports;
-  vm.runInNewContext(js, sandbox, { filename: file });
-  return sandbox.module.exports;
+  return loadFile(path.join(DATA, file));
 }
 
 /** 文字的檢查碼（FNV-1a），用來發現固定考卷的題目內容有沒有改變 */

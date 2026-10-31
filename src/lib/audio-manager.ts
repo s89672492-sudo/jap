@@ -9,8 +9,8 @@ import { speakLineAndWait, stopSpeaking } from '@/lib/speech';
 
 export type Segment = { text: string; speaker?: ScriptSpeaker; pauseAfterMs?: number };
 
-/** 選項用唸的大題（題目紙上沒有印選項）：發話表現、即時應答 */
-export const SPOKEN_OPTION_TYPES = ['utterance', 'quick-response'] as const;
+/** 選項用唸的大題（題目紙上沒有印選項）：概要理解、發話表現、即時應答 */
+export const SPOKEN_OPTION_TYPES = ['summary', 'utterance', 'quick-response'] as const;
 
 export function hasSpokenOptions(item: ExamRoundQuestion): boolean {
   return (SPOKEN_OPTION_TYPES as readonly string[]).includes(item.question.subcategory ?? '');
@@ -20,6 +20,7 @@ const NUMBERS = ['いち', 'に', 'さん', 'よん'];
 
 /** 作答時間（播完後幾秒自動換下一題，正式模式用） */
 export function answerSeconds(item: ExamRoundQuestion): number {
+  if (item.question.subcategory === 'summary') return 10;
   return hasSpokenOptions(item) ? 8 : 12;
 }
 
@@ -36,6 +37,16 @@ export function listeningSegments(item: ExamRoundQuestion): Segment[] {
     case 'utterance':
       // 看圖（情境）：旁白說明情境和問題，接著唸三個說法
       return [{ text: question.sentence, pauseAfterMs: 1000 }, ...spokenOptions];
+    case 'summary': {
+      // 概要理解：題目紙上什麼都沒有。情境說明 → 一段話 → 問題 → 四個選項，全部用唸的
+      const [intro, ...talk] = script;
+      return [
+        ...(intro ? [{ text: intro.text, speaker: intro.speaker, pauseAfterMs: 600 }] : []),
+        ...talk.map((line) => ({ text: line.text, speaker: line.speaker, pauseAfterMs: 300 })),
+        { text: question.sentence, pauseAfterMs: 1000 },
+        ...spokenOptions,
+      ];
+    }
     case 'quick-response':
       // 即時應答：先說一句話，接著唸三個回答
       return [

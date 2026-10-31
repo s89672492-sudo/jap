@@ -29,6 +29,8 @@ const OPTION_NUMBERS = ['１', '２', '３', '４'];
 const SUBCATEGORY_PROMPTS: Partial<Record<string, string>> = {
   task: '先聽問題，再聽對話，選出接下來要做的事或正確答案。',
   point: '先聽問題，看一下選項，再聽對話找出重點。',
+  summary: '題目紙上沒有問題和選項：聽完一段話後，會唸問題和四個選項。',
+  'integrated-listening': '聽比較長的對話或說明，回答問題。',
   utterance: '看情境說明，聽三個說法，選出最適合的一個。',
   'quick-response': '聽一句話，再聽三個回答，選出最適合的回答。',
 };
@@ -44,9 +46,11 @@ export function ExamQuestionView({
 }: ExamQuestionViewProps) {
   const theme = useTheme();
   const { question, options } = item;
-  // 發話表現、即時應答：選項用唸的，作答時只顯示號碼，作答後才顯示文字
+  // 概要理解、發話表現、即時應答：選項用唸的，作答時只顯示號碼，作答後才顯示文字
   const spoken = hasSpokenOptions(item);
   const showOptionText = !spoken || (reveal && picked !== null);
+  // 概要理解的問題也是用唸的（聽完才知道問什麼），作答前不顯示
+  const showSentence = question.subcategory !== 'summary' || showOptionText;
 
   return (
     <>
@@ -69,7 +73,7 @@ export function ExamQuestionView({
           onPlayed={listening?.onPlayed}
         />
       )}
-      <ExamSentence sentence={question.sentence} furigana={question.furigana} />
+      {showSentence && <ExamSentence sentence={question.sentence} furigana={question.furigana} />}
       <View style={styles.options}>
         {options.map((option, i) => (
           <AnswerOption
