@@ -32,8 +32,9 @@ export function JapaneseText({
 }: JapaneseTextProps) {
   const { furigana } = useSettings();
   // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
-  useFuriganaLoaded();
-  const annotated = furigana ? lookupFurigana(text) : undefined;
+  // 要用回傳值當條件：React Compiler 會記住計算結果，只有條件改變時才會重新查注音
+  const furiganaLoaded = useFuriganaLoaded();
+  const annotated = furigana && furiganaLoaded ? lookupFurigana(text) : undefined;
   const at = highlight ? text.indexOf(highlight) : -1;
 
   if (annotated) {

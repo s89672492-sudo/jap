@@ -48,7 +48,9 @@ export function loadFurigana(): Promise<void> {
 
 /**
  * 查一句話的注音版本；沒有漢字、沒收錄的句子，或對照表還沒載入時回傳 undefined
- * （先顯示沒有注音的句子，載入後會自動補上）。用到的元件要呼叫 useFuriganaLoaded() 才會更新。
+ * （先顯示沒有注音的句子，載入後會自動補上）。用到的元件要呼叫 useFuriganaLoaded()，
+ * 並把它的回傳值當成查詢的條件（`loaded ? lookupFurigana(text) : undefined`）：
+ * React Compiler 會記住元件裡的計算結果，不把回傳值放進條件的話，載入後也不會重新查。
  */
 export function lookupFurigana(text: string): string | undefined {
   return furiganaMap?.[text];

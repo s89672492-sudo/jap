@@ -34,9 +34,9 @@ export function GrammarQuestionView({
   const after = point.example.ja.slice(index + answer.length);
   const { furigana } = useSettings();
   // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
-  useFuriganaLoaded();
+  const furiganaLoaded = useFuriganaLoaded();
   const range: [number, number] = [index, index + answer.length];
-  const lookedUp = furigana ? lookupFurigana(point.example.ja) : undefined;
+  const lookedUp = furigana && furiganaLoaded ? lookupFurigana(point.example.ja) : undefined;
   // 空格切在一組注音中間時（例如「何時」只挖空「何」），作答前先不顯示注音，免得多遮住字
   const annotated =
     lookedUp && !(picked === null && splitsRuby(lookedUp, range)) ? lookedUp : undefined;

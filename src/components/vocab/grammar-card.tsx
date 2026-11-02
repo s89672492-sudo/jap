@@ -29,8 +29,8 @@ export const GrammarCard = memo(function GrammarCard({
   const index = ja.indexOf(highlight);
   const { furigana } = useSettings();
   // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
-  useFuriganaLoaded();
-  const annotated = furigana ? lookupFurigana(ja) : undefined;
+  const furiganaLoaded = useFuriganaLoaded();
+  const annotated = furigana && furiganaLoaded ? lookupFurigana(ja) : undefined;
 
   return (
     <View
