@@ -7,6 +7,7 @@ import '@/stores/challenge-store';
 import '@/stores/flashcard-store';
 import '@/stores/jlpt-level-store';
 import '@/stores/mistakes-store';
+import '@/stores/mock-exam-draft-store';
 import '@/stores/mock-exam-store';
 import '@/stores/reading-store';
 import '@/stores/settings-store';
@@ -41,7 +42,13 @@ export const LEARNING_KEYS = [
 /** 偏好設定：備份檔有才還原，沒有就保留這支手機目前的設定 */
 export const PREFERENCE_KEYS = ['settings', 'jlpt-level'] as const;
 
-const ALL_KEYS: readonly string[] = [...LEARNING_KEYS, ...PREFERENCE_KEYS];
+/**
+ * 進行中的模擬考：備份檔有才還原（舊版備份沒有這一項，還原時保留目前的考試）。
+ * 還原後時間照原本的截止時間計算，已經過了就自動交卷。
+ */
+export const IN_PROGRESS_KEYS = ['mock-exam-draft'] as const;
+
+const ALL_KEYS: readonly string[] = [...LEARNING_KEYS, ...PREFERENCE_KEYS, ...IN_PROGRESS_KEYS];
 
 /** 還原前把這支手機原本的紀錄另存在這裡，萬一要找回可以用 */
 export const BEFORE_RESTORE_KEY = 'backup-before-restore';
@@ -145,6 +152,7 @@ const KEY_LABELS: Record<string, string> = {
   'challenge-best': '限時挑戰最高分',
   'study-cards': '間隔複習紀錄',
   'study-log': '每日練習紀錄',
+  'mock-exam-draft': '進行中的模擬考',
   settings: '設定',
   'jlpt-level': '等級',
 };
@@ -175,6 +183,9 @@ export function summarize(raw: Record<string, string>): BackupSummary {
   const exams = Object.values(history ?? {}).reduce((sum, list) => sum + count(list), 0);
   const studyCards = (data['study-cards'] as { cards?: unknown } | undefined)?.cards;
   const best = Object.values((data['challenge-best'] as Record<string, number>) ?? {});
+  const draft = data['mock-exam-draft'] as
+    | { level?: string; sittingIndex?: number; sittings?: unknown[] }
+    | undefined;
   return [
     { label: '錯題本', value: `${count(data.mistakes)} 題` },
     { label: '已記住單字', value: `${count(data['known-words'])} 個` },
@@ -184,6 +195,12 @@ export function summarize(raw: Record<string, string>): BackupSummary {
     { label: '閱讀已讀', value: `${count(data['reading-done'])} 篇` },
     { label: '模擬考成績', value: `${exams} 次` },
     { label: '限時挑戰最高分', value: best.length ? `${Math.max(...best)} 題` : '—' },
+    {
+      label: '進行中的模擬考',
+      value: draft?.level
+        ? `${draft.level} 第 ${(draft.sittingIndex ?? 0) + 1} / ${draft.sittings?.length ?? '?'} 節`
+        : '無',
+    },
   ];
 }
 

@@ -21,7 +21,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '書いてください',
     },
     tip: '接在て形後，注意五段動詞音便（書く→書いて、読む→読んで）。比「〜てくれませんか」直接。',
-    quiz: { blank: 'てください', distractors: ['ています', 'てから', 'たいです'] },
+    quiz: { blank: 'てください', distractors: ['たください', 'ください', 'てから'] },
   },
   {
     id: 'n5-g03',
@@ -50,7 +50,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '見ています',
     },
     tip: '「〜ている」除了進行中，也表示結果狀態（結婚している、知っている）。',
-    quiz: { blank: 'ています', distractors: ['てあります', 'てください', 'たいです'] },
+    quiz: { blank: 'ています', distractors: ['てあります', 'てください', 'ながら'] },
   },
   {
     id: 'n5-g05',
@@ -59,7 +59,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '可以〜',
     example: { ja: '窓を開けてもいいですか。', zh: '可以打開窗戶嗎？', highlight: '開けてもいい' },
     tip: '問句「〜てもいいですか」請求許可；否定回答常用「〜てはいけません」或「すみません、ちょっと…」。',
-    quiz: { blank: 'てもいい', distractors: ['てはいけない', 'てください', 'ながら'] },
+    quiz: { blank: 'てもいい', distractors: ['たり', 'てください', 'ながら'] },
   },
   {
     id: 'n5-g06',
@@ -72,7 +72,10 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '吸ってはいけません',
     },
     tip: '與「〜てもいい」為一組考點：て＋は＋いけない表禁止，口語縮約為「〜ちゃいけない」。',
-    quiz: { blank: 'てはいけません', distractors: ['てもいいです', 'ています', 'たいです'] },
+    quiz: {
+      blank: 'てはいけません',
+      distractors: ['てはいい', 'てはだめません', 'たはいけません'],
+    },
   },
   {
     id: 'n5-g07',
@@ -81,7 +84,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '一起〜吧',
     example: { ja: 'いっしょに帰りましょう。', zh: '一起回家吧。', highlight: '帰りましょう' },
     tip: '「〜ましょう」積極提議一起做；「〜ませんか」較客氣，先詢問對方意願。',
-    quiz: { blank: 'ましょう', distractors: ['ました', 'たい', 'ながら'] },
+    quiz: { blank: 'ましょう', distractors: ['て', 'た', 'ながら'] },
   },
   {
     id: 'n5-g08',
@@ -94,7 +97,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'ですから',
     },
     tip: '「から」主觀說明理由，後句可接命令、請求；「ので」較客觀、禮貌。',
-    quiz: { blank: 'から', distractors: ['まで', 'が', 'ても'] },
+    quiz: { blank: 'から', distractors: ['まで', 'に', 'ても'] },
   },
   {
     id: 'n5-g09',
@@ -125,7 +128,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '在〜之前',
     example: { ja: '寝る前に歯をみがきます。', zh: '睡覺前刷牙。', highlight: '寝る前に' },
     tip: '動詞一定用辭書形（行く前に），即使整句是過去式；名詞要加の（食事の前に）。',
-    quiz: { blank: '前に', distractors: ['後で', 'ながら', 'まで'] },
+    quiz: { blank: '前に', distractors: ['後で', 'ながら', 'たり'] },
   },
   {
     id: 'n5-g12',
@@ -151,7 +154,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '見ませんか',
     },
     tip: '「〜ませんか」客氣邀約；回答同意時常說「ええ、〜ましょう」。',
-    quiz: { blank: 'ませんか', distractors: ['ましたか', 'ませんでした', 'たいですか'] },
+    quiz: { blank: 'ませんか', distractors: ['ませか', 'ませんでか', 'ませんだ'] },
   },
   {
     id: 'n5-g14',
@@ -164,7 +167,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '持ちましょうか',
     },
     tip: '「〜ましょうか」主動提議幫忙（我來〜吧？）；「〜ませんか」則是邀請對方一起做。',
-    quiz: { blank: 'ましょうか', distractors: ['ませんか', 'ましたか', 'たいですか'] },
+    quiz: { blank: 'ましょうか', distractors: ['ましょか', 'ませか', 'まして'] },
   },
   {
     id: 'n5-g15',
@@ -177,7 +180,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '授業の後で',
     },
     tip: '動詞要用た形（食べた後で），名詞加の；與「〜てから」相比，後で較單純表時間先後。',
-    quiz: { blank: '後で', distractors: ['前に', 'ながら', 'から'] },
+    quiz: { blank: '後で', distractors: ['てから', 'ながら', 'から'] },
   },
   {
     id: 'n5-g16',
@@ -216,7 +219,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '安いですが',
     },
     tip: '逆接的「が」接在句末普通形或丁寧形後；口語常用「けど」，意思相同。',
-    quiz: { blank: 'が', distractors: ['から', 'ので', 'と'] },
+    quiz: { blank: 'が', distractors: ['を', 'に', 'で'] },
   },
   {
     id: 'n5-g19',
@@ -242,7 +245,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '暖かくなりました',
     },
     tip: 'い形容詞去い＋くなる；な形容詞・名詞則用「〜になる」（静かになる）。',
-    quiz: { blank: 'くなりました', distractors: ['になりました', 'くしました', 'かったです'] },
+    quiz: { blank: 'くなりました', distractors: ['いなりました', 'くでした', 'いでした'] },
   },
   {
     id: 'n5-g21',
@@ -283,7 +286,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     tip: '表必須、義務；否定表「不必」時要改用「〜なくてもいい」，常成對出題。',
     quiz: {
       blank: 'なければなりません',
-      distractors: ['なくてもいいです', 'てはいけません', 'なくてはいけます'],
+      distractors: ['なければなります', 'なくてはなりませ', 'なけばなりません'],
     },
   },
   {
@@ -310,7 +313,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '水をください',
     },
     tip: '向別人要東西用「名詞＋をください」；請人做動作則用「動詞て形＋ください」。',
-    quiz: { blank: 'ください', distractors: ['あります', 'います', 'あげます'] },
+    quiz: { blank: 'ください', distractors: ['あります', 'います', 'です'] },
   },
   {
     id: 'n5-g26',
@@ -332,7 +335,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '還沒〜',
     example: { ja: '宿題はまだしていません。', zh: '作業還沒寫。', highlight: 'まだしていません' },
     tip: '回答「もう〜ましたか」時，否定要用「いいえ、まだです／まだ〜ていません」，不可用「まだ〜ませんでした」。',
-    quiz: { blank: 'ていません', distractors: ['ました', 'ています', 'てください'] },
+    quiz: { blank: 'ていません', distractors: ['ました', 'てでした', 'たです'] },
   },
   {
     id: 'n5-g28',
@@ -399,7 +402,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     tip: '表能力或可能性，與可能形意思相近（弾ける）；N5常考「名詞＋ができる」。',
     quiz: {
       blank: 'ことができます',
-      distractors: ['ことがあります', 'ことをします', 'のがします'],
+      distractors: ['ことにできます', 'ことをします', 'のがします'],
     },
   },
   {
@@ -593,7 +596,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '動作的對象（給〜、對〜）',
     example: { ja: '警察に電話をかけました。', zh: '打了電話給警察。', highlight: '警察に' },
     tip: '表動作的接受者（給〜、對〜），常與あげる、電話する、会う、聞く搭配。',
-    quiz: { blank: 'に', distractors: ['を', 'で', 'が'] },
+    quiz: { blank: 'に', distractors: ['を', 'の', 'が'] },
   },
   {
     id: 'n5-g50',
@@ -747,7 +750,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'パンかご飯',
     },
     tip: '「AかB」表二擇一；「AとB」是兩者都有，「AやB」是舉例。',
-    quiz: { blank: 'か', distractors: ['と', 'を', 'が'] },
+    quiz: { blank: 'か', distractors: ['で', 'を', 'が'] },
   },
   {
     id: 'n5-g64',
@@ -756,7 +759,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '〜吧；〜呢（徵求同意、感嘆）',
     example: { ja: '今日は寒いですね。', zh: '今天真冷呢。', highlight: '寒いですね' },
     tip: 'ね用於徵求對方同意或確認共同認知；告訴對方不知道的事用よ。',
-    quiz: { blank: 'ね', distractors: ['を', 'に', 'か'] },
+    quiz: { blank: 'ね', distractors: ['を', 'に', 'へ'] },
   },
   {
     id: 'n5-g65',
@@ -769,7 +772,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '開いていますよ',
     },
     tip: 'よ用於告知對方不知道的資訊、提醒；對長輩濫用會顯得強勢。',
-    quiz: { blank: 'よ', distractors: ['を', 'か', 'へ'] },
+    quiz: { blank: 'よ', distractors: ['を', 'に', 'へ'] },
   },
   {
     id: 'n5-g66',
@@ -800,7 +803,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '〜是〜（肯定判斷）',
     example: { ja: '私は探偵です。', zh: '我是偵探。', highlight: '私は探偵です' },
     tip: '「AはBです」為最基本判斷句；否定形為「ではありません／じゃありません」。',
-    quiz: { blank: 'です', distractors: ['ます', 'だ', 'でいます'] },
+    quiz: { blank: 'です', distractors: ['ます', 'でます', 'でいます'] },
   },
   {
     id: 'n5-g69',
@@ -840,7 +843,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     tip: '名詞・な形容詞的過去否定；口語可說「じゃなかったです」。',
     quiz: {
       blank: 'ではありませんでした',
-      distractors: ['くなかったです', 'ではありました', 'ではないでした'],
+      distractors: ['くなかったです', 'ではなかったでした', 'ではないでした'],
     },
   },
   {
@@ -850,7 +853,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '動詞的禮貌形（肯定、非過去）',
     example: { ja: '毎朝七時に起きます。', zh: '每天早上七點起床。', highlight: '起きます' },
     tip: 'ます形也可表示習慣或未來（明日行きます），不只是現在。',
-    quiz: { blank: 'ます', distractors: ['です', 'ません', 'たい'] },
+    quiz: { blank: 'ます', distractors: ['です', 'だ', 'でした'] },
   },
   {
     id: 'n5-g73',
@@ -859,7 +862,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '動詞的禮貌形否定',
     example: { ja: '私はお酒を飲みません。', zh: '我不喝酒。', highlight: '飲みません' },
     tip: 'ます形否定為「〜ません」；常體為ない形（飲まない）。',
-    quiz: { blank: 'ません', distractors: ['ます', 'ないです', 'ました'] },
+    quiz: { blank: 'ません', distractors: ['ない', 'なかった', 'ないです'] },
   },
   {
     id: 'n5-g74',
@@ -872,7 +875,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '逃げました',
     },
     tip: '過去肯定「〜ました」；過去否定為「〜ませんでした」。',
-    quiz: { blank: 'ました', distractors: ['ます', 'ません', 'でした'] },
+    quiz: { blank: 'ました', distractors: ['でした', 'ましだ', 'ませた'] },
   },
   {
     id: 'n5-g75',
@@ -1105,7 +1108,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     tip: '表「不必〜」；回答「〜なければなりませんか」的否定時常用。',
     quiz: {
       blank: 'なくてもいい',
-      distractors: ['なければならない', 'てはいけない', 'ないでください'],
+      distractors: ['ないでください', 'なくて', 'ないで'],
     },
   },
   {
@@ -1203,7 +1206,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '為什麼〜？',
     example: { ja: 'どうして嘘をついたんですか。', zh: '你為什麼說謊？', highlight: 'どうして' },
     tip: '問理由，句尾常配「〜んですか」；回答用「〜からです」。',
-    quiz: { blank: 'どうして', distractors: ['どれ', 'だれ', 'いつ'] },
+    quiz: { blank: 'どうして', distractors: ['どれ', 'だれ', 'どちら'] },
   },
   {
     id: 'n5-g104',
@@ -1229,7 +1232,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'いくらですか',
     },
     tip: '問價格；問數量或年齡用「いくつ」，兩者常互為干擾選項。',
-    quiz: { blank: 'いくら', distractors: ['いくつ', 'どれ', 'いつ'] },
+    quiz: { blank: 'いくら', distractors: ['どの', 'どれ', 'いつ'] },
   },
   {
     id: 'n5-g106',
@@ -1251,7 +1254,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '哪一個；哪個〜',
     example: { ja: 'あなたの傘はどれですか。', zh: '你的傘是哪一把？', highlight: 'どれですか' },
     tip: '「どれ」單獨使用，三者以上選一；後面接名詞時要用「どの」。',
-    quiz: { blank: 'どれ', distractors: ['どの', 'どんな', 'どう'] },
+    quiz: { blank: 'どれ', distractors: ['どの', 'どんな', 'どちらの'] },
   },
   {
     id: 'n5-g108',
@@ -1295,7 +1298,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '何も言いませんでした',
     },
     tip: '疑問詞＋も＋否定表全面否定；「誰か／何か」則表示不特定的某人某物。',
-    quiz: { blank: 'も', distractors: ['か', 'が', 'を'] },
+    quiz: { blank: 'も', distractors: ['に', 'が', 'を'] },
   },
   {
     id: 'n5-g112',
@@ -1304,7 +1307,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
     meaning: '〜如何？（客氣地推薦）',
     example: { ja: 'コーヒーはいかがですか。', zh: '要不要來杯咖啡？', highlight: 'いかがですか' },
     tip: '「どう」的禮貌說法，常用於推薦或詢問對方意願（お茶はいかがですか）。',
-    quiz: { blank: 'いかが', distractors: ['いくら', 'どれ', 'どこ'] },
+    quiz: { blank: 'いかが', distractors: ['どんな', 'どの', 'どうして'] },
   },
   {
     id: 'n5-g113',
@@ -1317,7 +1320,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'お願いします',
     },
     tip: '點餐、拜託時使用，比「〜をください」更禮貌；數量詞放在を後、動詞前。',
-    quiz: { blank: 'お願いします', distractors: ['あげます', 'あります', 'いきます'] },
+    quiz: { blank: 'お願いします', distractors: ['なります', 'あります', 'いきます'] },
   },
   {
     id: 'n5-g114',
@@ -1361,7 +1364,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: '高いけれども',
     },
     tip: '與逆接「が」同義；口語縮約為「けど」「けれど」。',
-    quiz: { blank: 'けれども', distractors: ['から', 'ので', 'と'] },
+    quiz: { blank: 'けれども', distractors: ['ても', 'でも', 'を'] },
   },
   {
     id: 'n5-g118',
@@ -1374,7 +1377,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'それから',
     },
     tip: '表動作或事情的先後順序；也可用於追加「還有」。',
-    quiz: { blank: 'それから', distractors: ['でも', 'だから', 'どうして'] },
+    quiz: { blank: 'それから', distractors: ['それとも', 'どうして', 'または'] },
   },
   {
     id: 'n5-g119',
@@ -1387,7 +1390,7 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'そして',
     },
     tip: '表單純並列或順序；「でも」表轉折，「だから」表因果，常互為選項。',
-    quiz: { blank: 'そして', distractors: ['でも', 'だから', 'どうして'] },
+    quiz: { blank: 'そして', distractors: ['それとも', 'だから', 'どうして'] },
   },
   {
     id: 'n5-g120',
@@ -1400,6 +1403,6 @@ export const N5_GRAMMAR: GrammarPoint[] = [
       highlight: 'でも',
     },
     tip: '用於句首表轉折，比「しかし」口語；句中逆接要用「が」或「けど」。',
-    quiz: { blank: 'でも', distractors: ['そして', 'それから', 'だから'] },
+    quiz: { blank: 'でも', distractors: ['それとも', 'どうして', 'だから'] },
   },
 ];

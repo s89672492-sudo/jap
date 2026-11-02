@@ -21,9 +21,11 @@ export function ExamSentence({ sentence, furigana: given }: ExamSentenceProps) {
   const parts = sentence.split(/(［.+?］|★)/);
   const { furigana } = useSettings();
   // 注音對照表在背景載入，載入完成後重新顯示（加上注音）
-  useFuriganaLoaded();
+  const furiganaLoaded = useFuriganaLoaded();
   // 注音版本已去掉［］，畫底線的字本身不加注音（避免洩漏漢字讀法題的答案）
-  const annotated = furigana ? (given ?? lookupFurigana(sentence)) : undefined;
+  const annotated = furigana
+    ? (given ?? (furiganaLoaded ? lookupFurigana(sentence) : undefined))
+    : undefined;
   const open = sentence.indexOf('［');
   const close = sentence.indexOf('］');
   const underline: [number, number] | undefined =

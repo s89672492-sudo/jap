@@ -221,7 +221,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-31',
     type: 'reading',
-    passage: 'わたしは まいあさ 七時に おきます。あさごはんは パンと たまごです。八時に いえを でて、でんしゃで がっこうへ いきます。がっこうは 九時から 三時までです。',
+    groupId: 'n5-exam-g01',
     sentence: 'この 人は 何時に いえを でますか。',
     options: ['八時', '七時', '九時', '三時'],
     explanation: '文中說「八時に いえを でて」，所以是八點出門。七點是起床時間。',
@@ -229,7 +229,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-32',
     type: 'reading',
-    passage: 'わたしは まいあさ 七時に おきます。あさごはんは パンと たまごです。八時に いえを でて、でんしゃで がっこうへ いきます。がっこうは 九時から 三時までです。',
+    groupId: 'n5-exam-g01',
     sentence: 'この 人は 何で がっこうへ いきますか。',
     options: ['でんしゃ', 'バス', 'じてんしゃ', 'あるいて'],
     explanation: '文中說「でんしゃで がっこうへ いきます」，是搭電車去學校。',
@@ -237,7 +237,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-33',
     type: 'reading',
-    passage: '田中さんへ\nきょうの かいぎは 四時から 五時に かわりました。ばしょは 三かいの へやです。\n山田',
+    groupId: 'n5-exam-g02',
     sentence: 'かいぎは 何時から ですか。',
     options: ['五時', '四時', '三時', '六時'],
     explanation: '便條說會議「四時から 五時に かわりました」，改成五點開始。',
@@ -245,7 +245,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-34',
     type: 'reading',
-    passage: '田中さんへ\nきょうの かいぎは 四時から 五時に かわりました。ばしょは 三かいの へやです。\n山田',
+    groupId: 'n5-exam-g02',
     sentence: 'かいぎは どこで ありますか。',
     options: ['三かいの へや', '四かいの へや', '五かいの へや', '一かいの へや'],
     explanation: '便條寫著「ばしょは 三かいの へやです」。',
@@ -253,7 +253,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-35',
     type: 'reading',
-    passage: 'きのうは 日よう日でした。わたしは ともだちと こうえんへ いきました。こうえんで しゃしんを たくさん とりました。それから、レストランで ひるごはんを たべました。とても おいしかったです。',
+    groupId: 'n5-exam-g03',
     sentence: 'この 人は こうえんで 何を しましたか。',
     options: ['しゃしんを とりました', 'ひるごはんを たべました', 'ほんを よみました', 'テニスを しました'],
     explanation: '在公園「しゃしんを たくさん とりました」，午餐是在餐廳吃的。',
@@ -261,7 +261,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-36',
     type: 'reading',
-    passage: 'きのうは 日よう日でした。わたしは ともだちと こうえんへ いきました。こうえんで しゃしんを たくさん とりました。それから、レストランで ひるごはんを たべました。とても おいしかったです。',
+    groupId: 'n5-exam-g03',
     sentence: 'ひるごはんは どこで たべましたか。',
     options: ['レストラン', 'こうえん', 'ともだちの いえ', 'じぶんの いえ'],
     explanation: '文中說「レストランで ひるごはんを たべました」。',
@@ -269,7 +269,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-37',
     type: 'reading',
-    passage: 'わたしの へやには つくえと いすと ベッドが あります。つくえの 上に パソコンが あります。ねこは いつも ベッドの 上で ねて います。',
+    groupId: 'n5-exam-g04',
     sentence: 'ねこは いつも どこで ねて いますか。',
     options: ['ベッドの 上', 'つくえの 上', 'いすの 上', 'パソコンの 上'],
     explanation: '文中說「ねこは いつも ベッドの 上で ねて います」。',
@@ -277,7 +277,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-38',
     type: 'reading',
-    passage: 'わたしの へやには つくえと いすと ベッドが あります。つくえの 上に パソコンが あります。ねこは いつも ベッドの 上で ねて います。',
+    groupId: 'n5-exam-g04',
     sentence: 'つくえの 上に 何が ありますか。',
     options: ['パソコン', 'ねこ', 'ベッド', 'いす'],
     explanation: '文中說「つくえの 上に パソコンが あります」。',
@@ -285,7 +285,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-39',
     type: 'reading',
-    passage: 'としょかんの おしらせ\n月よう日は やすみです。火よう日から 金よう日は 九時から 七時まで、土よう日と 日よう日は 九時から 五時までです。',
+    groupId: 'n5-exam-g05',
     sentence: '土よう日は 何時まで あいて いますか。',
     options: ['五時', '七時', '九時', '六時'],
     explanation: '週末（土、日）是「九時から 五時まで」。',
@@ -293,7 +293,7 @@ export const N5_EXAM: ExamQuestion[] = [
   {
     id: 'n5-exam-40',
     type: 'reading',
-    passage: 'としょかんの おしらせ\n月よう日は やすみです。火よう日から 金よう日は 九時から 七時まで、土よう日と 日よう日は 九時から 五時までです。',
+    groupId: 'n5-exam-g05',
     sentence: 'としょかんが やすみの 日は いつですか。',
     options: ['月よう日', '火よう日', '土よう日', '日よう日'],
     explanation: '公告第一句就是「月よう日は やすみです」。',

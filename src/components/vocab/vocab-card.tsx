@@ -7,7 +7,7 @@ import { LevelTag } from '@/components/ui/level-tag';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
-import { PART_OF_SPEECH_LABELS, type VocabWord } from '@/data/vocab';
+import { wordClassLabel, type VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 
 type VocabCardProps = {
@@ -41,7 +41,7 @@ export const VocabCard = memo(function VocabCard({ item, showLevel = false }: Vo
               )}
               <View style={[styles.posTag, { borderColor: theme.border }]}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.posText}>
-                  {PART_OF_SPEECH_LABELS[item.pos]}
+                  {wordClassLabel(item)}
                 </ThemedText>
               </View>
             </View>

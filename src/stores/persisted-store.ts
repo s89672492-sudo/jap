@@ -4,6 +4,8 @@ import { useSyncExternalStore } from 'react';
 export type PersistedStore<T> = {
   get: () => T;
   set: (value: T) => void;
+  /** 和 set 一樣，但等寫入手機完成；寫入失敗時丟出錯誤（畫面要告訴使用者沒存到） */
+  save: (value: T) => Promise<void>;
   /** 先等手機裡的資料讀回，再以最新的值計算並寫入（避免蓋掉還沒讀回的存檔） */
   update: (fn: (current: T) => T) => Promise<void>;
   /** 是否已經從手機儲存空間讀回資料 */
@@ -73,6 +75,13 @@ export function createPersistedStore<T>(options: {
     AsyncStorage.setItem(options.key, options.serialize(next)).catch(() => {});
   };
 
+  const save = async (next: T) => {
+    if (!loaded) changedBeforeLoad = true;
+    value = next;
+    emit();
+    await AsyncStorage.setItem(options.key, options.serialize(next));
+  };
+
   registry.set(options.key, {
     validate: (raw) => options.deserialize(raw) !== null,
     reload: async () => {
@@ -95,6 +104,7 @@ export function createPersistedStore<T>(options: {
     isLoaded: () => loaded,
     whenLoaded: () => load(),
     set,
+    save,
     update: (fn) => load().then(() => set(fn(value))),
     subscribe: (listener) => {
       listeners.add(listener);

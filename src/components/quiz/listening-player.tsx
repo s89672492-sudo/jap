@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { useEffect } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -7,15 +7,19 @@ import { JapaneseText } from '@/components/ui/japanese-text';
 import { Spacing } from '@/constants/theme';
 import type { ScriptLine } from '@/data/exam';
 import { useTheme } from '@/hooks/use-theme';
-import { speakScript, stopSpeaking } from '@/lib/speech';
+import { listeningSegments, playSegments } from '@/lib/audio-manager';
+import type { ExamRoundQuestion } from '@/lib/quiz';
 
 type ListeningPlayerProps = {
-  /** 用來判斷是不是換了新題目 */
-  questionId: string;
-  script: ScriptLine[];
-  question: string;
+  item: ExamRoundQuestion;
   /** 作答後顯示逐字稿 */
   showTranscript: boolean;
+  /** 可以再聽一次（練習）；正式模式只播一次 */
+  allowReplay?: boolean;
+  /** 這一題已經完整播放過了（正式模式不再播放） */
+  played?: boolean;
+  /** 完整播完時呼叫（中途停止不算） */
+  onPlayed?: () => void;
 };
 
 const SPEAKER_LABELS: Record<ScriptLine['speaker'], string> = {
@@ -24,22 +28,58 @@ const SPEAKER_LABELS: Record<ScriptLine['speaker'], string> = {
   woman: '女',
 };
 
-/** 聽解題的播放器：換題時自動播放，可以再聽一次，作答後顯示逐字稿 */
+/**
+ * 聽解題的播放器：換題時自動播放（依各大題的流程，見 lib/audio-manager.ts）。
+ * 練習時可以再聽一次；正式模式播完就不能重播。作答後顯示逐字稿。
+ */
 export function ListeningPlayer({
-  questionId,
-  script,
-  question,
+  item,
   showTranscript,
+  allowReplay = true,
+  played = false,
+  onPlayed,
 }: ListeningPlayerProps) {
   const theme = useTheme();
+  const [playing, setPlaying] = useState(false);
+  const stop = useRef<(() => void) | null>(null);
+  const script = item.question.script ?? [];
 
+  // 播完時用最新的 onPlayed（播放途中畫面可能重畫過）
+  const onPlayedRef = useRef(onPlayed);
   useEffect(() => {
-    speakScript(script, question);
-    // 離開這一題（換題、切換題型或分頁）時停止播放
-    return () => stopSpeaking();
-    // 只在換題時自動播放
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId]);
+    onPlayedRef.current = onPlayed;
+  });
+
+  const play = () => {
+    stop.current?.();
+    setPlaying(true);
+    stop.current = playSegments(listeningSegments(item), () => {
+      setPlaying(false);
+      onPlayedRef.current?.();
+    });
+  };
+
+  const autoPlay = useEffectEvent(() => {
+    if (allowReplay || !played) play();
+  });
+  useEffect(() => {
+    // 換題時自動播放（放到下一輪，不在 effect 裡直接更新畫面）；離開這一題時停止
+    const timer = setTimeout(autoPlay, 0);
+    return () => {
+      clearTimeout(timer);
+      stop.current?.();
+      stop.current = null;
+    };
+  }, [item.question.id]);
+
+  const canPlay = !playing && (allowReplay || !played);
+  const status = playing
+    ? '播放中…'
+    : allowReplay
+      ? '男生聲音較低、女生聲音較高'
+      : played
+        ? '已播放（正式模式只播一次）'
+        : '還沒播完，可以再播一次';
 
   return (
     <View
@@ -50,11 +90,16 @@ export function ListeningPlayer({
       <View style={styles.playRow}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="再聽一次"
-          onPress={() => speakScript(script, question)}
+          accessibilityLabel={allowReplay ? '再聽一次' : '播放'}
+          accessibilityState={{ disabled: !canPlay }}
+          disabled={!canPlay}
+          onPress={play}
           style={({ pressed }) => [
             styles.playButton,
-            { backgroundColor: theme.primary, borderColor: theme.gold },
+            {
+              backgroundColor: canPlay ? theme.primary : theme.backgroundSelected,
+              borderColor: theme.gold,
+            },
             pressed && styles.pressed,
           ]}>
           <SymbolView
@@ -64,18 +109,18 @@ export function ListeningPlayer({
               web: 'volume_up',
             }}
             size={30}
-            tintColor={theme.onPrimary}
+            tintColor={canPlay ? theme.onPrimary : theme.textSecondary}
           />
         </Pressable>
         <View style={styles.playText}>
-          <ThemedText type="smallBold">再聽一次</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            男生聲音較低、女生聲音較高
+          <ThemedText type="smallBold">{allowReplay ? '再聽一次' : '播放'}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" accessibilityLiveRegion="polite">
+            {status}
           </ThemedText>
         </View>
       </View>
 
-      {showTranscript && (
+      {showTranscript && script.length > 0 && (
         <View style={[styles.transcript, { borderTopColor: theme.border }]}>
           <ThemedText type="smallBold" style={{ color: theme.gold }}>
             逐字稿

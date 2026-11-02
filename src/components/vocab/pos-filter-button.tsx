@@ -4,21 +4,23 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
-import { PART_OF_SPEECH_LABELS, type PartOfSpeech } from '@/data/vocab';
+import { POS_FILTER_LABELS, type PosFilter } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 
-export type PosFilter = 'all' | PartOfSpeech;
+export type { PosFilter } from '@/data/vocab';
 
-const OPTIONS: { value: PosFilter; label: string }[] = [
-  { value: 'all', label: '全部詞性' },
-  ...(Object.keys(PART_OF_SPEECH_LABELS) as PartOfSpeech[]).map((pos) => ({
-    value: pos,
-    label: PART_OF_SPEECH_LABELS[pos],
-  })),
+/** 形容詞下面再分い形容詞、な形容詞（縮排顯示） */
+const OPTIONS: { value: PosFilter; sub?: boolean }[] = [
+  { value: 'all' },
+  { value: 'noun' },
+  { value: 'verb' },
+  { value: 'adjective' },
+  { value: 'i-adjective', sub: true },
+  { value: 'na-adjective', sub: true },
+  { value: 'adverb' },
 ];
 
-export const posFilterLabel = (value: PosFilter) =>
-  value === 'all' ? '全部詞性' : PART_OF_SPEECH_LABELS[value];
+export const posFilterLabel = (value: PosFilter) => POS_FILTER_LABELS[value];
 
 type PosFilterButtonProps = {
   value: PosFilter;
@@ -59,7 +61,7 @@ export function PosFilterButton({ value, onChange, counts }: PosFilterButtonProp
           type="smallBold"
           numberOfLines={1}
           style={{ color: active ? theme.onPrimary : theme.text }}>
-          {active ? `${PART_OF_SPEECH_LABELS[value]} ▾` : '篩選 ▾'}
+          {active ? `${value === 'adjective' ? '形容詞' : POS_FILTER_LABELS[value]} ▾` : '篩選 ▾'}
         </ThemedText>
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -92,13 +94,18 @@ export function PosFilterButton({ value, onChange, counts }: PosFilterButtonProp
                   onPress={() => pick(option.value)}
                   style={({ pressed }) => [
                     styles.row,
+                    option.sub && styles.subRow,
                     {
                       borderColor: selected ? theme.primary : theme.border,
                       backgroundColor: selected ? theme.backgroundSelected : theme.background,
                     },
                     pressed && styles.pressed,
                   ]}>
-                  <ThemedText style={styles.label}>{option.label}</ThemedText>
+                  <ThemedText style={styles.label}>
+                    {option.sub
+                      ? `・${POS_FILTER_LABELS[option.value]}`
+                      : POS_FILTER_LABELS[option.value]}
+                  </ThemedText>
                   {count !== undefined && (
                     <ThemedText type="small" themeColor="textSecondary">
                       {count} 個
@@ -156,6 +163,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     borderWidth: 1,
     borderRadius: Spacing.three,
+  },
+  subRow: {
+    marginLeft: Spacing.four,
   },
   label: {
     flex: 1,

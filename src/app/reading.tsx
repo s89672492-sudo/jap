@@ -4,6 +4,7 @@ import { BackHandler, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
+import { ExamLock } from '@/components/quiz/mock-exam/exam-lock';
 import { ArticleList } from '@/components/reading/article-list';
 import { ArticleView } from '@/components/reading/article-view';
 import { DailyCard } from '@/components/reading/daily-card';
@@ -64,63 +65,65 @@ export default function ReadingScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <AppBackground />
-      <View
-        style={[
-          styles.header,
-          {
-            paddingTop: insets.top + Spacing.three,
-            paddingLeft: insets.left + Spacing.three,
-            paddingRight: insets.right + Spacing.three,
-            borderBottomColor: theme.border,
-          },
-        ]}>
-        <View style={styles.inner}>
-          <View style={styles.titleRow}>
-            <ThemedText type="subtitle" style={styles.title}>
-              閱讀
-            </ThemedText>
-            <View style={styles.titleSide}>
-              <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
-                {levelData ? `已讀 ${readCount} / ${articles.length} 篇` : '載入中…'}
+      <ExamLock what="閱讀文章">
+        <View
+          style={[
+            styles.header,
+            {
+              paddingTop: insets.top + Spacing.three,
+              paddingLeft: insets.left + Spacing.three,
+              paddingRight: insets.right + Spacing.three,
+              borderBottomColor: theme.border,
+            },
+          ]}>
+          <View style={styles.inner}>
+            <View style={styles.titleRow}>
+              <ThemedText type="subtitle" style={styles.title}>
+                閱讀
               </ThemedText>
-              {/* 讀文章時不換等級，回到列表才顯示 */}
-              {!article && <LevelPicker />}
+              <View style={styles.titleSide}>
+                <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
+                  {levelData ? `已讀 ${readCount} / ${articles.length} 篇` : '載入中…'}
+                </ThemedText>
+                {/* 讀文章時不換等級，回到列表才顯示 */}
+                {!article && <LevelPicker />}
+              </View>
             </View>
           </View>
         </View>
-      </View>
 
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
-            paddingLeft: insets.left + Spacing.three,
-            paddingRight: insets.right + Spacing.three,
-          },
-        ]}>
-        <View style={styles.inner}>
-          {article ? (
-            <ArticleView article={article} onBack={() => open(null)} />
-          ) : (
-            <>
-              {daily && <DailyCard daily={daily} onOpen={() => open(daily.article)} />}
-              <ThemedText type="small" themeColor="textSecondary">
-                原創的分級文章，依等級的單字和文法撰寫。讀完做閱讀理解題就會打勾。
-              </ThemedText>
-              {levelData ? <ArticleList articles={articles} onOpen={open} /> : <LoadingNote />}
-              <ThemedText type="smallBold" style={[styles.section, { color: theme.accent }]}>
-                更多線上閱讀
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                以下是免費的日文閱讀網站，會用瀏覽器開啟。
-              </ThemedText>
-              <ExternalLinks level={level} />
-            </>
-          )}
-        </View>
-      </ScrollView>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={[
+            styles.content,
+            {
+              paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
+              paddingLeft: insets.left + Spacing.three,
+              paddingRight: insets.right + Spacing.three,
+            },
+          ]}>
+          <View style={styles.inner}>
+            {article ? (
+              <ArticleView article={article} onBack={() => open(null)} />
+            ) : (
+              <>
+                {daily && <DailyCard daily={daily} onOpen={() => open(daily.article)} />}
+                <ThemedText type="small" themeColor="textSecondary">
+                  原創的分級文章，依等級的單字和文法撰寫。讀完做閱讀理解題就會打勾。
+                </ThemedText>
+                {levelData ? <ArticleList articles={articles} onOpen={open} /> : <LoadingNote />}
+                <ThemedText type="smallBold" style={[styles.section, { color: theme.accent }]}>
+                  更多線上閱讀
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  以下是免費的日文閱讀網站，會用瀏覽器開啟。
+                </ThemedText>
+                <ExternalLinks level={level} />
+              </>
+            )}
+          </View>
+        </ScrollView>
+      </ExamLock>
     </View>
   );
 }

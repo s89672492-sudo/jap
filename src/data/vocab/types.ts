@@ -27,7 +27,7 @@ export type VocabWord = {
   reading: string;
   /** 中文意思 */
   meaning: string;
-  /** 詞性；い形容詞和な形容詞都歸在「形容詞」 */
+  /** 詞性；い形容詞和な形容詞都歸在「形容詞」（細分見 word-class.ts） */
   pos: PartOfSpeech;
   example?: VocabExample;
 };

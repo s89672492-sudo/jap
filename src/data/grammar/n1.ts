@@ -25,7 +25,7 @@ export const N1_GRAMMAR: GrammarPoint[] = [
       highlight: '説明するまでもない',
     },
     tip: '表「事情明顯，沒必要做」。常見「言うまでもない」。勿與「べくもない」（根本不可能）混淆。',
-    quiz: { blank: 'までもない', distractors: ['べくもない', 'ほかない', 'きらいがある'] },
+    quiz: { blank: 'までもない', distractors: ['までもある', 'ほかならない', 'きらいがある'] },
   },
   {
     id: 'n1-g03',
@@ -103,7 +103,7 @@ export const N1_GRAMMAR: GrammarPoint[] = [
       highlight: '名探偵といえども',
     },
     tip: '硬い表現，「即使是～也…」，前接身分地位高者，後接與預期相反內容。近義「とはいえ」。',
-    quiz: { blank: 'といえども', distractors: ['ともなれば', 'とあって', 'ならでは'] },
+    quiz: { blank: 'といえども', distractors: ['ともなく', 'とあって', 'ならでは'] },
   },
   {
     id: 'n1-g09',
@@ -207,7 +207,7 @@ export const N1_GRAMMAR: GrammarPoint[] = [
       highlight: '覚えるそばから',
     },
     tip: '用於反覆發生的事：剛做完就又被抵銷。常帶不滿語氣。與一次性的「が早いか」區分。',
-    quiz: { blank: 'そばから', distractors: ['が早いか', 'かたわら', 'までもなく'] },
+    quiz: { blank: 'そばから', distractors: ['が早く', 'かたわら', 'までもなく'] },
   },
   {
     id: 'n1-g17',
@@ -554,7 +554,7 @@ export const N1_GRAMMAR: GrammarPoint[] = [
       highlight: '許すべからざる',
     },
     tip: '修飾名詞「不可～的」，常見「許すべからざる」「欠くべからざる」。句尾形是「べからず」。',
-    quiz: { blank: 'べからざる', distractors: ['べからず', 'べく', 'べき'] },
+    quiz: { blank: 'べからざる', distractors: ['べからず', 'べく', 'べかる'] },
   },
   {
     id: 'n1-g43',
@@ -2049,7 +2049,7 @@ export const N1_GRAMMAR: GrammarPoint[] = [
       highlight: '名前すら',
     },
     tip: '＝「さえ」的書面語，舉極端例子；接主語時可作「ですら」。',
-    quiz: { blank: 'すら', distractors: ['こそ', 'だけ', 'ならでは'] },
+    quiz: { blank: 'すら', distractors: ['ずくめ', 'たる', 'ならでは'] },
   },
   {
     id: 'n1-g152',
@@ -2263,7 +2263,7 @@ export const N1_GRAMMAR: GrammarPoint[] = [
       highlight: 'あるまじき',
     },
     tip: '「〜にあるまじき＋名詞」最常考，表身分上不應有的行為；是「べき」的否定文語形。',
-    quiz: { blank: 'まじき', distractors: ['べからず', 'べき', 'べく'] },
+    quiz: { blank: 'まじき', distractors: ['べからず', 'べかる', 'べく'] },
   },
   {
     id: 'n1-g168',

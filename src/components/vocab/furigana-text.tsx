@@ -24,6 +24,9 @@ type FuriganaTextProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+/** 不能放在行首的標點 */
+const CLOSING = /^[。、，．！？」』）〕】・ー]$/;
+
 type Cell = { text: string; ruby?: string; start: number; replaced?: boolean };
 
 /**
@@ -73,6 +76,18 @@ export function FuriganaText({
             replaced: true,
           });
         replacedAdded = true;
+        continue;
+      }
+      // 句號、逗號、右括號不放在行首：黏在前一個字後面（前一個字沒有注音時）
+      const previous = cells[cells.length - 1];
+      if (
+        CLOSING.test(piece.text) &&
+        previous &&
+        !previous.ruby &&
+        !previous.replaced &&
+        previous.start + previous.text.length === piece.start
+      ) {
+        previous.text += piece.text;
         continue;
       }
       cells.push(piece);

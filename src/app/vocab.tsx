@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
+import { ExamLock } from '@/components/quiz/mock-exam/exam-lock';
 import { ThemedText } from '@/components/themed-text';
 import { KeepAlive } from '@/components/ui/keep-alive';
 import { LoadingNote } from '@/components/ui/loading-note';
@@ -22,7 +23,7 @@ import { VocabCard } from '@/components/vocab/vocab-card';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import type { GrammarPoint } from '@/data/grammar';
 import { useAllLevelData, useLevelData } from '@/data/level-data';
-import type { VocabWord } from '@/data/vocab';
+import { matchesPosFilter, wordClass, type VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 import { searchGrammar, searchWords } from '@/lib/search';
 import { useBookmarks } from '@/stores/bookmarks-store';
@@ -68,14 +69,20 @@ export default function VocabScreen() {
 
   const words = useMemo(() => {
     const all = levelData?.words ?? NO_WORDS;
-    return pos === 'all' ? all : all.filter((word) => word.pos === pos);
+    return pos === 'all' ? all : all.filter((word) => matchesPosFilter(word, pos));
   }, [levelData, pos]);
 
   // 篩選選單上每個詞性的數量
   const posCounts = useMemo(() => {
     const all = levelData?.words ?? NO_WORDS;
     const counts: Partial<Record<PosFilter, number>> = { all: all.length };
-    for (const word of all) counts[word.pos] = (counts[word.pos] ?? 0) + 1;
+    for (const word of all) {
+      counts[word.pos] = (counts[word.pos] ?? 0) + 1;
+      const detail = wordClass(word);
+      if (detail === 'i-adjective' || detail === 'na-adjective') {
+        counts[detail] = (counts[detail] ?? 0) + 1;
+      }
+    }
     return counts;
   }, [levelData]);
 
@@ -83,7 +90,7 @@ export default function VocabScreen() {
   const wordResults = useMemo(() => {
     if (!hasQuery || !allData) return NO_WORDS;
     const results = searchWords(allData.words, deferredQuery);
-    return pos === 'all' ? results : results.filter((word) => word.pos === pos);
+    return pos === 'all' ? results : results.filter((word) => matchesPosFilter(word, pos));
   }, [hasQuery, allData, deferredQuery, pos]);
   const grammarResults = useMemo(
     () => (hasQuery && allData ? searchGrammar(allData.grammar, deferredQuery) : NO_GRAMMAR),
@@ -144,125 +151,127 @@ export default function VocabScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <AppBackground />
-      {/* 標題（含等級）、模式和搜尋固定在上方 */}
-      <View
-        style={[
-          styles.header,
-          {
-            paddingTop: insets.top + Spacing.three,
-            paddingLeft: insets.left + Spacing.three,
-            paddingRight: insets.right + Spacing.three,
-            borderBottomColor: theme.border,
-          },
-        ]}>
-        <View style={styles.inner}>
-          <View style={styles.titleRow}>
-            <ThemedText type="subtitle" style={styles.title}>
-              {title}
-            </ThemedText>
-            <View style={styles.titleSide}>
-              <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
-                {subtitle}
+      <ExamLock what="單字和文法">
+        {/* 標題（含等級）、模式和搜尋固定在上方 */}
+        <View
+          style={[
+            styles.header,
+            {
+              paddingTop: insets.top + Spacing.three,
+              paddingLeft: insets.left + Spacing.three,
+              paddingRight: insets.right + Spacing.three,
+              borderBottomColor: theme.border,
+            },
+          ]}>
+          <View style={styles.inner}>
+            <View style={styles.titleRow}>
+              <ThemedText type="subtitle" style={styles.title}>
+                {title}
               </ThemedText>
-              <LevelPicker />
-            </View>
-          </View>
-          <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
-          {mode === 'list' && (
-            // 搜尋框旁邊是詞性篩選
-            <View style={styles.toolRow}>
-              <View style={styles.searchBox}>
-                <SearchBox value={query} onChange={setQuery} placeholder="搜尋日文、假名或中文" />
+              <View style={styles.titleSide}>
+                <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
+                  {subtitle}
+                </ThemedText>
+                <LevelPicker />
               </View>
-              {filterButton}
             </View>
-          )}
-          {mode === 'grammar' && (
-            <SearchBox value={query} onChange={setQuery} placeholder="搜尋文法：句型或中文" />
-          )}
-          {(mode === 'flashcard' || mode === 'autoplay') && (
-            <View style={styles.toolRow}>
-              <ThemedText type="small" themeColor="textSecondary" style={styles.toolNote}>
-                {filtered ? `只看${posFilterLabel(pos)}` : '全部詞性的單字'}
-              </ThemedText>
-              {filterButton}
-            </View>
-          )}
+            <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
+            {mode === 'list' && (
+              // 搜尋框旁邊是詞性篩選
+              <View style={styles.toolRow}>
+                <View style={styles.searchBox}>
+                  <SearchBox value={query} onChange={setQuery} placeholder="搜尋日文、假名或中文" />
+                </View>
+                {filterButton}
+              </View>
+            )}
+            {mode === 'grammar' && (
+              <SearchBox value={query} onChange={setQuery} placeholder="搜尋文法：句型或中文" />
+            )}
+            {(mode === 'flashcard' || mode === 'autoplay') && (
+              <View style={styles.toolRow}>
+                <ThemedText type="small" themeColor="textSecondary" style={styles.toolNote}>
+                  {filtered ? `只看${posFilterLabel(pos)}` : '全部詞性的單字'}
+                </ThemedText>
+                {filterButton}
+              </View>
+            )}
+          </View>
         </View>
-      </View>
 
-      {/* 打開過的模式切走時只是隱藏，切回來還在原本的頁數、單字卡進度 */}
-      <KeepAlive active={mode === 'list'} style={styles.fill}>
-        {hasQuery ? (
-          <PagedList
-            items={wordResults}
-            pageSize={PAGE_SIZE}
-            keyExtractor={(item) => item.id}
-            renderItem={(item) => <VocabCard item={item} showLevel />}
-            resetKey={`search-${deferredQuery}-${pos}`}
-            emptyText={
-              allLoading
-                ? '載入全部等級的單字…'
-                : filtered
-                  ? `找不到符合的${posFilterLabel(pos)}（可以按「${posFilterLabel(pos)} ▾」改成全部詞性）`
-                  : '找不到符合的單字'
-            }
-            contentContainerStyle={listStyle}
-          />
-        ) : (
-          <PagedList
-            items={words}
-            pageSize={PAGE_SIZE}
-            keyExtractor={(item) => item.id}
-            renderItem={(item) => <VocabCard item={item} />}
-            resetKey={`${level}-${pos}`}
-            emptyText={loading ? '載入中…' : '這個分類沒有單字'}
-            contentContainerStyle={listStyle}
-          />
-        )}
-      </KeepAlive>
-      <KeepAlive active={mode === 'grammar'} style={styles.fill}>
-        <PagedList
-          items={hasQuery ? grammarResults : grammar}
-          pageSize={GRAMMAR_PAGE_SIZE}
-          keyExtractor={(item) => item.id}
-          renderItem={(item) => <GrammarCard item={item} showLevel={hasQuery} />}
-          resetKey={hasQuery ? `search-${deferredQuery}` : `grammar-${level}`}
-          emptyText={(hasQuery ? allLoading : loading) ? '載入中…' : '找不到符合的文法'}
-          contentContainerStyle={listStyle}
-        />
-      </KeepAlive>
-      <KeepAlive active={mode === 'saved'} style={styles.fill}>
-        <PagedList
-          items={saved}
-          pageSize={PAGE_SIZE}
-          keyExtractor={(entry) => entry.item.id}
-          renderItem={(entry) =>
-            entry.kind === 'word' ? (
-              <VocabCard item={entry.item} showLevel />
-            ) : (
-              <GrammarCard item={entry.item} showLevel />
-            )
-          }
-          resetKey="saved"
-          emptyText={allLoading ? '載入中…' : '還沒有收藏。在單字或文法卡片上點 ☆ 就能加入這裡。'}
-          contentContainerStyle={listStyle}
-        />
-      </KeepAlive>
-      <KeepAlive active={mode === 'autoplay'} style={styles.fill}>
-        <ScrollView contentContainerStyle={listStyle}>
-          {loading ? <LoadingNote /> : <AutoPlayer words={words} />}
-        </ScrollView>
-      </KeepAlive>
-      <KeepAlive active={mode === 'flashcard'} style={styles.fill}>
-        <ScrollView contentContainerStyle={listStyle}>
-          {loading ? (
-            <LoadingNote />
+        {/* 打開過的模式切走時只是隱藏，切回來還在原本的頁數、單字卡進度 */}
+        <KeepAlive active={mode === 'list'} style={styles.fill}>
+          {hasQuery ? (
+            <PagedList
+              items={wordResults}
+              pageSize={PAGE_SIZE}
+              keyExtractor={(item) => item.id}
+              renderItem={(item) => <VocabCard item={item} showLevel />}
+              resetKey={`search-${deferredQuery}-${pos}`}
+              emptyText={
+                allLoading
+                  ? '載入全部等級的單字…'
+                  : filtered
+                    ? `找不到符合的${posFilterLabel(pos)}（可以按「${posFilterLabel(pos)} ▾」改成全部詞性）`
+                    : '找不到符合的單字'
+              }
+              contentContainerStyle={listStyle}
+            />
           ) : (
-            <FlashcardDeck level={level} words={words} sessionKey={`${level}-${pos}`} />
+            <PagedList
+              items={words}
+              pageSize={PAGE_SIZE}
+              keyExtractor={(item) => item.id}
+              renderItem={(item) => <VocabCard item={item} />}
+              resetKey={`${level}-${pos}`}
+              emptyText={loading ? '載入中…' : '這個分類沒有單字'}
+              contentContainerStyle={listStyle}
+            />
           )}
-        </ScrollView>
-      </KeepAlive>
+        </KeepAlive>
+        <KeepAlive active={mode === 'grammar'} style={styles.fill}>
+          <PagedList
+            items={hasQuery ? grammarResults : grammar}
+            pageSize={GRAMMAR_PAGE_SIZE}
+            keyExtractor={(item) => item.id}
+            renderItem={(item) => <GrammarCard item={item} showLevel={hasQuery} />}
+            resetKey={hasQuery ? `search-${deferredQuery}` : `grammar-${level}`}
+            emptyText={(hasQuery ? allLoading : loading) ? '載入中…' : '找不到符合的文法'}
+            contentContainerStyle={listStyle}
+          />
+        </KeepAlive>
+        <KeepAlive active={mode === 'saved'} style={styles.fill}>
+          <PagedList
+            items={saved}
+            pageSize={PAGE_SIZE}
+            keyExtractor={(entry) => entry.item.id}
+            renderItem={(entry) =>
+              entry.kind === 'word' ? (
+                <VocabCard item={entry.item} showLevel />
+              ) : (
+                <GrammarCard item={entry.item} showLevel />
+              )
+            }
+            resetKey="saved"
+            emptyText={allLoading ? '載入中…' : '還沒有收藏。在單字或文法卡片上點 ☆ 就能加入這裡。'}
+            contentContainerStyle={listStyle}
+          />
+        </KeepAlive>
+        <KeepAlive active={mode === 'autoplay'} style={styles.fill}>
+          <ScrollView contentContainerStyle={listStyle}>
+            {loading ? <LoadingNote /> : <AutoPlayer words={words} />}
+          </ScrollView>
+        </KeepAlive>
+        <KeepAlive active={mode === 'flashcard'} style={styles.fill}>
+          <ScrollView contentContainerStyle={listStyle}>
+            {loading ? (
+              <LoadingNote />
+            ) : (
+              <FlashcardDeck level={level} words={words} sessionKey={`${level}-${pos}`} />
+            )}
+          </ScrollView>
+        </KeepAlive>
+      </ExamLock>
     </View>
   );
 }

@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { TaskRow } from './task-row';
 
 import { CaseCard } from '@/components/detective/case-card';
+import { LevelPicker } from '@/components/ui/level-picker';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import type { JlptLevel } from '@/data/vocab';
@@ -16,20 +17,22 @@ type TodayTasksProps = {
   level: JlptLevel;
   progress: LearningProgress;
   daily: DailyArticle | null;
+  /** 打開「今日複習單字」清單 */
+  onReviewWords: () => void;
 };
 
 const openQuiz = (mode: 'vocab' | 'grammar' | 'review') =>
   router.navigate({ pathname: '/quiz', params: { mode } });
 
 /** 首頁「今日任務」：今天該複習的、今日文章、今天做了多少、連續學習天數 */
-export function TodayTasks({ level, progress, daily }: TodayTasksProps) {
+export function TodayTasks({ level, progress, daily, onReviewWords }: TodayTasksProps) {
   const theme = useTheme();
   const current = progress.levels[level];
   const todayLog = progress.log[progress.today] ?? { n: 0, c: 0, w: 0 };
   const practiced = todayLog.n > 0 || progress.readToday;
 
   return (
-    <CaseCard label="TODAY" title={`今日任務・${level}`}>
+    <CaseCard label="TODAY" title="今日任務" action={<LevelPicker />}>
       <View style={styles.stats}>
         <Stat value={`🔥 ${progress.streak}`} label="連續天數" color={theme.gold} />
         <Stat value={`${todayLog.n}`} label="今日答題" color={theme.text} />
@@ -40,10 +43,10 @@ export function TodayTasks({ level, progress, daily }: TodayTasksProps) {
         <TaskRow
           icon="📝"
           title="待複習單字"
-          note={current.dueWords > 0 ? '單字測驗會優先出這些' : '目前沒有到期的單字'}
+          note={current.dueWords > 0 ? '點開一個一個看，看完打勾' : '目前沒有到期的單字'}
           value={current.dueWords > 0 ? `${current.dueWords} 個` : '✓ 完成'}
           done={current.dueWords === 0}
-          onPress={() => openQuiz('vocab')}
+          onPress={current.dueWords > 0 ? onReviewWords : undefined}
         />
         {current.dueGrammar > 0 && (
           <TaskRow
