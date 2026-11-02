@@ -34,6 +34,30 @@ export function usage(
   };
 }
 
+/** 言い換え類義：畫底線的部分換成意思最接近的說法 */
+export function paraphrase(
+  id: string,
+  difficulty: Difficulty,
+  sentence: string,
+  options: Four,
+  explanation: string,
+  translation: string,
+  optionNotes: Four,
+): ExamQuestion {
+  return {
+    ...BASE,
+    id,
+    type: 'paraphrase',
+    subcategory: 'paraphrase',
+    difficulty,
+    sentence,
+    options,
+    explanation,
+    translation,
+    optionNotes,
+  };
+}
+
 /** 語形成（N2）：接頭語、接尾語、複合語 */
 export function wordFormation(
   id: string,

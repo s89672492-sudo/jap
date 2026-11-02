@@ -1,6 +1,8 @@
 import type { JlptLevel } from '@/data/vocab/types';
 import { stripRuby } from '@/lib/furigana';
 
+import { N1_EXAM_BANK } from './bank/n1';
+import { N1_LISTENING_BANK } from './bank/n1-listening';
 import { N2_EXAM_BANK } from './bank/n2';
 import { N2_LISTENING_BANK } from './bank/n2-listening';
 import { N3_EXAM_BANK } from './bank/n3';
@@ -52,7 +54,7 @@ const RAW_EXAM: Record<JlptLevel, ExamQuestion[]> = {
   N4: [...N4_EXAM, ...N4_EXAM_BANK, ...N4_LISTENING_BANK, ...N4_LISTENING_BANK_2],
   N3: [...N3_EXAM, ...N3_EXAM_BANK, ...N3_LISTENING_BANK],
   N2: [...N2_EXAM, ...N2_EXAM_BANK, ...N2_LISTENING_BANK],
-  N1: N1_EXAM,
+  N1: [...N1_EXAM, ...N1_EXAM_BANK, ...N1_LISTENING_BANK],
 };
 
 export const EXAM_GROUPS_BY_LEVEL: Record<JlptLevel, ExamGroup[]> = {
