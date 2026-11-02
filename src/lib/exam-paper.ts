@@ -32,7 +32,7 @@ import type { ExamRoundQuestion } from '@/lib/quiz';
 /** 隨機考卷的 paperId */
 export const RANDOM_PAPER_ID = 'random';
 /** 隨機組卷規則的版本：規則改變時加一，紀錄裡可以分辨用哪一版規則組的 */
-export const RANDOM_PAPER_VERSION = 2;
+export const RANDOM_PAPER_VERSION = 3;
 
 /** 一節考試（考生一次坐下來作答、一起計時的範圍） */
 export type Sitting = {
@@ -258,7 +258,11 @@ function pickUnits(
     if (picked.length >= quota) break;
     const unit = info.load();
     if (!unit) continue;
-    if (count[unit.difficulty] >= Math.max(1, target[unit.difficulty])) {
+    // 難度已經夠了，或題組放進去會超過題數：先留著，之後再補
+    if (
+      count[unit.difficulty] >= Math.max(1, target[unit.difficulty]) ||
+      picked.length + unit.questions.length > quota
+    ) {
       skipped.push(unit);
       continue;
     }
@@ -266,9 +270,17 @@ function pickUnits(
     picked.push(...unit.questions);
     used.add(unit.key);
   }
-  // 第二輪：題目不夠時不管難度補滿
+  // 第二輪：題目不夠時不管難度補上（先補放得下的）
   for (const unit of skipped) {
     if (picked.length >= quota) break;
+    if (picked.length + unit.questions.length > quota) continue;
+    picked.push(...unit.questions);
+    used.add(unit.key);
+  }
+  // 第三輪：還是不夠才用會超過題數的題組（題組不拆開）
+  for (const unit of skipped) {
+    if (picked.length >= quota) break;
+    if (used.has(unit.key)) continue;
     picked.push(...unit.questions);
     used.add(unit.key);
   }

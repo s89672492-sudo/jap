@@ -13,6 +13,9 @@ import { N4_LISTENING_BANK_2 } from './bank/n4-listening-2';
 import { N5_EXAM_BANK } from './bank/n5';
 import { N5_LISTENING_BANK } from './bank/n5-listening';
 import { N5_LISTENING_BANK_2 } from './bank/n5-listening-2';
+import { N1_FROZEN } from './frozen/n1';
+import { N2_FROZEN } from './frozen/n2';
+import { N3_FROZEN } from './frozen/n3';
 import { N4_FROZEN } from './frozen/n4';
 import { N5_FROZEN } from './frozen/n5';
 import { N1_EXAM_GROUPS } from './groups/n1';
@@ -122,9 +125,9 @@ export const EXAM_BY_LEVEL: Record<JlptLevel, ExamQuestion[]> = {
 export const FROZEN_BY_LEVEL: Record<JlptLevel, ExamQuestion[]> = {
   N5: N5_FROZEN.map(({ from: _from, ...q }) => normalizeQuestion('N5', q)),
   N4: N4_FROZEN.map(({ from: _from, ...q }) => normalizeQuestion('N4', q)),
-  N3: [],
-  N2: [],
-  N1: [],
+  N3: N3_FROZEN.map(({ from: _from, ...q }) => normalizeQuestion('N3', q)),
+  N2: N2_FROZEN.map(({ from: _from, ...q }) => normalizeQuestion('N2', q)),
+  N1: N1_FROZEN.map(({ from: _from, ...q }) => normalizeQuestion('N1', q)),
 };
 
 const QUESTION_BY_ID = new Map(

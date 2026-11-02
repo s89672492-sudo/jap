@@ -1179,7 +1179,7 @@ export const N2_GRAMMAR: GrammarPoint[] = [
       highlight: '聞くものだ',
     },
     tip: '表社會常理「本來就應該〜」；與「ことだ（給個人的忠告）」常被混考。',
-    quiz: { blank: 'ものだ', distractors: ['わけだ', 'ところだ', '一方だ'] },
+    quiz: { blank: 'ものだ', distractors: ['はずか', 'ことか', '一方だ'] },
   },
   {
     id: 'n2-g91',

@@ -136,6 +136,24 @@ async function main() {
   }
   ok('authored lookup', getAuthoredQuestion('n5-exam-31')?.passage?.length > 0);
 
+  // 題組不拆開，但放得下的題組優先：各大問的題數不超過藍圖（30 個種子）
+  for (const level of ['N5', 'N4', 'N3', 'N2', 'N1']) {
+    const limit = Object.fromEntries(
+      BLUEPRINTS[level].sittings.flatMap((s) =>
+        s.items.map((i) => [i.subcategory, i.officialCount]),
+      ),
+    );
+    let over = 0;
+    for (let i = 0; i < 30; i++) {
+      const paper = engine.buildRandomPaper(level, engine.EMPTY_HISTORY, `quota-${i}`);
+      const got = {};
+      for (const q of paper.flatMap((s) => s.questions))
+        got[q.question.subcategory] = (got[q.question.subcategory] ?? 0) + 1;
+      over += Object.entries(got).filter(([sub, n]) => n > limit[sub]).length;
+    }
+    ok(`${level} random never exceeds blueprint counts`, over === 0);
+  }
+
   for (const [name, passed] of Object.entries(results))
     console.log(`${passed ? '✓' : '✗'} ${name}`);
   const failed = Object.entries(results).filter(([, v]) => !v);

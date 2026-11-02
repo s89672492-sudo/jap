@@ -23,6 +23,9 @@ const FILE = path.join(__dirname, '..', 'src/data/exam/frozen', `${lv}.ts`);
 const PLAN = {
   N5: { 'kanji-reading': 7, orthography: 5, context: 6, grammar: 9 },
   N4: { 'kanji-reading': 7, orthography: 5, context: 8, grammar: 13 },
+  N3: { 'kanji-reading': 8, orthography: 6, context: 11, grammar: 13 },
+  N2: { 'kanji-reading': 5, orthography: 5, context: 7, grammar: 12 },
+  N1: { 'kanji-reading': 6, context: 7, grammar: 10 },
 };
 /**
  * 人工檢查後排除的自動出題（有兩個以上合文法的答案，不適合放進固定考卷）。
@@ -61,6 +64,24 @@ const REJECTED = new Set([
   'gen-cx-n5-697', // 母に（プレゼント／テーブル／テレビゲーム）をあげました
   'gen-cx-n5-328', // 毎日、（日本語／動物）を勉強しています
   'gen-cx-n4-505', // 祖母が編んだ（セーター／スカート）は暖かい
+  'gen-cx-n3-954', // 優秀な（技術者／少年）
+  'gen-cx-n3-601', // （お互い／持ち主）の意見
+  'gen-cx-n3-167', // その選手は今年（引退／参加）した
+  'gen-cx-n3-2416', // （軍事／続編）に関する情報は公開されない
+  'gen-cx-n3-033', // その夜の（記憶／順番）がはっきりしない
+  'gen-cx-n2-1622', // （壮大／広大／巨大）な景色
+  'gen-cx-n3-756', // この（　）の歌が好きだ。
+  'gen-cx-n3-811', // （　）について話し合った。
+  'gen-cx-n3-2246', // 彼は大学を出てからずっと（　）だ。
+  'gen-cx-n3-1915', // 芸術は新しい価値の（　）だ。
+  'gen-cx-n3-2031', // 新しい（　）が記者会見を開いた。
+  'gen-cx-n3-1774', // 子どもの頃、偉人の（　）をよく読んだ。
+  'gen-cx-n3-736', // 駅の周りは（　）施設が多い。
+  'gen-cx-n3-2414', // 彼の父は（　）で、世界中に住んだ。
+  'gen-cx-n3-2424', // （　）の車が大きな音で走っていた。
+  'gen-cx-n2-1948', // 彼は（　）で今の会社に入った。
+  'gen-or-n3-1410', // ［おもいのほか］：「想いのほか」也有人這樣寫
+  'gen-gr-n2-g90', // 最後まで聞く（ものだ／ところだ），已修正文法資料，但固定考卷不用
 ]);
 const SHORT = { 'kanji-reading': 'kr', orthography: 'or', context: 'cx', grammar: 'gf' };
 
