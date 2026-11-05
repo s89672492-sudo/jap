@@ -7,6 +7,7 @@ import { LoadingNote } from '@/components/ui/loading-note';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
 import { SpeakButton } from '@/components/ui/speak-button';
+import { ExampleSentence } from '@/components/vocab/example-sentence';
 import { Spacing } from '@/constants/theme';
 import { useLevelData } from '@/data/level-data';
 import { wordClassLabel, type JlptLevel, type VocabWord } from '@/data/vocab';
@@ -167,11 +168,8 @@ function WordRow({
         </View>
         <SpeakButton text={word.reading} />
       </View>
-      {word.example && (
-        <ThemedText type="small" themeColor="textSecondary">
-          {word.example.ja.replace(/\[([^|\]]+)\|[^\]]+\]/g, '$1')}　{word.example.zh}
-        </ThemedText>
-      )}
+      {/* 例句和單字頁一樣：假名注音（看設定）、標出單字、可朗讀 */}
+      <ExampleSentence word={word} />
       {mark ? (
         <ThemedText
           type="smallBold"
