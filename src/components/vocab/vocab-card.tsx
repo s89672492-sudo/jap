@@ -7,6 +7,7 @@ import { FrequencyTag } from '@/components/ui/frequency-tag';
 import { LevelTag } from '@/components/ui/level-tag';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
+import { RelatedWords } from '@/components/vocab/related-words';
 import { Spacing } from '@/constants/theme';
 import { wordClassLabel, type VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
@@ -57,6 +58,7 @@ export const VocabCard = memo(function VocabCard({ item, showLevel = false }: Vo
             <SpeakButton text={item.reading} />
           </View>
         </View>
+        <RelatedWords word={item} />
         <ExampleSentence word={item} />
       </View>
     </View>

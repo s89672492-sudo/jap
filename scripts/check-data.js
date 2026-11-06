@@ -120,6 +120,31 @@ for (const lv of LEVELS) {
   }
 }
 
+// ── 同義詞、反義詞：對方的 id 要存在，寫法、讀音、意思要和單字表一致 ──
+{
+  const wordsById = new Map(LEVELS.flatMap((lv) => load(`vocab/${lv}.ts`).map((w) => [w.id, w])));
+  for (const lv of LEVELS) {
+    const file = `vocab/related/${lv}.ts`;
+    if (!fs.existsSync(path.join(DATA, file))) continue;
+    for (const [id, list] of Object.entries(load(file))) {
+      const where = `相關單字 ${id}`;
+      if (wordIds.get(id) !== lv) error(where, '對應的單字不存在（或不在這個等級）');
+      for (const r of list) {
+        const other = wordsById.get(r.id);
+        if (!['synonym', 'antonym'].includes(r.kind)) error(where, `種類不正確：${r.kind}`);
+        if (!other) error(where, `對方的單字 ${r.id} 不存在`);
+        else if (
+          other.word !== r.word ||
+          other.reading !== r.reading ||
+          other.meaning !== r.meaning
+        )
+          error(where, `${r.id} 的寫法、讀音或意思和單字表不一致（請重新產生）`);
+        if (r.id === id) error(where, '不能和自己配對');
+      }
+    }
+  }
+}
+
 // ── 文法 ──
 const grammarIds = new Set();
 let grammarCount = 0;
