@@ -145,6 +145,45 @@ for (const lv of LEVELS) {
   }
 }
 
+// ── 生活旅行用語：id 不重複、注音格式、中文翻譯 ──
+if (fs.existsSync(path.join(DATA, 'travel/phrases.ts'))) {
+  const ids = new Set();
+  const travelText = (where, value, ruby = true) => {
+    if (!isText(value)) error(where, '缺少文字');
+    else if (ruby) checkRuby(where, value);
+  };
+  const files = [
+    ['travel/phrases.ts', '情境會話'],
+    ['travel/heard.ts', '日本人這樣說'],
+    ['travel/kanji.ts', '漢字大不同'],
+  ];
+  for (const [file, label] of files) {
+    for (const item of load(file)) {
+      const where = `${label} ${item.id ?? '(沒有 id)'}`;
+      if (!isText(item.id)) error(where, '缺少 id');
+      if (ids.has(item.id)) error(where, 'id 重複');
+      ids.add(item.id);
+      if (item.note !== undefined) travelText(where, item.note);
+      if (file.endsWith('kanji.ts')) {
+        travelText(where, item.word, false);
+        if (!KANA.test(item.reading ?? '')) error(where, `讀音不是假名：${item.reading}`);
+        travelText(where, item.meaning, false);
+        travelText(where, item.misread);
+        travelText(where, item.example?.ja);
+        travelText(where, item.example?.zh, false);
+      } else {
+        travelText(where, item.scene, false);
+        travelText(where, item.ja);
+        travelText(where, item.zh, false);
+        if (item.reply) {
+          travelText(where, item.reply.ja);
+          travelText(where, item.reply.zh, false);
+        }
+      }
+    }
+  }
+}
+
 // ── 文法 ──
 const grammarIds = new Set();
 let grammarCount = 0;
