@@ -10,8 +10,10 @@ import Animated, {
 
 import { ThemedText } from '@/components/themed-text';
 import { FitText } from '@/components/ui/fit-text';
+import { FrequencyTag } from '@/components/ui/frequency-tag';
 import { SpeakButton } from '@/components/ui/speak-button';
 import { ExampleSentence } from '@/components/vocab/example-sentence';
+import { RelatedWords } from '@/components/vocab/related-words';
 import { Spacing } from '@/constants/theme';
 import type { VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
@@ -44,10 +46,16 @@ export function Flashcard({ word, flipped, onFlip, reverse = false }: FlashcardP
   }, [flipped, progress, reduceMotion]);
 
   const frontStyle = useAnimatedStyle(() => ({
-    transform: [{ perspective: 1000 }, { rotateY: `${interpolate(progress.value, [0, 1], [0, 180])}deg` }],
+    transform: [
+      { perspective: 1000 },
+      { rotateY: `${interpolate(progress.value, [0, 1], [0, 180])}deg` },
+    ],
   }));
   const backStyle = useAnimatedStyle(() => ({
-    transform: [{ perspective: 1000 }, { rotateY: `${interpolate(progress.value, [0, 1], [180, 360])}deg` }],
+    transform: [
+      { perspective: 1000 },
+      { rotateY: `${interpolate(progress.value, [0, 1], [180, 360])}deg` },
+    ],
   }));
 
   const faceColors = { backgroundColor: theme.backgroundElement, borderColor: theme.border };
@@ -98,7 +106,9 @@ export function Flashcard({ word, flipped, onFlip, reverse = false }: FlashcardP
           )}
           <FitText style={styles.backWord}>{word.word}</FitText>
           <ThemedText style={[styles.meaning, { color: theme.accent }]}>{word.meaning}</ThemedText>
+          <FrequencyTag word={word} style={styles.centered} />
           <SpeakButton text={word.reading} size="large" />
+          <RelatedWords word={word} center />
           <ExampleSentence word={word} />
         </View>
       </Animated.View>
@@ -116,6 +126,9 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     overflow: 'hidden',
     backfaceVisibility: 'hidden',
+  },
+  centered: {
+    alignSelf: 'center',
   },
   faceContent: {
     flex: 1,

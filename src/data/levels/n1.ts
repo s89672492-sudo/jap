@@ -3,6 +3,8 @@ import { N1_GRAMMAR_NOTES } from '../grammar/notes/n1';
 import { withNotes } from '../grammar/types';
 import { N1_READING } from '../reading/n1';
 import { N1_EXAMPLES } from '../vocab/examples/n1';
+import { N1_FREQUENCY } from '../vocab/frequency/n1';
+import { N1_RELATED } from '../vocab/related/n1';
 import { N1_WORDS } from '../vocab/n1';
 import { withExamples } from '../vocab/with-examples';
 
@@ -10,7 +12,7 @@ import type { LevelData } from '@/data/level-data';
 
 /** N1 的單字（含例句）、文法和閱讀文章；用到 N1 時才載入（見 data/level-data.ts） */
 export const LEVEL_DATA: LevelData = {
-  words: withExamples(N1_WORDS, N1_EXAMPLES),
+  words: withExamples(N1_WORDS, N1_EXAMPLES, { frequency: N1_FREQUENCY, related: N1_RELATED }),
   grammar: withNotes(N1_GRAMMAR, N1_GRAMMAR_NOTES),
   reading: N1_READING,
 };

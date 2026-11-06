@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { FrequencyTag } from '@/components/ui/frequency-tag';
 import { LoadingNote } from '@/components/ui/loading-note';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
@@ -161,6 +162,7 @@ function WordRow({
             {showReading ? `${word.reading}・` : ''}
             {wordClassLabel(word)}
           </ThemedText>
+          <FrequencyTag word={word} />
           <ThemedText style={styles.wordTitle}>{word.word}</ThemedText>
           <ThemedText type="small" style={{ color: theme.accent }}>
             {word.meaning}

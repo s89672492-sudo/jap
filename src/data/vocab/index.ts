@@ -1,7 +1,15 @@
 import type { JlptLevel } from './types';
 
-export { PART_OF_SPEECH_LABELS } from './types';
-export type { JlptLevel, PartOfSpeech, VocabExample, VocabWord } from './types';
+export { EXAM_FREQUENCY_LABELS, PART_OF_SPEECH_LABELS } from './types';
+export type {
+  ExamFrequency,
+  ExamFrequencyTag,
+  JlptLevel,
+  PartOfSpeech,
+  VocabExample,
+  VocabWord,
+  WordRelation,
+} from './types';
 export {
   POS_FILTER_LABELS,
   WORD_CLASS_LABELS,

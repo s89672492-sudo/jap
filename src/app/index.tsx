@@ -17,11 +17,14 @@ import { ChipButton } from '@/components/ui/chip-button';
 import { LoadingNote } from '@/components/ui/loading-note';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
+import { TravelGuide } from '@/components/travel/travel-guide';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useDailyArticle } from '@/hooks/use-daily-article';
 import { useLearningProgress } from '@/hooks/use-learning-progress';
 import { useTheme } from '@/hooks/use-theme';
 import { useJlptLevel } from '@/stores/jlpt-level-store';
+
+type HomeView = 'home' | 'overview' | 'review' | 'travel';
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -29,11 +32,11 @@ export default function HomeScreen() {
   const level = useJlptLevel();
   const daily = useDailyArticle(level);
   const progress = useLearningProgress();
-  // 首頁、「學習進度總覽」或「今日複習單字」
-  const [view, setView] = useState<'home' | 'overview' | 'review'>('home');
+  // 首頁、「學習進度總覽」、「今日複習單字」或「生活旅行用語」
+  const [view, setView] = useState<HomeView>('home');
   const scrollRef = useRef<ScrollView>(null);
 
-  const open = (next: 'home' | 'overview' | 'review') => {
+  const open = (next: HomeView) => {
     setView(next);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
@@ -72,10 +75,18 @@ export default function HomeScreen() {
                 onPress={() => open('home')}
               />
               <ThemedText type="subtitle" style={styles.overviewTitle} numberOfLines={1}>
-                {view === 'review' ? `複習單字・${level}` : '學習進度總覽'}
+                {view === 'review'
+                  ? `複習單字・${level}`
+                  : view === 'travel'
+                    ? '生活旅行用語'
+                    : '學習進度總覽'}
               </ThemedText>
             </View>
-            {view === 'review' ? (
+            {view === 'travel' ? (
+              <ExamLock what="生活旅行用語">
+                <TravelGuide />
+              </ExamLock>
+            ) : view === 'review' ? (
               // 考試中不能看單字（避免查到答案）
               <ExamLock what="單字複習">
                 <DueWordsReview level={level} />
@@ -122,6 +133,13 @@ export default function HomeScreen() {
             </CaseCard>
 
             <PrimaryButton label="開始調查單字" onPress={() => router.navigate('/vocab')} />
+
+            <CaseCard label="CASE 003" title="生活旅行用語">
+              <ThemedText type="small" themeColor="textSecondary">
+                到日本自由行用得到的句子：點餐、搭車、購物、問路，還有店員常說的話和容易誤會的漢字。
+              </ThemedText>
+            </CaseCard>
+            <SecondaryButton label="打開生活旅行用語" onPress={() => open('travel')} />
 
             {progress && (
               <>

@@ -106,6 +106,82 @@ for (const lv of LEVELS) {
   }
   const missing = words.filter((w) => !examples[w.id]).length;
   if (missing > 0) warn(`單字 ${lv}`, `${missing} 個單字沒有例句`);
+  // 真題頻率：[頻率] 或 [頻率, 統計的等級]
+  const frequencyFile = `vocab/frequency/${lv}.ts`;
+  if (fs.existsSync(path.join(DATA, frequencyFile))) {
+    for (const [id, tag] of Object.entries(load(frequencyFile))) {
+      const where = `真題頻率 ${id}`;
+      if (wordIds.get(id) !== lv) error(where, '對應的單字不存在（或不在這個等級）');
+      if (!Array.isArray(tag) || !['high', 'mid', 'low'].includes(tag[0]))
+        error(where, `頻率格式不正確：${JSON.stringify(tag)}`);
+      else if (tag[1] !== undefined && !/^N[1-5]$/.test(tag[1]))
+        error(where, `統計等級不正確：${tag[1]}`);
+    }
+  }
+}
+
+// ── 同義詞、反義詞：對方的 id 要存在，寫法、讀音、意思要和單字表一致 ──
+{
+  const wordsById = new Map(LEVELS.flatMap((lv) => load(`vocab/${lv}.ts`).map((w) => [w.id, w])));
+  for (const lv of LEVELS) {
+    const file = `vocab/related/${lv}.ts`;
+    if (!fs.existsSync(path.join(DATA, file))) continue;
+    for (const [id, list] of Object.entries(load(file))) {
+      const where = `相關單字 ${id}`;
+      if (wordIds.get(id) !== lv) error(where, '對應的單字不存在（或不在這個等級）');
+      for (const r of list) {
+        const other = wordsById.get(r.id);
+        if (!['synonym', 'antonym'].includes(r.kind)) error(where, `種類不正確：${r.kind}`);
+        if (!other) error(where, `對方的單字 ${r.id} 不存在`);
+        else if (
+          other.word !== r.word ||
+          other.reading !== r.reading ||
+          other.meaning !== r.meaning
+        )
+          error(where, `${r.id} 的寫法、讀音或意思和單字表不一致（請重新產生）`);
+        if (r.id === id) error(where, '不能和自己配對');
+      }
+    }
+  }
+}
+
+// ── 生活旅行用語：id 不重複、注音格式、中文翻譯 ──
+if (fs.existsSync(path.join(DATA, 'travel/phrases.ts'))) {
+  const ids = new Set();
+  const travelText = (where, value, ruby = true) => {
+    if (!isText(value)) error(where, '缺少文字');
+    else if (ruby) checkRuby(where, value);
+  };
+  const files = [
+    ['travel/phrases.ts', '情境會話'],
+    ['travel/heard.ts', '日本人這樣說'],
+    ['travel/kanji.ts', '漢字大不同'],
+  ];
+  for (const [file, label] of files) {
+    for (const item of load(file)) {
+      const where = `${label} ${item.id ?? '(沒有 id)'}`;
+      if (!isText(item.id)) error(where, '缺少 id');
+      if (ids.has(item.id)) error(where, 'id 重複');
+      ids.add(item.id);
+      if (item.note !== undefined) travelText(where, item.note);
+      if (file.endsWith('kanji.ts')) {
+        travelText(where, item.word, false);
+        if (!KANA.test(item.reading ?? '')) error(where, `讀音不是假名：${item.reading}`);
+        travelText(where, item.meaning, false);
+        travelText(where, item.misread);
+        travelText(where, item.example?.ja);
+        travelText(where, item.example?.zh, false);
+      } else {
+        travelText(where, item.scene, false);
+        travelText(where, item.ja);
+        travelText(where, item.zh, false);
+        if (item.reply) {
+          travelText(where, item.reply.ja);
+          travelText(where, item.reply.zh, false);
+        }
+      }
+    }
+  }
 }
 
 // ── 文法 ──

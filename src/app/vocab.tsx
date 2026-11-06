@@ -82,6 +82,9 @@ export default function VocabScreen() {
       if (detail === 'i-adjective' || detail === 'na-adjective') {
         counts[detail] = (counts[detail] ?? 0) + 1;
       }
+      if (word.freq === 'high') counts['freq-high'] = (counts['freq-high'] ?? 0) + 1;
+      if (word.freq === 'high' || word.freq === 'mid')
+        counts['freq-mid-up'] = (counts['freq-mid-up'] ?? 0) + 1;
     }
     return counts;
   }, [levelData]);
