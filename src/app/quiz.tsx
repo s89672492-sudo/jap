@@ -11,6 +11,7 @@ import { QUIZ_MODES, QuizModeMenu, type QuizMode } from '@/components/quiz/quiz-
 import { ReadingQuiz } from '@/components/quiz/reading-quiz';
 import { ReviewQuiz } from '@/components/quiz/review-quiz';
 import { SpeakingPractice } from '@/components/quiz/speaking-practice';
+import { SpellingQuiz } from '@/components/quiz/spelling-quiz';
 import { TimedChallenge } from '@/components/quiz/timed-challenge';
 import { VocabQuiz } from '@/components/quiz/vocab-quiz';
 import { ThemedText } from '@/components/themed-text';
@@ -152,6 +153,9 @@ export default function QuizScreen() {
           </KeepAlive>
           <KeepAlive active={mode === 'speaking'}>
             <SpeakingPractice level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
+          </KeepAlive>
+          <KeepAlive active={mode === 'spelling'}>
+            <SpellingQuiz level={level} onAnswered={scrollToEnd} onNext={scrollToTop} />
           </KeepAlive>
           <KeepAlive active={mode === 'exam'}>
             <ExamQuiz

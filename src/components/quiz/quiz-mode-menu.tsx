@@ -12,6 +12,7 @@ export type QuizMode =
   | 'exam'
   | 'timed'
   | 'speaking'
+  | 'spelling'
   | 'review';
 
 export const QUIZ_MODES: { value: QuizMode; icon: string; title: string; note: string }[] = [
@@ -22,6 +23,7 @@ export const QUIZ_MODES: { value: QuizMode; icon: string; title: string; note: s
   { value: 'exam', icon: '📋', title: '試題', note: '題型練習、完整模擬考' },
   { value: 'timed', icon: '⏱️', title: '限時', note: '60 秒內答越多越好' },
   { value: 'speaking', icon: '🎤', title: '口說', note: '唸出單字，檢查發音' },
+  { value: 'spelling', icon: '🧱', title: '拼寫', note: '看中文，用假名方塊拼讀音' },
   { value: 'review', icon: '🔁', title: '錯題', note: '複習答錯過的題目' },
 ];
 
@@ -31,7 +33,7 @@ type QuizModeMenuProps = {
   inProgress: ReadonlySet<QuizMode>;
 };
 
-/** 測驗頁的入口：八種模式排成兩欄卡片，點了才開始答題 */
+/** 測驗頁的入口：各種模式排成兩欄卡片，點了才開始答題 */
 export function QuizModeMenu({ onPick, inProgress }: QuizModeMenuProps) {
   const theme = useTheme();
 
