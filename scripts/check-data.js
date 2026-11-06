@@ -106,6 +106,18 @@ for (const lv of LEVELS) {
   }
   const missing = words.filter((w) => !examples[w.id]).length;
   if (missing > 0) warn(`單字 ${lv}`, `${missing} 個單字沒有例句`);
+  // 真題頻率：[頻率] 或 [頻率, 統計的等級]
+  const frequencyFile = `vocab/frequency/${lv}.ts`;
+  if (fs.existsSync(path.join(DATA, frequencyFile))) {
+    for (const [id, tag] of Object.entries(load(frequencyFile))) {
+      const where = `真題頻率 ${id}`;
+      if (wordIds.get(id) !== lv) error(where, '對應的單字不存在（或不在這個等級）');
+      if (!Array.isArray(tag) || !['high', 'mid', 'low'].includes(tag[0]))
+        error(where, `頻率格式不正確：${JSON.stringify(tag)}`);
+      else if (tag[1] !== undefined && !/^N[1-5]$/.test(tag[1]))
+        error(where, `統計等級不正確：${tag[1]}`);
+    }
+  }
 }
 
 // ── 文法 ──

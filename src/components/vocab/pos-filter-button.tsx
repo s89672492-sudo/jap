@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Modal, Pressable, StyleSheet } from 'react-native';
+import { Fragment, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -9,8 +9,8 @@ import { useTheme } from '@/hooks/use-theme';
 
 export type { PosFilter } from '@/data/vocab';
 
-/** 形容詞下面再分い形容詞、な形容詞（縮排顯示） */
-const OPTIONS: { value: PosFilter; sub?: boolean }[] = [
+/** 形容詞下面再分い形容詞、な形容詞（縮排顯示）；最後一組是真題頻率（前面加小標題） */
+const OPTIONS: { value: PosFilter; sub?: boolean; heading?: string }[] = [
   { value: 'all' },
   { value: 'noun' },
   { value: 'verb' },
@@ -18,6 +18,8 @@ const OPTIONS: { value: PosFilter; sub?: boolean }[] = [
   { value: 'i-adjective', sub: true },
   { value: 'na-adjective', sub: true },
   { value: 'adverb' },
+  { value: 'freq-high', heading: '依真題頻率（2010 年後的 JLPT 真題）' },
+  { value: 'freq-mid-up' },
 ];
 
 export const posFilterLabel = (value: PosFilter) => POS_FILTER_LABELS[value];
@@ -61,7 +63,9 @@ export function PosFilterButton({ value, onChange, counts }: PosFilterButtonProp
           type="smallBold"
           numberOfLines={1}
           style={{ color: active ? theme.onPrimary : theme.text }}>
-          {active ? `${value === 'adjective' ? '形容詞' : POS_FILTER_LABELS[value]} ▾` : '篩選 ▾'}
+          {active
+            ? `${value === 'adjective' ? '形容詞' : value === 'freq-mid-up' ? '高＋中頻' : POS_FILTER_LABELS[value]} ▾`
+            : '篩選 ▾'}
         </ThemedText>
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -83,42 +87,53 @@ export function PosFilterButton({ value, onChange, counts }: PosFilterButtonProp
             <ThemedText type="smallBold" style={styles.heading}>
               依詞性篩選單字
             </ThemedText>
-            {OPTIONS.map((option) => {
-              const selected = option.value === value;
-              const count = counts?.[option.value];
-              return (
-                <Pressable
-                  key={option.value}
-                  accessibilityRole="radio"
-                  aria-checked={selected}
-                  onPress={() => pick(option.value)}
-                  style={({ pressed }) => [
-                    styles.row,
-                    option.sub && styles.subRow,
-                    {
-                      borderColor: selected ? theme.primary : theme.border,
-                      backgroundColor: selected ? theme.backgroundSelected : theme.background,
-                    },
-                    pressed && styles.pressed,
-                  ]}>
-                  <ThemedText style={styles.label}>
-                    {option.sub
-                      ? `・${POS_FILTER_LABELS[option.value]}`
-                      : POS_FILTER_LABELS[option.value]}
-                  </ThemedText>
-                  {count !== undefined && (
-                    <ThemedText type="small" themeColor="textSecondary">
-                      {count} 個
-                    </ThemedText>
-                  )}
-                  {selected && (
-                    <ThemedText type="smallBold" style={{ color: theme.primary }}>
-                      ✓
-                    </ThemedText>
-                  )}
-                </Pressable>
-              );
-            })}
+            {/* 小螢幕放不下全部選項時可以捲動 */}
+            <ScrollView contentContainerStyle={styles.list}>
+              {OPTIONS.map((option) => {
+                const selected = option.value === value;
+                const count = counts?.[option.value];
+                // 這個等級沒有真題統計時不顯示頻率選項
+                if (option.value.startsWith('freq-') && counts && !count) return null;
+                return (
+                  <Fragment key={option.value}>
+                    {option.heading && (
+                      <ThemedText type="smallBold" style={styles.heading}>
+                        {option.heading}
+                      </ThemedText>
+                    )}
+                    <Pressable
+                      accessibilityRole="radio"
+                      aria-checked={selected}
+                      onPress={() => pick(option.value)}
+                      style={({ pressed }) => [
+                        styles.row,
+                        option.sub && styles.subRow,
+                        {
+                          borderColor: selected ? theme.primary : theme.border,
+                          backgroundColor: selected ? theme.backgroundSelected : theme.background,
+                        },
+                        pressed && styles.pressed,
+                      ]}>
+                      <ThemedText style={styles.label}>
+                        {option.sub
+                          ? `・${POS_FILTER_LABELS[option.value]}`
+                          : POS_FILTER_LABELS[option.value]}
+                      </ThemedText>
+                      {count !== undefined && (
+                        <ThemedText type="small" themeColor="textSecondary">
+                          {count} 個
+                        </ThemedText>
+                      )}
+                      {selected && (
+                        <ThemedText type="smallBold" style={{ color: theme.primary }}>
+                          ✓
+                        </ThemedText>
+                      )}
+                    </Pressable>
+                  </Fragment>
+                );
+              })}
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -149,6 +164,10 @@ const styles = StyleSheet.create({
     borderTopRightRadius: Spacing.four,
     borderWidth: 1,
     padding: Spacing.three,
+    gap: Spacing.two,
+    maxHeight: '85%',
+  },
+  list: {
     gap: Spacing.two,
   },
   heading: {

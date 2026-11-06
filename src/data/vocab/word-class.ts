@@ -42,7 +42,14 @@ export const wordClassLabel = (word: Pick<VocabWord, 'word' | 'pos'>) =>
   WORD_CLASS_LABELS[wordClass(word)];
 
 /** 單字列表的詞性篩選：大類（名詞、形容詞…）或形容詞的細類 */
-export type PosFilter = 'all' | VocabWord['pos'] | 'i-adjective' | 'na-adjective';
+/** 單字列表的篩選：詞性，或真題頻率（高頻；高頻＋中頻） */
+export type PosFilter =
+  | 'all'
+  | VocabWord['pos']
+  | 'i-adjective'
+  | 'na-adjective'
+  | 'freq-high'
+  | 'freq-mid-up';
 
 export const POS_FILTER_LABELS: Record<PosFilter, string> = {
   all: '全部詞性',
@@ -50,10 +57,17 @@ export const POS_FILTER_LABELS: Record<PosFilter, string> = {
   adjective: '形容詞（全部）',
   'i-adjective': 'い形容詞',
   'na-adjective': 'な形容詞',
+  'freq-high': '真題高頻',
+  'freq-mid-up': '真題高頻＋中頻',
 };
 
-export function matchesPosFilter(word: Pick<VocabWord, 'word' | 'pos'>, filter: PosFilter) {
+export function matchesPosFilter(
+  word: Pick<VocabWord, 'word' | 'pos' | 'freq'>,
+  filter: PosFilter,
+) {
   if (filter === 'all') return true;
+  if (filter === 'freq-high') return word.freq === 'high';
+  if (filter === 'freq-mid-up') return word.freq === 'high' || word.freq === 'mid';
   if (filter === 'i-adjective' || filter === 'na-adjective') return wordClass(word) === filter;
   return word.pos === filter;
 }

@@ -5,6 +5,7 @@ import { AppBackground } from '@/components/app-background';
 import { BackgroundPicker } from '@/components/settings/background-picker';
 import { BackupSection } from '@/components/settings/backup-section';
 import { ClearMistakes } from '@/components/settings/clear-mistakes';
+import { DataCredits } from '@/components/settings/data-credits';
 import { SettingsSection } from '@/components/settings/settings-section';
 import { VoicePicker } from '@/components/settings/voice-picker';
 import { ThemedText } from '@/components/themed-text';
@@ -129,6 +130,10 @@ export default function SettingsScreen() {
 
           <SettingsSection title="錯題本">
             <ClearMistakes />
+          </SettingsSection>
+
+          <SettingsSection title="資料來源與授權">
+            <DataCredits />
           </SettingsSection>
 
           <ThemedText type="small" themeColor="textSecondary" style={styles.note}>
