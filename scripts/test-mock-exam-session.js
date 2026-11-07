@@ -95,6 +95,49 @@ results.parseBad =
 let many = d2;
 for (let i = 0; i < 150; i++) many = m.addEvent(many, 'return', i);
 results.eventCap = many.events.length === 100;
+
+// 暫停：計時停止、不能作答、截止時間往後延；停留時間不算暫停的時間
+{
+  const P0 = 5_000_000;
+  let p = m.createDraft('N5', 'official', sittings, P0);
+  const deadline = p.deadline;
+  p = m.pauseExam(p, P0 + 60_000);
+  results.pauseSetsState = p.pausedAt === P0 + 60_000 && p.events.at(-1).kind === 'pause';
+  results.pauseBlocksAnswer = m.answerQuestion(p, 'a1', 'a', P0 + 70_000) === p;
+  results.pauseFreezesRemaining =
+    m.remainingMs(p, P0 + 60_000) === m.remainingMs(p, P0 + 3_600_000) &&
+    m.remainingMs(p, P0 + 60_000) === deadline - (P0 + 60_000);
+  // 暫停中超過原本的截止時間也不會自動交卷
+  results.pauseNoExpire = !m.expireIfNeeded(p, deadline + 999_999).expired;
+  results.pauseTwiceNoop = m.pauseExam(p, P0 + 61_000) === p;
+  // 暫停中離開 App 不算離開考試畫面
+  results.pauseLeaveNotCounted = m.addEvent(p, 'background', P0 + 62_000).leaveCount === 0;
+  const pausedFor = 5 * 60_000;
+  p = m.resumeExam(p, P0 + 60_000 + pausedFor);
+  results.resumeShiftsDeadline =
+    p.pausedAt === undefined &&
+    p.deadline === deadline + pausedFor &&
+    p.pausedMs === pausedFor &&
+    p.events.at(-1).kind === 'unpause';
+  results.resumeAnswer =
+    m.answerQuestion(p, 'a1', 'a', P0 + 60_000 + pausedFor + 1000).answers.a1 === 'a';
+  p = m.goToQuestion(p, 1, P0 + 60_000 + pausedFor + 10_000);
+  // a1：暫停前 60 秒 + 繼續後 10 秒
+  results.spentExcludesPause = p.spent.a1 === 70_000;
+  results.resumeNotPausedNoop = m.resumeExam(p, P0 + 9_999_999) === p;
+  // 暫停中交卷：先結束暫停，暫停時間照樣記下來
+  let q2 = m.pauseExam(p, P0 + 400_000);
+  const sub = m.submitSitting(q2, P0 + 460_000, false);
+  results.submitWhilePaused =
+    sub.draft.pausedAt === undefined &&
+    sub.draft.pausedMs === pausedFor + 60_000 &&
+    sub.draft.status === 'break';
+  // 存檔格式：暫停中的存檔可以讀回，舊存檔（沒有暫停欄位）也可以
+  results.parsePaused = m.parseDraft(JSON.parse(JSON.stringify(q2))) !== null;
+  results.parseBadPaused = m.parseDraft({ ...q2, pausedAt: 'x' }) === null;
+  // 休息時間（節和節之間）不能暫停
+  results.noPauseOnBreak = m.pauseExam(sub.draft, P0 + 470_000) === sub.draft;
+}
 for (const [name, passed] of Object.entries(results)) console.log(`${passed ? '✓' : '✗'} ${name}`);
 const failed = Object.entries(results)
   .filter(([, v]) => !v)

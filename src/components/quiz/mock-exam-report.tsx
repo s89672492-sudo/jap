@@ -39,6 +39,13 @@ const FILTER_OPTIONS: { value: ReviewFilter; label: string }[] = [
   { value: 'all', label: '全部題目' },
 ];
 
+/** 暫停的總時間：不到一分鐘顯示秒數 */
+function formatPause(ms: number): string {
+  return ms < 60_000
+    ? `${Math.max(1, Math.round(ms / 1000))} 秒`
+    : `${Math.round(ms / 60_000)} 分鐘`;
+}
+
 /** 模擬考成績單：合格判定、各科分數、各題型正確率、逐題檢討 */
 export function MockExamReport({
   level,
@@ -87,6 +94,9 @@ export function MockExamReport({
       ? `每題平均 ${Math.round(totalMs / answeredCount / 1000)} 秒`
       : null,
     record?.leaveCount !== undefined ? `離開考試畫面 ${record.leaveCount} 次` : null,
+    record?.pauseCount
+      ? `暫停 ${record.pauseCount} 次（共 ${formatPause(record.pausedMs ?? 0)}）`
+      : null,
   ].filter(Boolean);
   const reviewItems = items.filter(
     (item) => filter === 'all' || answers[item.question.id] !== item.answer,

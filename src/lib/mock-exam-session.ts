@@ -27,7 +27,9 @@ export type ExamEventKind =
   | 'leave'
   | 'return'
   | 'submit'
-  | 'auto-submit';
+  | 'auto-submit'
+  | 'pause'
+  | 'unpause';
 
 export type ExamEvent = { at: number; kind: ExamEventKind; sitting: number };
 
@@ -70,8 +72,12 @@ export type MockExamDraft = {
   startedAt: number;
   /** 目前這一題開始顯示的時間（算停留時間用） */
   shownAt: number;
-  /** 這一節的截止時間 */
+  /** 這一節的截止時間（暫停後繼續時會往後延） */
   deadline: number;
+  /** 暫停中：按下暫停的時間（暫停時計時停止、不能作答；舊存檔沒有） */
+  pausedAt?: number;
+  /** 這場考試暫停的總時間（毫秒） */
+  pausedMs?: number;
   events: ExamEvent[];
   /** 考試中離開考試畫面（切到背景、其他分頁）的次數 */
   leaveCount: number;
@@ -139,7 +145,10 @@ export function addEvent(draft: MockExamDraft, kind: ExamEventKind, now: number)
   return {
     ...draft,
     events,
-    leaveCount: draft.leaveCount + (leaving && draft.status === 'sitting' ? 1 : 0),
+    // 暫停中離開（例如去做別的事）不算離開考試畫面
+    leaveCount:
+      draft.leaveCount +
+      (leaving && draft.status === 'sitting' && draft.pausedAt === undefined ? 1 : 0),
     updatedAt: now,
   };
 }
@@ -153,14 +162,17 @@ function addSpent(draft: MockExamDraft, now: number): Record<string, number> {
   const item = currentQuestion(draft);
   if (!item || draft.status !== 'sitting') return draft.spent;
   const id = item.question.id;
-  const elapsed = Math.max(0, Math.min(now, draft.deadline) - draft.shownAt);
+  // 暫停中的時間不算進停留時間
+  const until = Math.min(draft.pausedAt ?? now, now, draft.deadline);
+  const elapsed = Math.max(0, until - draft.shownAt);
   return { ...draft.spent, [id]: (draft.spent[id] ?? 0) + elapsed };
 }
 
-/** 只有正在作答、還沒到截止時間的節可以作答 */
+/** 只有正在作答、沒有暫停、還沒到截止時間的節可以作答 */
 export function canAnswer(draft: MockExamDraft, now: number): boolean {
   return (
     draft.status === 'sitting' &&
+    draft.pausedAt === undefined &&
     now < draft.deadline &&
     !draft.completed.includes(draft.sittingIndex)
   );
@@ -218,6 +230,8 @@ export function submitSitting(
   if (draft.status !== 'sitting' || draft.completed.includes(draft.sittingIndex)) {
     return { draft, finished: false };
   }
+  // 暫停中交卷：先結束暫停（暫停時間照樣記下來）
+  if (draft.pausedAt !== undefined) draft = resumeExam(draft, now);
   const closed = addEvent(
     {
       ...draft,
@@ -246,12 +260,43 @@ export function startNextSitting(draft: MockExamDraft, now: number): MockExamDra
   };
 }
 
-/** 時間到了沒交卷（例如關掉 App 期間時間到了）：自動交卷 */
+/** 這一節還剩多少毫秒（暫停中停在按下暫停時的剩餘時間） */
+export function remainingMs(draft: MockExamDraft, now: number): number {
+  return Math.max(0, draft.deadline - (draft.pausedAt ?? now));
+}
+
+/**
+ * 暫停：計時停止，題目先遮起來、不能作答。暫停的時間和次數會記在紀錄裡。
+ * 只有作答中、還沒到截止時間時可以暫停。
+ */
+export function pauseExam(draft: MockExamDraft, now: number): MockExamDraft {
+  if (draft.status !== 'sitting' || draft.pausedAt !== undefined || now >= draft.deadline) {
+    return draft;
+  }
+  const paused = { ...draft, spent: addSpent(draft, now), shownAt: now, pausedAt: now };
+  return addEvent(paused, 'pause', now);
+}
+
+/** 繼續：截止時間往後延暫停的時間，從暫停時剩下的時間接著算 */
+export function resumeExam(draft: MockExamDraft, now: number): MockExamDraft {
+  if (draft.pausedAt === undefined) return draft;
+  const paused = Math.max(0, now - draft.pausedAt);
+  const { pausedAt: _resumed, ...rest } = draft;
+  const resumed = {
+    ...rest,
+    deadline: draft.deadline + paused,
+    shownAt: now,
+    pausedMs: (draft.pausedMs ?? 0) + paused,
+  };
+  return addEvent(resumed, 'unpause', now);
+}
+
+/** 時間到了沒交卷（例如關掉 App 期間時間到了）：自動交卷；暫停中不會到時間 */
 export function expireIfNeeded(
   draft: MockExamDraft,
   now: number,
 ): { draft: MockExamDraft; finished: boolean; expired: boolean } {
-  if (draft.status === 'sitting' && now >= draft.deadline) {
+  if (draft.status === 'sitting' && draft.pausedAt === undefined && now >= draft.deadline) {
     return { ...submitSitting(draft, now, true), expired: true };
   }
   return { draft, finished: false, expired: false };
@@ -355,6 +400,8 @@ export function parseDraft(value: unknown): MockExamDraft | null {
     isNumber(d.startedAt) &&
     isNumber(d.shownAt) &&
     isNumber(d.deadline) &&
+    (d.pausedAt === undefined || isNumber(d.pausedAt)) &&
+    (d.pausedMs === undefined || isNumber(d.pausedMs)) &&
     Array.isArray(d.events) &&
     isNumber(d.leaveCount) &&
     isNumber(d.updatedAt);

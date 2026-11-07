@@ -40,6 +40,9 @@ import {
   expireIfNeeded,
   goToQuestion,
   markPlayed,
+  pauseExam,
+  remainingMs,
+  resumeExam,
   startNextSitting,
   submitSitting,
   toggleMark,
@@ -201,7 +204,10 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
   const [confirmQuit, setConfirmQuit] = useState(false);
   // 正式模式的聽解：播完後的作答時間，時間到自動換下一題
   const [answerWindow, setAnswerWindow] = useState<{ id: string; until: number } | null>(null);
+  // 暫停時聽解作答時間還剩多少，繼續時接著倒數
+  const windowLeft = useRef<{ id: string; ms: number } | null>(null);
   const wasFocused = useRef(focused);
+  const paused = draft.pausedAt !== undefined;
 
   /** 用手機裡最新的進度計算下一步並存檔（避免用到畫面上舊的資料） */
   const update = (fn: (current: MockExamDraft, time: number) => MockExamDraft) => {
@@ -211,6 +217,29 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
     const next = fn(current, time);
     // 存檔會更新 store，畫面跟著重畫
     if (next !== current) saveMockExamDraft(next);
+  };
+
+  /** 暫停：停止播放、記下聽解作答時間還剩多少，計時停止 */
+  const pause = () =>
+    update((d, t) => {
+      stopSpeaking();
+      setReviewing(false);
+      if (answerWindow) {
+        windowLeft.current = { id: answerWindow.id, ms: Math.max(0, answerWindow.until - t) };
+        setAnswerWindow(null);
+      }
+      return pauseExam(d, t);
+    });
+
+  /** 繼續：截止時間往後延，聽解作答時間接著倒數 */
+  const resume = () => {
+    update((d, t) => {
+      const left = windowLeft.current;
+      windowLeft.current = null;
+      if (left) setAnswerWindow({ id: left.id, until: t + left.ms });
+      return resumeExam(d, t);
+    });
+    onScrollTop?.();
   };
 
   const finish = async (final: MockExamDraft) => {
@@ -240,6 +269,8 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
     const time = Date.now();
     setNow(time);
     if (!current || current.sessionId !== draft.sessionId) return;
+    // 暫停中：計時停止，不換題也不會時間到
+    if (current.pausedAt !== undefined) return;
     if (answerWindow && time >= answerWindow.until) {
       const questions = current.sittings[current.sittingIndex].questions;
       const onThatQuestion = questions[current.questionIndex]?.question.id === answerWindow.id;
@@ -399,7 +430,7 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
   const item = sitting.questions[draft.questionIndex];
   const picked = draft.answers[item.question.id] ?? null;
   const marked = draft.marked.includes(item.question.id);
-  const remaining = Math.max(0, draft.deadline - now);
+  const remaining = remainingMs(draft, now);
   const lowTime = remaining <= 60_000;
   const isLastQuestion = draft.questionIndex + 1 >= sitting.questions.length;
   const isLastSitting = draft.sittingIndex + 1 >= draft.sittings.length;
@@ -429,7 +460,7 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
           </ThemedText>
         </View>
         <View
-          accessibilityLabel={`剩餘時間 ${formatTime(remaining)}`}
+          accessibilityLabel={`剩餘時間 ${formatTime(remaining)}${paused ? '，已暫停' : ''}`}
           style={[styles.timer, { borderColor: lowTime ? theme.accent : theme.gold }]}>
           <ThemedText style={[styles.timerText, { color: lowTime ? theme.accent : theme.text }]}>
             {formatTime(remaining)}
@@ -437,99 +468,139 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
         </View>
       </View>
 
-      <QuestionNavigator
-        questions={sitting.questions}
-        answers={draft.answers}
-        marked={draft.marked}
-        current={draft.questionIndex}
-        onJump={goTo}
-      />
-
-      <View style={styles.questionHead}>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
-          第 {draft.questionIndex + 1} 題・{questionLabel(item.question)}
-        </ThemedText>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={marked ? '取消標記這一題' : '標記這一題，稍後檢查'}
-          accessibilityState={{ selected: marked }}
-          onPress={() => update((d, t) => toggleMark(d, item.question.id, t))}
-          style={({ pressed }) => [
-            styles.markButton,
-            {
-              borderColor: marked ? theme.gold : theme.border,
-              backgroundColor: marked ? theme.backgroundSelected : theme.backgroundElement,
-            },
-            pressed && styles.pressed,
-          ]}>
-          <ThemedText type="smallBold" style={{ color: marked ? theme.gold : theme.text }}>
-            {marked ? '🚩 已標記' : '🚩 標記'}
-          </ThemedText>
-        </Pressable>
-      </View>
-      <ExamQuestionView
-        item={item}
-        picked={picked}
-        reveal={false}
-        listening={
-          // 正式模式：聽解只播一次，播完後有固定的作答時間，接著自動換下一題
-          draft.mode === 'official'
-            ? {
-                allowReplay: false,
-                played: (draft.played?.[item.question.id] ?? 0) > 0,
-                onPlayed: () => {
-                  update((d, t) => markPlayed(d, item.question.id, t));
-                  setAnswerWindow({
-                    id: item.question.id,
-                    until: Date.now() + answerSeconds(item) * 1000,
-                  });
-                },
-              }
-            : undefined
-        }
-        getState={(option) => (option === picked ? 'selected' : 'idle')}
-        onPick={(option) => {
-          if (open) update((d, t) => answerQuestion(d, item.question.id, option, t));
-        }}
-      />
-
-      {answerWindow?.id === item.question.id && (
-        <ThemedText type="small" themeColor="textSecondary" accessibilityLiveRegion="polite">
-          作答時間：還有 {Math.max(0, Math.ceil((answerWindow.until - now) / 1000))}{' '}
-          秒，之後自動進入下一題
-        </ThemedText>
-      )}
-      <View style={styles.navRow}>
-        <View style={styles.flex}>
-          <SecondaryButton
-            label="上一題"
-            onPress={() => goTo(Math.max(0, draft.questionIndex - 1))}
-          />
-        </View>
-        {!isLastQuestion && (
-          <View style={styles.flex}>
-            <PrimaryButton label="下一題" onPress={() => goTo(draft.questionIndex + 1)} />
+      {paused && (
+        <>
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: theme.backgroundElement, borderColor: theme.gold },
+            ]}
+            accessibilityLiveRegion="polite">
+            <ThemedText type="subtitle" style={styles.center}>
+              ⏸ 考試暫停中
+            </ThemedText>
+            <ThemedText type="small" style={styles.center}>
+              計時已停止，這一節還剩 {formatTime(remaining)}。
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              暫停時題目會先遮起來；按「繼續考試」從剛才那一題接著作答。
+              {draft.mode === 'official'
+                ? '正式考試不能暫停，成績單會記下這次暫停的次數和時間。'
+                : ''}
+            </ThemedText>
           </View>
-        )}
-      </View>
-
-      {reviewing ? (
-        <SubmitReview
-          questions={sitting.questions}
-          answers={draft.answers}
-          marked={draft.marked}
-          isLast={isLastSitting}
-          onJump={goTo}
-          onSubmit={() => submit(false)}
-          onCancel={() => setReviewing(false)}
-        />
-      ) : (
-        <SecondaryButton
-          label={isLastSitting ? '交卷，查看成績' : '交卷，結束這一節'}
-          onPress={() => setReviewing(true)}
-        />
+          <PrimaryButton label="▶ 繼續考試" onPress={resume} />
+          {quit}
+        </>
       )}
-      {quit}
+      {!paused && (
+        <>
+          <QuestionNavigator
+            questions={sitting.questions}
+            answers={draft.answers}
+            marked={draft.marked}
+            current={draft.questionIndex}
+            onJump={goTo}
+          />
+
+          <View style={styles.questionHead}>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.flex}>
+              第 {draft.questionIndex + 1} 題・{questionLabel(item.question)}
+            </ThemedText>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="暫停考試"
+              onPress={pause}
+              style={({ pressed }) => [
+                styles.markButton,
+                { borderColor: theme.border, backgroundColor: theme.backgroundElement },
+                pressed && styles.pressed,
+              ]}>
+              <ThemedText type="smallBold">⏸ 暫停</ThemedText>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={marked ? '取消標記這一題' : '標記這一題，稍後檢查'}
+              accessibilityState={{ selected: marked }}
+              onPress={() => update((d, t) => toggleMark(d, item.question.id, t))}
+              style={({ pressed }) => [
+                styles.markButton,
+                {
+                  borderColor: marked ? theme.gold : theme.border,
+                  backgroundColor: marked ? theme.backgroundSelected : theme.backgroundElement,
+                },
+                pressed && styles.pressed,
+              ]}>
+              <ThemedText type="smallBold" style={{ color: marked ? theme.gold : theme.text }}>
+                {marked ? '🚩 已標記' : '🚩 標記'}
+              </ThemedText>
+            </Pressable>
+          </View>
+          <ExamQuestionView
+            item={item}
+            picked={picked}
+            reveal={false}
+            listening={
+              // 正式模式：聽解只播一次，播完後有固定的作答時間，接著自動換下一題
+              draft.mode === 'official'
+                ? {
+                    allowReplay: false,
+                    played: (draft.played?.[item.question.id] ?? 0) > 0,
+                    onPlayed: () => {
+                      update((d, t) => markPlayed(d, item.question.id, t));
+                      setAnswerWindow({
+                        id: item.question.id,
+                        until: Date.now() + answerSeconds(item) * 1000,
+                      });
+                    },
+                  }
+                : undefined
+            }
+            getState={(option) => (option === picked ? 'selected' : 'idle')}
+            onPick={(option) => {
+              if (open) update((d, t) => answerQuestion(d, item.question.id, option, t));
+            }}
+          />
+
+          {answerWindow?.id === item.question.id && (
+            <ThemedText type="small" themeColor="textSecondary" accessibilityLiveRegion="polite">
+              作答時間：還有 {Math.max(0, Math.ceil((answerWindow.until - now) / 1000))}{' '}
+              秒，之後自動進入下一題
+            </ThemedText>
+          )}
+          <View style={styles.navRow}>
+            <View style={styles.flex}>
+              <SecondaryButton
+                label="上一題"
+                onPress={() => goTo(Math.max(0, draft.questionIndex - 1))}
+              />
+            </View>
+            {!isLastQuestion && (
+              <View style={styles.flex}>
+                <PrimaryButton label="下一題" onPress={() => goTo(draft.questionIndex + 1)} />
+              </View>
+            )}
+          </View>
+
+          {reviewing ? (
+            <SubmitReview
+              questions={sitting.questions}
+              answers={draft.answers}
+              marked={draft.marked}
+              isLast={isLastSitting}
+              onJump={goTo}
+              onSubmit={() => submit(false)}
+              onCancel={() => setReviewing(false)}
+            />
+          ) : (
+            <SecondaryButton
+              label={isLastSitting ? '交卷，查看成績' : '交卷，結束這一節'}
+              onPress={() => setReviewing(true)}
+            />
+          )}
+          {quit}
+        </>
+      )}
     </View>
   );
 }
@@ -618,6 +689,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
     minWidth: 76,
     alignItems: 'center',
+  },
+  center: {
+    textAlign: 'center',
   },
   timerText: {
     fontSize: 20,
