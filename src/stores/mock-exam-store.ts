@@ -26,6 +26,9 @@ export type MockExamRecord = {
   startedAt?: string;
   /** 考試中離開考試畫面的次數 */
   leaveCount?: number;
+  /** 暫停的總時間（毫秒）和次數（有暫停過才有） */
+  pausedMs?: number;
+  pauseCount?: number;
   events?: ExamEvent[];
   /** 考卷快照：當時的題目、選項順序和正確答案，題庫之後更新也能還原。只有最近幾次保留 */
   snapshot?: ExamRoundQuestion[];
@@ -59,6 +62,9 @@ function cleanRecord(record: MockExamRecord): MockExamRecord {
     } else delete cleaned.snapshot;
   }
   if (record.events !== undefined && !Array.isArray(record.events)) delete cleaned.events;
+  if (record.pausedMs !== undefined && typeof record.pausedMs !== 'number') delete cleaned.pausedMs;
+  if (record.pauseCount !== undefined && typeof record.pauseCount !== 'number')
+    delete cleaned.pauseCount;
   return cleaned;
 }
 

@@ -48,6 +48,7 @@ export function MockExamHistoryItem({ level, record, onOpen }: MockExamHistoryIt
           {paperLabel(level, record.paperId, record.paperVersion)}・
           {MOCK_EXAM_MODE_LABELS[record.mode]}
           {record.leaveCount ? `・離開考試畫面 ${record.leaveCount} 次` : ''}
+          {record.pauseCount ? `・暫停 ${record.pauseCount} 次` : ''}
         </ThemedText>
       )}
       {record.items && (

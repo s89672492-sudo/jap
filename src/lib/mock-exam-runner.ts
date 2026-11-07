@@ -59,6 +59,12 @@ export async function finishMockExam(draft: MockExamDraft): Promise<FinishedExam
       ...(draft.seed ? { seed: draft.seed } : {}),
       startedAt: new Date(draft.startedAt).toISOString(),
       leaveCount: draft.leaveCount,
+      ...(draft.pausedMs || draft.events.some((e) => e.kind === 'pause')
+        ? {
+            pausedMs: draft.pausedMs ?? 0,
+            pauseCount: draft.events.filter((e) => e.kind === 'pause').length,
+          }
+        : {}),
       events: draft.events.slice(-50),
       snapshot: items,
     };
