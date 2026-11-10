@@ -34,7 +34,10 @@ export function BowTie({ size = 56 }: BowTieProps) {
             height: size / 4,
             marginHorizontal: -size / 10,
             backgroundColor: theme.accent,
-            borderColor: theme.background,
+            // 結的外框用半透明的深色，放在淺色或深色底上都看得出立體感
+            borderColor: 'rgba(0, 0, 0, 0.22)',
+            borderWidth: Math.max(1, Math.round(size / 32)),
+            borderRadius: Math.max(2, Math.round(size / 16)),
           },
         ]}
       />
@@ -66,8 +69,6 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   knot: {
-    borderRadius: 4,
-    borderWidth: 2,
     zIndex: 1,
   },
 });

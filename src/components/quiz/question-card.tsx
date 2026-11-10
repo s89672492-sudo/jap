@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { FitText } from '@/components/ui/fit-text';
 import { SpeakButton } from '@/components/ui/speak-button';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import type { VocabWord } from '@/data/vocab';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -21,7 +21,11 @@ export function QuestionCard({ word, revealReading }: QuestionCardProps) {
     <View
       style={[
         styles.card,
-        { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+        {
+          backgroundColor: theme.backgroundElement,
+          borderColor: theme.border,
+          boxShadow: `0 2px 10px ${theme.shadow}`,
+        },
       ]}>
       <ThemedText type="small" themeColor="textSecondary" style={styles.reading}>
         {revealReading && word.reading !== word.word ? word.reading : ' '}
@@ -35,7 +39,7 @@ export function QuestionCard({ word, revealReading }: QuestionCardProps) {
 const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.card,
     alignItems: 'center',
     paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.three,
