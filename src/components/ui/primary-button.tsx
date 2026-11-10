@@ -23,7 +23,11 @@ export function PrimaryButton({ label, onPress, disabled = false }: PrimaryButto
       hitSlop={8}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: theme.primary, borderColor: theme.gold },
+        {
+          backgroundColor: theme.primary,
+          borderColor: theme.gold,
+          boxShadow: `0 3px 8px ${theme.shadow}`,
+        },
         pressed && styles.pressed,
         disabled && styles.disabled,
       ]}>

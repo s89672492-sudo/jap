@@ -2,7 +2,7 @@ import type { PropsWithChildren } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type SettingsSectionProps = PropsWithChildren<{
@@ -16,7 +16,14 @@ export function SettingsSection({ title, description, children }: SettingsSectio
 
   return (
     <View
-      style={[styles.section, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+      style={[
+        styles.section,
+        {
+          backgroundColor: theme.backgroundElement,
+          borderColor: theme.border,
+          boxShadow: `0 2px 10px ${theme.shadow}`,
+        },
+      ]}>
       <View style={styles.heading}>
         <ThemedText style={styles.title}>{title}</ThemedText>
         {description && (
@@ -33,7 +40,7 @@ export function SettingsSection({ title, description, children }: SettingsSectio
 const styles = StyleSheet.create({
   section: {
     borderWidth: 1,
-    borderRadius: Spacing.three,
+    borderRadius: Radius.card,
     padding: Spacing.three,
     gap: Spacing.three,
   },

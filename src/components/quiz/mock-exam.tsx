@@ -9,6 +9,7 @@ import { MockExamIntro } from './mock-exam-intro';
 import { MockExamReport } from './mock-exam-report';
 
 import { ThemedText } from '@/components/themed-text';
+import { Icon } from '@/components/ui/icon';
 import { LoadingNote } from '@/components/ui/loading-note';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { SecondaryButton } from '@/components/ui/secondary-button';
@@ -516,7 +517,8 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
                 { borderColor: theme.border, backgroundColor: theme.backgroundElement },
                 pressed && styles.pressed,
               ]}>
-              <ThemedText type="smallBold">⏸ 暫停</ThemedText>
+              <Icon name="pause" size={16} />
+              <ThemedText type="smallBold">暫停</ThemedText>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -531,8 +533,9 @@ function MockExamSession({ draft, onScrollTop, onFinished }: SessionProps) {
                 },
                 pressed && styles.pressed,
               ]}>
+              <Icon name="flag" size={16} color={marked ? theme.gold : theme.text} />
               <ThemedText type="smallBold" style={{ color: marked ? theme.gold : theme.text }}>
-                {marked ? '🚩 已標記' : '🚩 標記'}
+                {marked ? '已標記' : '標記'}
               </ThemedText>
             </Pressable>
           </View>
@@ -705,8 +708,10 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   markButton: {
+    flexDirection: 'row',
+    gap: Spacing.one,
     minHeight: 44,
-    paddingHorizontal: Spacing.three,
+    paddingHorizontal: Spacing.three - 2,
     borderRadius: 22,
     borderWidth: 1,
     alignItems: 'center',

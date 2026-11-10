@@ -3,8 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { ArticleCover } from './article-cover';
 
 import { ThemedText } from '@/components/themed-text';
+import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { Spacing } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import type { DailyArticle } from '@/hooks/use-daily-article';
 import { useTheme } from '@/hooks/use-theme';
 import { useReadArticles } from '@/stores/reading-store';
@@ -22,14 +23,27 @@ export function DailyCard({ daily, onOpen }: DailyCardProps) {
 
   return (
     <View
-      style={[styles.card, { backgroundColor: theme.backgroundElement, borderColor: theme.gold }]}>
+      style={[
+        styles.card,
+        {
+          backgroundColor: theme.backgroundElement,
+          borderColor: theme.gold,
+          boxShadow: `0 2px 10px ${theme.shadow}`,
+        },
+      ]}>
       <View style={styles.header}>
-        <ThemedText type="smallBold" style={{ color: theme.accent }}>
-          📅 今日一篇
-        </ThemedText>
-        <ThemedText type="smallBold" style={{ color: theme.gold }}>
-          🔥 連續 {streak} 天
-        </ThemedText>
+        <View style={styles.headerItem}>
+          <Icon name="calendar" size={16} color={theme.accent} />
+          <ThemedText type="smallBold" style={{ color: theme.accent }}>
+            今日一篇
+          </ThemedText>
+        </View>
+        <View style={styles.headerItem}>
+          <Icon name="streak" size={16} color={theme.gold} />
+          <ThemedText type="smallBold" style={{ color: theme.gold }}>
+            連續 {streak} 天
+          </ThemedText>
+        </View>
       </View>
       <View style={styles.body}>
         <ArticleCover id={article.id} topic={article.topic} size="thumb" />
@@ -50,10 +64,15 @@ export function DailyCard({ daily, onOpen }: DailyCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderWidth: 2,
-    borderRadius: Spacing.three,
+    borderWidth: 1.5,
+    borderRadius: Radius.card,
     padding: Spacing.three,
     gap: Spacing.two,
+  },
+  headerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
   },
   header: {
     flexDirection: 'row',

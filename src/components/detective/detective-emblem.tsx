@@ -5,22 +5,33 @@ import { BowTie } from './bow-tie';
 
 import { useTheme } from '@/hooks/use-theme';
 
-/** 首頁主視覺：金框放大鏡徽章 + 紅領結 */
-export function DetectiveEmblem() {
+/** 主視覺：金框放大鏡徽章 + 紅領結；size 是徽章的直徑 */
+export function DetectiveEmblem({ size = 120 }: { size?: number }) {
   const theme = useTheme();
 
   return (
     <View style={styles.container} accessibilityElementsHidden>
-      <View style={[styles.badge, { backgroundColor: theme.primary, borderColor: theme.gold }]}>
+      <View
+        style={[
+          styles.badge,
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            borderWidth: Math.max(2, Math.round(size / 30)),
+            backgroundColor: theme.primary,
+            borderColor: theme.gold,
+          },
+        ]}>
         <SymbolView
           name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }}
-          size={56}
+          size={Math.round(size * 0.47)}
           weight="bold"
           tintColor={theme.gold}
         />
       </View>
-      <View style={styles.bowTie}>
-        <BowTie size={64} />
+      <View style={{ marginTop: -Math.round(size * 0.12) }}>
+        <BowTie size={Math.round(size * 0.53)} />
       </View>
     </View>
   );
@@ -31,14 +42,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badge: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 4,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  bowTie: {
-    marginTop: -14,
   },
 });

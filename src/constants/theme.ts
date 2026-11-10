@@ -23,6 +23,18 @@ export const Colors = {
     border: '#D9CBA8',
     onPrimary: '#FFFFFF',
     success: '#2E7D32',
+    // 圖示底色等用的淡色（和上面四個主色成對）
+    primarySoft: '#E3E8F6',
+    accentSoft: '#F8E1E3',
+    goldSoft: '#F3E7C6',
+    successSoft: '#DFEEDD',
+    /** 卡片陰影的顏色（深藍，不用純黑） */
+    shadow: 'rgba(20, 33, 61, 0.10)',
+    /** 首頁招牌區塊：深藍西裝色底、米白字 */
+    hero: '#14213D',
+    onHero: '#F5EFE0',
+    onHeroMuted: '#A9B3C7',
+    heroGold: '#F2C94C',
   },
   dark: {
     text: '#F5EFE0',
@@ -36,6 +48,15 @@ export const Colors = {
     border: '#2C3B5A',
     onPrimary: '#FFFFFF',
     success: '#4CAF50',
+    primarySoft: '#1E2F57',
+    accentSoft: '#3D1E2A',
+    goldSoft: '#3A3320',
+    successSoft: '#1C3526',
+    shadow: 'rgba(0, 0, 0, 0.35)',
+    hero: '#1A2A4A',
+    onHero: '#F5EFE0',
+    onHeroMuted: '#A9B3C7',
+    heroGold: '#F2C94C',
   },
 } as const;
 
@@ -77,6 +98,14 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+} as const;
+
+/** 圓角：小標籤、列、卡片、大卡片（依層級由小到大，不要全部同一個圓角） */
+export const Radius = {
+  tag: 6,
+  row: 12,
+  card: 18,
+  sheet: 24,
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80, web: 64 }) ?? 0;

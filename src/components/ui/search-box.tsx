@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { Icon } from '@/components/ui/icon';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -17,9 +18,7 @@ export function SearchBox({ value, onChange, placeholder }: SearchBoxProps) {
   return (
     <View
       style={[styles.box, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
-      <ThemedText themeColor="textSecondary" style={styles.icon}>
-        🔍
-      </ThemedText>
+      <Icon name="search" size={20} color={theme.textSecondary} />
       <TextInput
         value={value}
         onChangeText={onChange}
@@ -55,10 +54,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 22,
     paddingLeft: Spacing.three,
-  },
-  icon: {
-    fontSize: 14,
-    marginRight: Spacing.two,
+    gap: Spacing.two,
   },
   input: {
     flex: 1,

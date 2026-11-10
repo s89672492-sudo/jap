@@ -5,9 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppBackground } from '@/components/app-background';
 import { CaseCard } from '@/components/detective/case-card';
-import { DetectiveEmblem } from '@/components/detective/detective-emblem';
 import { DueWordsReview } from '@/components/home/due-words-review';
 import { ExamSummary } from '@/components/home/exam-summary';
+import { HomeHero } from '@/components/home/home-hero';
 import { LevelProgressList } from '@/components/home/level-progress-list';
 import { ProgressOverview } from '@/components/home/progress-overview';
 import { TodayTasks } from '@/components/home/today-tasks';
@@ -60,7 +60,7 @@ export default function HomeScreen() {
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing.four,
+            paddingTop: insets.top + Spacing.three,
             paddingBottom: insets.bottom + BottomTabInset + Spacing.four,
             paddingLeft: insets.left + Spacing.three,
             paddingRight: insets.right + Spacing.three,
@@ -99,17 +99,7 @@ export default function HomeScreen() {
           </View>
         ) : (
           <View style={styles.inner}>
-            <View style={styles.hero}>
-              <DetectiveEmblem />
-              <ThemedText type="subtitle" style={styles.title}>
-                偵探事務所
-              </ThemedText>
-              <View style={[styles.taglineBox, { borderColor: theme.gold }]}>
-                <ThemedText type="smallBold" style={[styles.tagline, { color: theme.gold }]}>
-                  真相只有一個！
-                </ThemedText>
-              </View>
-            </View>
+            <HomeHero progress={progress} />
 
             <ExamInProgressBanner />
 
@@ -168,24 +158,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     gap: Spacing.four,
-  },
-  hero: {
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingVertical: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-    letterSpacing: 4,
-  },
-  taglineBox: {
-    borderWidth: 1.5,
-    borderRadius: Spacing.five,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
-  },
-  tagline: {
-    letterSpacing: 2,
   },
   overviewHeader: {
     flexDirection: 'row',

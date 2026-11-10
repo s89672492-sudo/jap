@@ -1,27 +1,28 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Icon, IconBadge, type IconName } from '@/components/ui/icon';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type TaskRowProps = {
-  icon: string;
+  icon: IconName;
   title: string;
   /** 標題下方的說明，例如文章標題 */
   note?: string;
-  /** 右邊的數字或狀態，例如「12 個」「✓ 完成」 */
+  /** 右邊的數字或狀態，例如「12 個」；完成時不顯示，改蓋「完成」章 */
   value: string;
   done?: boolean;
   onPress?: () => void;
 };
 
-/** 今日任務的一列：整列都可以按，前往對應的練習 */
+/** 今日任務的一列：整列都可以按，前往對應的練習；完成的蓋上「完成」章 */
 export function TaskRow({ icon, title, note, value, done = false, onPress }: TaskRowProps) {
   const theme = useTheme();
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={`${title}：${value}${note ? `，${note}` : ''}`}
+      accessibilityLabel={`${title}：${done ? '完成' : value}${note ? `，${note}` : ''}`}
       disabled={!onPress}
       onPress={onPress}
       style={({ pressed }) => [
@@ -29,7 +30,7 @@ export function TaskRow({ icon, title, note, value, done = false, onPress }: Tas
         { borderColor: theme.border, backgroundColor: theme.background },
         pressed && styles.pressed,
       ]}>
-      <ThemedText style={styles.icon}>{icon}</ThemedText>
+      <IconBadge name={icon} tone={done ? 'success' : 'primary'} />
       <View style={styles.text}>
         <ThemedText type="smallBold">{title}</ThemedText>
         {note ? (
@@ -38,16 +39,16 @@ export function TaskRow({ icon, title, note, value, done = false, onPress }: Tas
           </ThemedText>
         ) : null}
       </View>
-      <ThemedText
-        type="smallBold"
-        style={[styles.value, { color: done ? theme.success : theme.accent }]}>
-        {value}
-      </ThemedText>
-      {onPress ? (
-        <ThemedText type="smallBold" themeColor="textSecondary">
-          ›
+      {done ? (
+        <View style={[styles.stamp, { borderColor: theme.success }]}>
+          <ThemedText style={[styles.stampText, { color: theme.success }]}>完成</ThemedText>
+        </View>
+      ) : (
+        <ThemedText type="smallBold" style={[styles.value, { color: theme.accent }]}>
+          {value}
         </ThemedText>
-      ) : null}
+      )}
+      {onPress ? <Icon name="chevron" size={18} color={theme.textSecondary} /> : null}
     </Pressable>
   );
 }
@@ -56,19 +57,15 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
-    minHeight: 52,
+    gap: Spacing.two + 2,
+    minHeight: 60,
     paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.three,
+    paddingHorizontal: Spacing.two + 2,
     borderWidth: 1,
-    borderRadius: Spacing.two,
+    borderRadius: Radius.row,
   },
   pressed: {
     opacity: 0.7,
-  },
-  icon: {
-    fontSize: 20,
-    lineHeight: 26,
   },
   text: {
     flex: 1,
@@ -76,5 +73,20 @@ const styles = StyleSheet.create({
   },
   value: {
     flexShrink: 0,
+  },
+  // 像蓋印章：外框、字距拉開、稍微歪一點
+  stamp: {
+    flexShrink: 0,
+    borderWidth: 1.5,
+    borderRadius: Radius.tag,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 1,
+    transform: [{ rotate: '-4deg' }],
+  },
+  stampText: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: 700,
+    letterSpacing: 2,
   },
 });
