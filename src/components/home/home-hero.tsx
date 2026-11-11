@@ -38,7 +38,7 @@ export function HomeHero({ progress }: { progress: LearningProgress | null }) {
         <View style={[styles.stats, { borderTopColor: 'rgba(245, 239, 224, 0.18)' }]}>
           <View style={styles.stat}>
             <View style={styles.statValueRow}>
-              <Icon name="streak" size={18} color={theme.heroGold} />
+              <Icon name="streak" size={22} color={theme.heroGold} />
               <ThemedText style={[styles.statValue, { color: theme.heroGold }]}>
                 {progress.streak}
               </ThemedText>
@@ -118,8 +118,8 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   statLabel: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 14,
+    lineHeight: 20,
     fontWeight: 500,
   },
 });
