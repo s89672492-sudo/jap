@@ -27,12 +27,12 @@ export function TaskRow({ icon, title, note, value, done = false, onPress }: Tas
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
-        { borderColor: theme.border, backgroundColor: theme.background },
+        { borderColor: theme.border, backgroundColor: theme.backgroundElement },
         pressed && styles.pressed,
       ]}>
-      <IconBadge name={icon} tone={done ? 'success' : 'primary'} />
+      <IconBadge name={icon} tone={done ? 'success' : 'primary'} size={44} />
       <View style={styles.text}>
-        <ThemedText type="smallBold">{title}</ThemedText>
+        <ThemedText style={styles.title}>{title}</ThemedText>
         {note ? (
           <ThemedText type="small" themeColor="textSecondary" numberOfLines={2}>
             {note}
@@ -44,9 +44,7 @@ export function TaskRow({ icon, title, note, value, done = false, onPress }: Tas
           <ThemedText style={[styles.stampText, { color: theme.success }]}>完成</ThemedText>
         </View>
       ) : (
-        <ThemedText type="smallBold" style={[styles.value, { color: theme.accent }]}>
-          {value}
-        </ThemedText>
+        <ThemedText style={[styles.value, { color: theme.accentIcon }]}>{value}</ThemedText>
       )}
       {onPress ? <Icon name="chevron" size={18} color={theme.textSecondary} /> : null}
     </Pressable>
@@ -71,8 +69,16 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
+  title: {
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: 700,
+  },
   value: {
     flexShrink: 0,
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: 700,
   },
   // 像蓋印章：外框、字距拉開、稍微歪一點
   stamp: {

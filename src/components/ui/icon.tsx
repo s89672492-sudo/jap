@@ -69,10 +69,10 @@ type IconBadgeProps = {
 export function IconBadge({ name, tone = 'primary', size = 40, style }: IconBadgeProps) {
   const theme = useTheme();
   const colors = {
-    primary: [theme.primarySoft, theme.primary],
-    accent: [theme.accentSoft, theme.accent],
-    gold: [theme.goldSoft, theme.gold],
-    success: [theme.successSoft, theme.success],
+    primary: [theme.primarySoft, theme.primaryIcon],
+    accent: [theme.accentSoft, theme.accentIcon],
+    gold: [theme.goldSoft, theme.goldIcon],
+    success: [theme.successSoft, theme.successIcon],
   } as const;
   const [background, foreground] = colors[tone];
   return (
@@ -82,7 +82,7 @@ export function IconBadge({ name, tone = 'primary', size = 40, style }: IconBadg
         { width: size, height: size, backgroundColor: background, borderRadius: Radius.row },
         style,
       ]}>
-      <Icon name={name} size={Math.round(size * 0.55)} color={foreground} />
+      <Icon name={name} size={Math.round(size * 0.6)} color={foreground} />
     </View>
   );
 }
