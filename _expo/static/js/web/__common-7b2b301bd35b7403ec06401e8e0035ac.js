@@ -1,0 +1,2 @@
+__d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.withNotes=function(t,n){return t.map(t=>n[t.id]?{...t,...n[t.id]}:t)}},1231,[]);
+__d(function(g,r,i,a,m,e,d){"use strict";Object.defineProperty(e,'__esModule',{value:!0}),e.withExamples=function(n,u,f={}){return n.map(n=>{const l=u[n.id],c=f.frequency?.[n.id],s=f.related?.[n.id];return l||c||s?{...n,...l&&{example:{ja:(0,t.stripRuby)(l.ja),zh:l.zh,furigana:l.ja}},...c&&{freq:c[0],...c[1]&&{freqLevel:c[1]}},...s&&{related:s}}:n})};var t=r(d[0])},1237,[1223]);
