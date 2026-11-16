@@ -29,6 +29,8 @@ export type MockExamRecord = {
   /** 暫停的總時間（毫秒）和次數（有暫停過才有） */
   pausedMs?: number;
   pauseCount?: number;
+  /** 考試中用密碼解鎖複習頁面的次數（有解鎖過才有） */
+  unlockCount?: number;
   events?: ExamEvent[];
   /** 考卷快照：當時的題目、選項順序和正確答案，題庫之後更新也能還原。只有最近幾次保留 */
   snapshot?: ExamRoundQuestion[];
@@ -65,6 +67,8 @@ function cleanRecord(record: MockExamRecord): MockExamRecord {
   if (record.pausedMs !== undefined && typeof record.pausedMs !== 'number') delete cleaned.pausedMs;
   if (record.pauseCount !== undefined && typeof record.pauseCount !== 'number')
     delete cleaned.pauseCount;
+  if (record.unlockCount !== undefined && typeof record.unlockCount !== 'number')
+    delete cleaned.unlockCount;
   return cleaned;
 }
 

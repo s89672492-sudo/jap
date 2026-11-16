@@ -6,6 +6,7 @@ import { BackgroundPicker } from '@/components/settings/background-picker';
 import { BackupSection } from '@/components/settings/backup-section';
 import { ClearMistakes } from '@/components/settings/clear-mistakes';
 import { DataCredits } from '@/components/settings/data-credits';
+import { ExamPinSection } from '@/components/settings/exam-pin-section';
 import { SettingsSection } from '@/components/settings/settings-section';
 import { VoicePicker } from '@/components/settings/voice-picker';
 import { ThemedText } from '@/components/themed-text';
@@ -120,6 +121,12 @@ export default function SettingsScreen() {
             title="背景圖片"
             description="從相簿選一張自己的圖片當背景。圖片只存在這支手機裡，不會上傳，也不會出現在別人打開的網站上。">
             <BackgroundPicker />
+          </SettingsSection>
+
+          <SettingsSection
+            title="考試鎖密碼"
+            description="考模擬考時，單字、閱讀和首頁的複習會先鎖起來；輸入這組密碼可以解鎖。密碼只存在這支手機，不會放進備份。">
+            <ExamPinSection />
           </SettingsSection>
 
           <SettingsSection

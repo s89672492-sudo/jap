@@ -83,12 +83,12 @@ export default function HomeScreen() {
               </ThemedText>
             </View>
             {view === 'travel' ? (
-              <ExamLock what="生活旅行用語">
+              <ExamLock what="生活旅行用語" inline>
                 <TravelGuide />
               </ExamLock>
             ) : view === 'review' ? (
               // 考試中不能看單字（避免查到答案）
-              <ExamLock what="單字複習">
+              <ExamLock what="單字複習" inline>
                 <DueWordsReview level={level} />
               </ExamLock>
             ) : progress ? (

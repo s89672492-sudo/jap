@@ -29,7 +29,9 @@ export type ExamEventKind =
   | 'submit'
   | 'auto-submit'
   | 'pause'
-  | 'unpause';
+  | 'unpause'
+  | 'unlock'
+  | 'relock';
 
 export type ExamEvent = { at: number; kind: ExamEventKind; sitting: number };
 
@@ -78,6 +80,8 @@ export type MockExamDraft = {
   pausedAt?: number;
   /** 這場考試暫停的總時間（毫秒） */
   pausedMs?: number;
+  /** 考試中用密碼解鎖了複習頁面（單字、閱讀等）；重新鎖上或考完就恢復鎖住（舊存檔沒有） */
+  unlocked?: boolean;
   events: ExamEvent[];
   /** 考試中離開考試畫面（切到背景、其他分頁）的次數 */
   leaveCount: number;
@@ -291,6 +295,19 @@ export function resumeExam(draft: MockExamDraft, now: number): MockExamDraft {
   return addEvent(resumed, 'unpause', now);
 }
 
+/** 用密碼解鎖複習頁面：這場考試接下來都可以看，次數會記在成績單上 */
+export function unlockReview(draft: MockExamDraft, now: number): MockExamDraft {
+  if (draft.unlocked) return draft;
+  return addEvent({ ...draft, unlocked: true }, 'unlock', now);
+}
+
+/** 重新鎖上複習頁面 */
+export function relockReview(draft: MockExamDraft, now: number): MockExamDraft {
+  if (!draft.unlocked) return draft;
+  const { unlocked: _was, ...rest } = draft;
+  return addEvent(rest, 'relock', now);
+}
+
 /** 時間到了沒交卷（例如關掉 App 期間時間到了）：自動交卷；暫停中不會到時間 */
 export function expireIfNeeded(
   draft: MockExamDraft,
@@ -402,6 +419,7 @@ export function parseDraft(value: unknown): MockExamDraft | null {
     isNumber(d.deadline) &&
     (d.pausedAt === undefined || isNumber(d.pausedAt)) &&
     (d.pausedMs === undefined || isNumber(d.pausedMs)) &&
+    (d.unlocked === undefined || typeof d.unlocked === 'boolean') &&
     Array.isArray(d.events) &&
     isNumber(d.leaveCount) &&
     isNumber(d.updatedAt);
