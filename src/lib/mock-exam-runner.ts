@@ -65,6 +65,9 @@ export async function finishMockExam(draft: MockExamDraft): Promise<FinishedExam
             pauseCount: draft.events.filter((e) => e.kind === 'pause').length,
           }
         : {}),
+      ...(draft.events.some((e) => e.kind === 'unlock')
+        ? { unlockCount: draft.events.filter((e) => e.kind === 'unlock').length }
+        : {}),
       events: draft.events.slice(-50),
       snapshot: items,
     };

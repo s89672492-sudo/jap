@@ -138,6 +138,38 @@ results.eventCap = many.events.length === 100;
   // 休息時間（節和節之間）不能暫停
   results.noPauseOnBreak = m.pauseExam(sub.draft, P0 + 470_000) === sub.draft;
 }
+
+// 考試鎖：用密碼解鎖複習頁面、重新鎖上
+{
+  const P0 = 1_700_000_000_000;
+  const d = m.createDraft('N5', 'practice', sittings, P0);
+  const u = m.unlockReview(d, P0 + 1000);
+  results.unlockSetsFlag = u.unlocked === true && u.events.at(-1).kind === 'unlock';
+  results.unlockTwiceNoop = m.unlockReview(u, P0 + 2000) === u;
+  const r = m.relockReview(u, P0 + 3000);
+  results.relockClears = r.unlocked === undefined && r.events.at(-1).kind === 'relock';
+  results.relockNoop = m.relockReview(d, P0 + 3000) === d;
+  results.unlockNotLeave = u.leaveCount === 0;
+  results.parseUnlocked = m.parseDraft(JSON.parse(JSON.stringify(u))) !== null;
+  results.parseBadUnlocked = m.parseDraft({ ...u, unlocked: 'yes' }) === null;
+}
+
+// 考試鎖密碼：只存雜湊，對的密碼才通過
+{
+  const pin = loadTs('src/lib/exam-pin.ts');
+  results.pinFormat =
+    pin.isValidPin('1234') &&
+    pin.isValidPin('12345678') &&
+    !pin.isValidPin('123') &&
+    !pin.isValidPin('123456789') &&
+    !pin.isValidPin('12a4');
+  const saved = pin.makePin('2468');
+  results.pinNoPlainText = !JSON.stringify(saved).includes('2468');
+  results.pinCheck = pin.checkPin(saved, '2468') && !pin.checkPin(saved, '2469');
+  results.pinSalted = pin.makePin('2468', () => 0.5).hash !== pin.makePin('2468', () => 0.1).hash;
+  results.pinParse =
+    pin.parsePin(JSON.parse(JSON.stringify(saved))) !== null && pin.parsePin({}) === null;
+}
 for (const [name, passed] of Object.entries(results)) console.log(`${passed ? '✓' : '✗'} ${name}`);
 const failed = Object.entries(results)
   .filter(([, v]) => !v)

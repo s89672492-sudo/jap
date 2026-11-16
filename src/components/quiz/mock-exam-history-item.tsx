@@ -49,6 +49,7 @@ export function MockExamHistoryItem({ level, record, onOpen }: MockExamHistoryIt
           {MOCK_EXAM_MODE_LABELS[record.mode]}
           {record.leaveCount ? `・離開考試畫面 ${record.leaveCount} 次` : ''}
           {record.pauseCount ? `・暫停 ${record.pauseCount} 次` : ''}
+          {record.unlockCount ? `・解鎖複習 ${record.unlockCount} 次` : ''}
         </ThemedText>
       )}
       {record.items && (

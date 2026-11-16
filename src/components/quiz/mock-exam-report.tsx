@@ -97,6 +97,7 @@ export function MockExamReport({
     record?.pauseCount
       ? `暫停 ${record.pauseCount} 次（共 ${formatPause(record.pausedMs ?? 0)}）`
       : null,
+    record?.unlockCount ? `考試中用密碼解鎖複習 ${record.unlockCount} 次` : null,
   ].filter(Boolean);
   const reviewItems = items.filter(
     (item) => filter === 'all' || answers[item.question.id] !== item.answer,
